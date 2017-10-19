@@ -24,6 +24,13 @@ you can generate one with openssl like so:
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cert -days 36500 -outform DER
 ```
 
+### Signing licesnses
+
+I leave this up to the reader. They're just JSON files, with a signature section. All the code is open source.
+I'll add a tool in the future to just do it for you.
+
+# Questions (you might have?)
+
 ## But why? Its open source?
 
 Yes, bitwarden is great. If I didn't care about it i wouldn't be doing this.
