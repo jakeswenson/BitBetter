@@ -1,0 +1,17 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: microsoft/dotnet:2-sdk
+    steps:
+      - checkout
+      - run:
+          name: build
+          command: dotnet restore
+      - run:
+          name: Print the Current Time
+          command: date
+      - setup_remote_docker
+      - run:
+          name: Build script
+          command: ./build.sh
