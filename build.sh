@@ -2,4 +2,4 @@
 
 dotnet restore
 dotnet publish
-docker build . -t bitbetter/api --squash
+docker build . -t bitbetter/api # --squash
