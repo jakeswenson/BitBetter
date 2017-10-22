@@ -10,7 +10,7 @@ namespace bitwardenSelfLicensor
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             string cerFile;
             string corePath;
@@ -86,6 +86,8 @@ namespace bitwardenSelfLicensor
             // }
 
             module.Write("modified.dll");
+
+            return 0;
         }
     }
 }
