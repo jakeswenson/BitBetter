@@ -1,5 +1,5 @@
 # BitBetter
-
+[![CircleCI](https://img.shields.io/circleci/project/github/jakeswenson/BitBetter.svg)](https://circleci.com/gh/jakeswenson/BitBetter/tree/master)
 This project is a tool to modify bitwardens core dll to allow me to self license.
 Beware this does janky IL magic to rewrite the bitwarden core dll and install my self signed certificate.
 
