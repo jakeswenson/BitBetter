@@ -6,9 +6,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: build
-          command: dotnet restore
-      - run:
           name: Print the Current Time
           command: date
       - setup_remote_docker

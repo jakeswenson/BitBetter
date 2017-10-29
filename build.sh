@@ -1,8 +1,8 @@
 #!/bin/bash
 
-mkdir ./src/bitbetter/.keys
+mkdir ./src/bitBetter/.keys
 
-cp .keys/cert.cert ./src/bitbetter/.keys
+cp .keys/cert.cert ./src/bitBetter/.keys
 
 cd ./src/bitbetter
 
