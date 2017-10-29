@@ -4,7 +4,7 @@ mkdir ./src/bitBetter/.keys
 
 cp .keys/cert.cert ./src/bitBetter/.keys
 
-cd ./src/bitbetter
+cd ./src/bitBetter
 
 dotnet restore
 dotnet publish
