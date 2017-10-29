@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.Loader;
 using System.Security.Cryptography.X509Certificates;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
+using Microsoft.Extensions.CommandLineUtils;
+using Newtonsoft.Json;
 
 namespace bitwardenSelfLicensor
 {
@@ -12,82 +12,162 @@ namespace bitwardenSelfLicensor
     {
         static int Main(string[] args)
         {
-            string cerFile;
-            string corePath;
+            var app = new Microsoft.Extensions.CommandLineUtils.CommandLineApplication();
+            var cert = app.Option("-c | --cert", "cert file", CommandOptionType.SingleValue);
+            var coreDll = app.Option("--core", "path to core dll", CommandOptionType.SingleValue);
 
-            if(args.Length >= 2) {
-                cerFile = args[0];
-                corePath = args[1];
-            } else if (args.Length == 1) {
-                cerFile = args[0];
-                corePath = "/app/Core.dll";
+            app.Command("user", config =>
+            {
+                var name = config.Argument("Name", "your name");
+                var email = config.Argument("Email", "your email");
+                var key = config.Argument("Key", "your key id (optional)");
+                var help = config.HelpOption("--help | -h | -?");
+
+                config.OnExecute(() =>
+                {
+                    if (!cert.HasValue() || !coreDll.HasValue())
+                    {
+                        app.ShowHelp();
+                        return 1;
+                    }
+                    else if (string.IsNullOrWhiteSpace(name.Value) || string.IsNullOrWhiteSpace(email.Value))
+                    {
+                        config.ShowHelp("user");
+                        return 1;
+                    }
+
+                    GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, key.Value);
+
+                    return 0;
+                });
+            });
+            app.Command("org", config =>
+            {
+                var name = config.Argument("Name", "your name");
+                var email = config.Argument("Email", "your email");
+                var installId = config.Argument("InstallId", "your installation id (GUID)");
+                var key = config.Argument("Key", "your key id (optional)");
+                var help = config.HelpOption("--help | -h | -?");
+
+                config.OnExecute(() =>
+                {
+                    if (!cert.HasValue() || !coreDll.HasValue())
+                    {
+                        app.ShowHelp();
+                        return 1;
+                    }
+                    else if (string.IsNullOrWhiteSpace(name.Value) ||
+                            string.IsNullOrWhiteSpace(email.Value) ||
+                            string.IsNullOrWhiteSpace(installId.Value))
+                    {
+                        config.Error.WriteLine("Missing arguments");
+                        config.ShowHelp("org");
+                        return 1;
+                    }
+
+                    if (!Guid.TryParse(installId.Value, out Guid installationId))
+                    {
+                        config.Error.WriteLine("Unable to parse your installation id as a GUID");
+                        config.ShowHelp("org");
+                    }
+
+                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, installationId key.Value);
+
+                    return 0;
+                });
+            });
+
+            app.OnExecute(() =>
+            {
+                app.ShowHelp();
+                return 10;
+            });
+
+            app.HelpOption("-? | -h | --help");
+
+            try
+            {
+                return app.Execute(args);
             }
-            else {
-                cerFile = "/newLicensing.cer";
-                corePath = "/app/Core.dll";
+            catch (Exception e)
+            {
+                Console.Error.WriteLine("Oops: {0}", e);
+                return 100;
+            }
+        }
+
+        static void GenerateUserLicense(X509Certificate2 cert, string corePath,
+            string userName, string email, string key)
+        {
+            var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
+
+            var type = core.GetType("Bit.Core.Models.Business.UserLicense");
+
+            var license = Activator.CreateInstance(type);
+
+            void set(string name, object value)
+            {
+                type.GetProperty(name).SetValue(license, value);
             }
 
+            set("LicenseKey", string.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key);
+            set("Id", Guid.NewGuid());
+            set("Name", userName);
+            set("Email", email);
+            set("MaxStorageGb", short.MaxValue);
+            set("Premium", true);
+            set("Version", 1);
+            set("Issued", DateTime.UtcNow);
+            set("Refresh", DateTime.UtcNow.AddYears(1).AddMonths(-1));
+            set("Expires", DateTime.UtcNow.AddYears(1));
+            set("Trial", false);
 
-            var module =  ModuleDefinition.ReadModule(new MemoryStream(File.ReadAllBytes(corePath)));
-            var cert = File.ReadAllBytes(cerFile);
+            set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
+            set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
 
-            var x = module.Resources.OfType<EmbeddedResource>()
-                                    .Where(r => r.Name.Equals("Bit.Core.licensing.cer"))
-                                    .First();
+            Console.WriteLine(JsonConvert.SerializeObject(license));
+        }
 
-            Console.WriteLine(x.Name);
+        static void GenerateOrgLicense(X509Certificate2 cert, string corePath,
+            string userName, string email, Guid instalId, string key)
+        {
+            var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
-            var e = new EmbeddedResource("Bit.Core.licensing.cer", x.Attributes, cert);
+            var type = core.GetType("Bit.Core.Models.Business.OrganizationLicense");
 
-            module.Resources.Add(e);
-            module.Resources.Remove(x);
+            var license = Activator.CreateInstance(type);
 
-            var services = module.Types.Where(t => t.Namespace == "Bit.Core.Services");
-            
-
-            var type = services.First(t => t.Name == "LicensingService");
-
-            var licensingType =  type.Resolve();
-
-            var existingCert = new X509Certificate2(x.GetResourceData());
-
-            Console.WriteLine($"Existing Cert Thumbprin: {existingCert.Thumbprint}");
-            X509Certificate2 certificate = new X509Certificate2(cert);
-
-            Console.WriteLine($"New cert Thumbprint: {certificate.Thumbprint}");
-
-            var ctor = licensingType.GetConstructors().Single();
-
-
-            var rewriter = ctor.Body.GetILProcessor();
-
-            var instToReplace = 
-                ctor.Body.Instructions.Where(i => i.OpCode == OpCodes.Ldstr
-                    && string.Equals((string)i.Operand, existingCert.Thumbprint, StringComparison.InvariantCultureIgnoreCase))
-                .FirstOrDefault();
-
-            if(instToReplace != null) {
-                rewriter.Replace(instToReplace, Instruction.Create(OpCodes.Ldstr, certificate.Thumbprint));
-            }
-            else {
-                Console.WriteLine("Cant find inst");
+            void set(string name, object value)
+            {
+                type.GetProperty(name).SetValue(license, value);
             }
 
-            // foreach (var inst in ctor.Body.Instructions)
-            // {
-            //     Console.Write(inst.OpCode.Name + " " + inst.Operand?.GetType() + " = ");
-            //     if(inst.OpCode.FlowControl == FlowControl.Call) {
-            //         Console.WriteLine(inst.Operand);
-            //     }
-            //     else if(inst.OpCode == OpCodes.Ldstr) {
-            //         Console.WriteLine(inst.Operand);
-            //     }
-            //     else {Console.WriteLine();}
-            // }
+            set("LicenseKey", string.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key);
+            set("InstallationId", instalId);
+            set("Id", Guid.NewGuid());
+            set("Name", userName);
+            set("BillingEmail", email);
+            set("BusinessName", "BitBetter");
+            set("Enabled", true);
+            set("Seats", (short)5);
+            set("MaxCollections", short.MaxValue);
+            set("MaxStorageGb", short.MaxValue);
+            set("SelfHost", true);
+            set("UseGroups", true);
+            set("UseDirectory", true);
+            set("UseTotp", true);
+            set("PlanType", (byte)6);
+            set("Plan", "Custom");
+            set("Version", 1);
+            set("Issued", DateTime.UtcNow);
+            set("Refresh", DateTime.UtcNow.AddYears(1).AddMonths(-1));
+            set("Expires", DateTime.UtcNow.AddYears(1));
+            set("Trial", false);
 
-            module.Write("modified.dll");
+            set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
+            set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
 
-            return 0;
+            Console.WriteLine(JsonConvert.SerializeObject(license));
         }
     }
 }

@@ -9,5 +9,5 @@ cd ./src/bitbetter
 dotnet restore
 dotnet publish
 
-docker build . -t bitbetter/api # --squash
+docker build --pull . -t bitbetter/api # --squash
 
