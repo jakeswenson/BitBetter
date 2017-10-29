@@ -71,7 +71,7 @@ namespace bitwardenSelfLicensor
                         config.ShowHelp("org");
                     }
 
-                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, installationId key.Value);
+                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, installationId, key.Value);
 
                     return 0;
                 });
