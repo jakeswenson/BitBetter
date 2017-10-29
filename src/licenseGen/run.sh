@@ -2,10 +2,11 @@
 
 script_dir=`cd $(dirname $0); pwd`
 
-if [ "$#" -ne "1" ]; then
-    echo "USAGE: $0 <ABSOLUTE PATH TO CERT.PFX>"
+if [ "$#" -lt "1" ]; then
+    echo "USAGE: $0 <ABSOLUTE PATH TO CERT.PFX> [License Gen args...]"
     exit 1
 fi
-
-docker run -it -v "$1:/cert.pfx" bitbetter/licensegen
+cert_path=$1
+shift
+docker run -it -v "$cert_path:/cert.pfx" bitbetter/licensegen "$@"
 

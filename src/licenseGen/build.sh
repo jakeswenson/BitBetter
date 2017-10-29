@@ -7,5 +7,5 @@ cd $script_dir
 dotnet restore
 dotnet publish
 
-docker build . -t bitbetter/licenseGen # --squash
+docker build . -t bitbetter/licensegen # --squash
 
