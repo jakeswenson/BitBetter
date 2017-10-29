@@ -4,3 +4,4 @@ obj/
 *.dll
 *.pem
 .vscode/
+*.pfx

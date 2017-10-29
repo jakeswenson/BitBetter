@@ -1,7 +1,7 @@
 FROM bitwarden/api
 
 COPY bin/Debug/netcoreapp2.0/publish/* /bitBetter/
-COPY cert.cert /newLicensing.cer
+COPY ./.keys/cert.cert /newLicensing.cer
 
 RUN dotnet /bitBetter/bitBetter.dll && \
     echo "modified dll" && \
