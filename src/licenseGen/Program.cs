@@ -16,11 +16,13 @@ namespace bitwardenSelfLicensor
             var cert = app.Option("--cert", "cert file", CommandOptionType.SingleValue);
             var coreDll = app.Option("--core", "path to core dll", CommandOptionType.SingleValue);
 
-            bool certExists() {
+            bool certExists()
+            {
                 return File.Exists(cert.Value());
             }
 
-            bool coreExists() {
+            bool coreExists()
+            {
                 return File.Exists(coreDll.Value());
             }
 
@@ -35,6 +37,7 @@ namespace bitwardenSelfLicensor
             {
                 var name = config.Argument("Name", "your name");
                 var email = config.Argument("Email", "your email");
+                var userIdArg = config.Argument("User ID", "your user id");
                 var key = config.Argument("Key", "your key id (optional)");
                 var help = config.HelpOption("--help | -h | -?");
 
@@ -42,14 +45,15 @@ namespace bitwardenSelfLicensor
                 {
                     if (!verifyTopOptions())
                     {
-                        if(!coreExists())
+                        if (!coreExists())
                         {
                             config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
                         }
-                        if (!certExists()) {
+                        if (!certExists())
+                        {
                             config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
                         }
-                        
+
                         config.ShowHelp();
                         return 1;
                     }
@@ -60,7 +64,15 @@ namespace bitwardenSelfLicensor
                         return 1;
                     }
 
-                    GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, key.Value);
+
+                    if (string.IsNullOrWhiteSpace(userIdArg.Value) || !Guid.TryParse(userIdArg.Value, out Guid userId))
+                    {
+                        config.Error.WriteLine($"User ID not provided");
+                        config.ShowHelp("user");
+                        return 1;
+                    }
+
+                    GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, userId, key.Value);
 
                     return 0;
                 });
@@ -77,11 +89,12 @@ namespace bitwardenSelfLicensor
                 {
                     if (!verifyTopOptions())
                     {
-                        if(!coreExists())
+                        if (!coreExists())
                         {
                             config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
                         }
-                        if (!certExists()) {
+                        if (!certExists())
+                        {
                             config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
                         }
 
@@ -131,7 +144,7 @@ namespace bitwardenSelfLicensor
         }
 
         static void GenerateUserLicense(X509Certificate2 cert, string corePath,
-            string userName, string email, string key)
+            string userName, string email, Guid userId, string key)
         {
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
@@ -145,7 +158,7 @@ namespace bitwardenSelfLicensor
             }
 
             set("LicenseKey", string.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key);
-            set("Id", Guid.NewGuid());
+            set("Id", userId);
             set("Name", userName);
             set("Email", email);
             set("MaxStorageGb", short.MaxValue);
