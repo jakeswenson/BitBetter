@@ -50,10 +50,14 @@ This tool build ontop of the bitbetter/api container image so make sure you've b
 After that you can run the tool using:
 
 ```bash
-./src/LicenseGen/run.sh <PATH TO YOUR PFX>
+cd ~/BitBetter/src/licenseGen
+./run.sh ~/BitBetter/.keys/cert.pfx user "Name" "EMail" "User-GUID"
+./run.sh ~/BitBetter/.keys/cert.pfx org "Name" "EMail" "Install-ID used to install the server"
 ```
 
 # Questions (you might have?)
+
+I'll work on updates in the next couple weeks, right now, I just wanted something to start with.
 
 ## But why? Its open source?
 
@@ -65,7 +69,6 @@ To host it myself. And maintain it myself. Basically WTH was bitwarden doing tha
 ## You should have reached out to bitwarden
 
 Thanks, good idea. And I did. Currently they're not focused on solving this issue - yet. 
-To be clear i'm totally happy to give them my money. Offer a perpetual family license, and i'd pay for it. 
-Offer me a license thats tied to a version, I'll gladly rebuy another when a new version comes out AND i'm ready to upgrade.
+To be clear i'm totally happy to give them my money. Offer a perpetual server license, and i'd pay for it.  Let me license the server, period.  Allow an orginzation to have Premium for all users..  500 seats, let the 500 users in the orginzation have the Premium features too.
 
-I provided all these suggestions to bitwarden and they told me to wait until next year. Until then there's this.
+I'm still in the testing/evaluating phase.  If I am hosting the server/data, let me license the server, period.  How many licenses does one user need to have...
