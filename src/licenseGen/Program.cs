@@ -196,7 +196,7 @@ namespace bitwardenSelfLicensor
             set("BillingEmail", email);
             set("BusinessName", "BitBetter");
             set("Enabled", true);
-            set("Seats", (short)65534);
+            set("Seats", (short)32767);
             set("MaxCollections", short.MaxValue);
             set("MaxStorageGb", short.MaxValue);
             set("SelfHost", true);
