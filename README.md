@@ -15,25 +15,9 @@ replace anywhere `bitwarden/api` is used with `bitbetter/api` and give it a go. 
 
 ## Issuing your own licenses
 
-The repo is setup to replace the licesning signing cert in bitwarden.core with my own personal self signed cert (`cert.cert`)
+The repo is setup to replace the licesning signing cert in bitwarden.core with your own personal self signed cert (`cert.cert`)
 If you want to be able to sign your own licenses obviously you'll have to replace it with your own self signed cert.
 
-you can generate one with openssl like so:
-```bash
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cert -days 36500 -outform DER
-```
-
-### Convert your DER certificate to a PEM
-
-```bash
-openssl x509 -inform DER -in cert.cert -out cert.pem
-```
-
-### Convert your public and private key into a PKCS12/PFX
-
-```bash
-openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem
-```
 
 ### Signing licesnses
 
