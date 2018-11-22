@@ -1,8 +1,9 @@
 # BitBetter
-[![CircleCI](https://img.shields.io/circleci/project/github/jakeswenson/BitBetter.svg)](https://circleci.com/gh/jakeswenson/BitBetter/tree/master)
 
 This project is a tool to modify bitwardens core dll to allow me to self license.
 Beware this does janky IL magic to rewrite the bitwarden core dll and install my self signed certificate.
+
+Yes, there still are quite a few things that need to be fixed.  Updates and Organization Buiness Name is hardcoded to Bitbetter, are the first to things to fix..  Better handling of the User-GUID comes to mind too.
 
 ## Building
 
@@ -15,7 +16,7 @@ replace anywhere `bitwarden/api` is used with `bitbetter/api` and give it a go. 
 
 ## Issuing your own licenses
 
-The repo is setup to replace the licesning signing cert in bitwarden.core with your own personal self signed cert (`cert.cert`)
+The repo is setup to replace the licesning signing cert in bitwarden.core with your own personal self signed cert (`cert.pfx`)
 If you want to be able to sign your own licenses obviously you'll have to replace it with your own self signed cert.
 
 
