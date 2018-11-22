@@ -5,6 +5,8 @@ Beware this does janky IL magic to rewrite the bitwarden core dll and install my
 
 Yes, there still are quite a few things that need to be fixed.  Updates and Organization Buiness Name is hardcoded to Bitbetter, are the first to things to fix..  Better handling of the User-GUID comes to mind too.
 
+Credit to https://github.com/h44z/BitBetter and https://github.com/jakeswenson/BitBetter 
+
 ## Building
 
 To build your own `bitwarden/api` image run
