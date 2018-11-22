@@ -165,8 +165,8 @@ namespace bitwardenSelfLicensor
             set("Premium", true);
             set("Version", 1);
             set("Issued", DateTime.UtcNow);
-            set("Refresh", DateTime.UtcNow.AddYears(1).AddMonths(-1));
-            set("Expires", DateTime.UtcNow.AddYears(1));
+            set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
+            set("Expires", DateTime.UtcNow.AddYears(100));
             set("Trial", false);
 
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
@@ -196,7 +196,7 @@ namespace bitwardenSelfLicensor
             set("BillingEmail", email);
             set("BusinessName", "BitBetter");
             set("Enabled", true);
-            set("Seats", (short)5);
+            set("Seats", (short)65534);
             set("MaxCollections", short.MaxValue);
             set("MaxStorageGb", short.MaxValue);
             set("SelfHost", true);
@@ -207,8 +207,8 @@ namespace bitwardenSelfLicensor
             set("Plan", "Custom");
             set("Version", 1);
             set("Issued", DateTime.UtcNow);
-            set("Refresh", DateTime.UtcNow.AddYears(1).AddMonths(-1));
-            set("Expires", DateTime.UtcNow.AddYears(1));
+            set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
+            set("Expires", DateTime.UtcNow.AddYears(100));
             set("Trial", false);
 
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
