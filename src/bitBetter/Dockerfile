@@ -7,7 +7,6 @@ RUN dotnet /bitBetter/bitBetter.dll && \
     echo "modified dll" && \
     mv /app/Core.dll /app/Core.orig.dll && \
     mv /app/modified.dll /app/Core.dll && \
-    cp -f /app/Core.dll /jobs/Core.dll && \
     echo "replaced dll" && \
     rm -rf /bitBetter && rm -rf /newLicensing.cer && \
     echo "cleaned up"

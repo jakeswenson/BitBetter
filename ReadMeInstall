@@ -1,0 +1,95 @@
+These are the commands I used (and a few of my notes) for a minimal Debian Stretch install..
+Software Selection - "SSH server" and 'standard system utilities" only
+
+
+
+sudo apt-get update
+sudo apt-get install vim vim-doc vim-scripts wget curl git
+sudo apt-get dist-upgrade
+sudo reboot
+
+---The next few lines I setup my server authentication and other misc profile settings you can skip until sudo apt-get
+
+ssh-keygen
+
+echo "ssh-rsa AA...1Q== " >>  .ssh/authorized_keys
+
+echo ":set mouse=" >> .vimrc
+echo "set nocompatible" >> .vimrc
+
+vi .bashrc
+
+sudo visudo  ---- tom ALL=(ALL) NOPASSWD:ALL
+
+sudo vi /etc/ssh/sshd_config  -  Enable 'PermitRootLogin prohibit-password' and 'PasswordAuthentication no'
+
+sudo apt-get update
+sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+sudo apt update
+apt-cache policy docker-ce
+sudo apt install docker-ce
+sudo systemctl status docker
+sudo usermod -aG docker ${USER}
+exit
+
+id -nG
+docker version
+docker info
+docker run hello-world
+
+sudo curl -L --fail https://github.com/docker/compose/releases/download/1.23.1/run.sh -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
+sudo mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
+wget -q https://packages.microsoft.com/config/debian/9/prod.list
+sudo mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
+sudo chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+sudo chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+
+curl -s -o bitwarden.sh https://raw.githubusercontent.com/bitwarden/core/master/scripts/bitwarden.sh && sudo chmod u+x bitwarden.sh
+./bitwarden.sh install
+
+sudo apt-get update
+sudo apt-get install dotnet-sdk-2.1
+
+git clone https://github.com/online-stuff/BitBetter.git
+
+cd BitBetter/src/licenseGen/
+dotnet add package Newtonsoft.Json --version 11.0.0 
+
+cd ~/BitBetter/src/bitBetter
+dotnet add package Newtonsoft.Json --version 11.0.0 
+
+cd ~/BitBetter/.keys
+rm *
+
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cert -days 36500 -outform DER -passout pass:test
+openssl x509 -inform DER -in cert.cert -out cert.pem
+openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:test -passout pass:test
+
+
+cd ~/BitBetter
+./build.sh
+
+cd src/licenseGen/
+./build.sh
+
+cd ~
+
+vi ~/bwdata/docker/docker-compose.yml   -  Change image: bitwarden/api:1.26.0 to image: bitbetter/api
+vi ~/bwdata/env/global.override.env    -  Enter mail__smtp relay settings
+vi ~/bwdata/scripts/run.sh   -   function restart() {   dockerComposePull to  #dockerComposePull
+
+./bitwarden start
+
+----Server should be up and running..  Create a user account
+
+cd ~/BitBetter/src/licenseGen/
+./build.sh
+./run.sh ~/BitBetter/.keys/cert.pfx user "Name" "EMail" "User-GUID"
+	Get User-GUID from the admin portal of the BitWarden server
+
+./run.sh ~/BitBetter/.keys/cert.pfx org "Name" "EMail" "Install-ID used to install the server from bitwarden.com/host"

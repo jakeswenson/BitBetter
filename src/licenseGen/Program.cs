@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.Loader;
@@ -165,8 +165,8 @@ namespace bitwardenSelfLicensor
             set("Premium", true);
             set("Version", 1);
             set("Issued", DateTime.UtcNow);
-            set("Refresh", DateTime.UtcNow.AddYears(1).AddMonths(-1));
-            set("Expires", DateTime.UtcNow.AddYears(1));
+            set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
+            set("Expires", DateTime.UtcNow.AddYears(100));
             set("Trial", false);
 
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
@@ -196,19 +196,22 @@ namespace bitwardenSelfLicensor
             set("BillingEmail", email);
             set("BusinessName", "BitBetter");
             set("Enabled", true);
-            set("Seats", (short)5);
+            set("Plan", "Custom");
+            set("PlanType", (byte)6);
+            set("Seats", (short)32767);
             set("MaxCollections", short.MaxValue);
-            set("MaxStorageGb", short.MaxValue);
-            set("SelfHost", true);
             set("UseGroups", true);
+            set("UseEvents", true);
             set("UseDirectory", true);
             set("UseTotp", true);
-            set("PlanType", (byte)6);
-            set("Plan", "Custom");
-            set("Version", 1);
+            set("Use2fa", true);
+            set("MaxStorageGb", short.MaxValue);
+            set("SelfHost", true);
+            set("UsersGetPremium", true);
+            set("Version", 4);
             set("Issued", DateTime.UtcNow);
-            set("Refresh", DateTime.UtcNow.AddYears(1).AddMonths(-1));
-            set("Expires", DateTime.UtcNow.AddYears(1));
+            set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
+            set("Expires", DateTime.UtcNow.AddYears(100));
             set("Trial", false);
 
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
