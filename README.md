@@ -24,9 +24,9 @@ If you want to be able to sign your own licenses obviously you'll have to replac
 
 ### Signing licesnses
 
-There is a tool included to generate a license (see `src/liceseGen/`)
+To sign your own license you first need to generate your own singing cert using the `.keys/generate-keys.sh` script. Running this script will prompt you to enter some information about your new certificate, you may leave these at the defaults or set them to your preference. The script will then create a pkcs12 file (.pfx) containing your new key/cert.
 
-generate a PFX above using a password of `test` and then build the tool using:
+There is a tool included to generate a license (see `src/liceseGen/`), build it using:
 
 ```bash
 ./src/licenseGen/build.sh
