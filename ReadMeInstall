@@ -79,7 +79,7 @@ cd src/licenseGen/
 
 cd ~
 
-vi ~/bwdata/docker/docker-compose.yml   -  Change image: bitwarden/api:1.26.0 to image: bitbetter/api
+vi ~/bwdata/docker/docker-compose.yml   -  Change image: bitwarden/api:1.26.0 to image: bitbetter/api and image: bitwarden/identity:x.xx.x to image: bitbetter/identity
 vi ~/bwdata/env/global.override.env    -  Enter mail__smtp relay settings
 vi ~/bwdata/scripts/run.sh   -   function restart() {   dockerComposePull to  #dockerComposePull
 

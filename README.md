@@ -9,12 +9,12 @@ Credit to https://github.com/h44z/BitBetter and https://github.com/jakeswenson/B
 
 ## Building
 
-To build your own `bitwarden/api` image run
+To build your own `bitwarden/api` & `bitwarden/identity` images run
 ```bash
 ./build.sh
 ```
 
-replace anywhere `bitwarden/api` is used with `bitbetter/api` and give it a go. no promises
+In your `bwdata/docker/docker-compose.yml` replace each reference to `bitwarden/api:x.xx.x` with `bitbetter/api` and each reference to `bitwarden/identity:x.xx.x` with `bitbetter/identity` and the start bitwarden as normal.
 
 ## Issuing your own licenses
 
