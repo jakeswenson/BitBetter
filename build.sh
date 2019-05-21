@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ -e .keys ]  || mkdir .keys
+.keys/generate-keys.sh
 
 [ -e ./source/bitBetter/api/.keys ]  || mkdir ./src/bitBetter/api/.keys
 [ -e ./source/bitBetter/identity/.keys ]  || mkdir ./src/bitBetter/identity/.keys
