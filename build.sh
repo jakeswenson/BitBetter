@@ -1,6 +1,7 @@
 #!/bin/bash
 
-.keys/generate-keys.sh
+# If there aren't any keys, generate them first.
+[ -e ./keys/cert.cert] || ./.keys/generate-keys.sh
 
 [ -e ./source/bitBetter/api/.keys ]  || mkdir ./src/bitBetter/api/.keys
 [ -e ./source/bitBetter/identity/.keys ]  || mkdir ./src/bitBetter/identity/.keys
