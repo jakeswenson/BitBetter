@@ -40,8 +40,33 @@ dotnet add package Newtonsoft.Json --version 11.0.0
 cd ../bitBetter
 dotnet add package Newtonsoft.Json --version 11.0.0 
 ```
+## Building BitBetter
 
-Next, we need to generate the self-signed certificate we will use to sign any licenses we generate.
+Now that you've set up your build environment, you can run the main `BitBetter/build.sh` script to generate a modified version of the `bitwarden/api` and `bitwarden/identity` docker images.
+
+From the BitBetter directory, simply run:
+```bash
+./build.sh
+```
+
+This will create a new self-signed certificate in the `.keys` directory one does not already exist and then create a modified version of the official `bitwarden/api` called `bitbetter/api` and a modified version of the `bitwarden/identity` called `bitbetter/identity`. You may now simply edit your bitwarden docker-compose.yml to utilize the modified image.
+
+Edit your  `/path/to/bwdata/docker/docker-compose.yml`.
+
+> Replace `image: bitwarden/api:x.xx.x`<br>with `image: bitbetter/api`
+
+> Replace `image: bitwarden/identity:x.xx.x`<br>with `image: bitbetter/identity`
+
+You'll also want to edit the `/path/to/bwdata/scripts/run.sh` file. In the `function restart()` block, comment out the call to `dockerComposePull`.
+
+> Replace `dockerComposePull`<br>with `#dockerComposePull`
+
+You can now start or restart Bitwarden as normal and the modified api will be used. <b>It is now ready to accept self-issued licenses.</b>
+
+---
+**Note: Manually generating Certificate & Key**
+
+If you wish to generate your self-signed cert & key manually, you can run the following commands.
 
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cert -days 36500 -outform DER -passout pass:test
@@ -51,26 +76,7 @@ openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:te
 
 Note that the password here must be `test`.<sup>[1](#f1)</sup>
 
-## Building BitBetter
-
-Now that you've generated your own own self-signed certificate, you can run the main `BitBetter/build.sh` script to generate a modified version of the `bitwarden/api` docker image.
-
-From the BitBetter directory, simply run:
-```bash
-./build.sh
-```
-
-This will create a modified version of the official `bitwarden/api` called `bitbetter/api`. You may now simply edit your bitwarden docker-compose.yml to utilize the modified image.
-
-Edit your  `/path/to/bwdata/docker/docker-compose.yml`.
-
-> Replace `image: bitwarden/api:x.xx.x`<br>with `image: bitbetter/api`
-
-You'll also want to edit the `/path/to/bwdata/scripts/run.sh` file. In the `function restart()` block, comment out the call to `dockerComposePull`.
-
-> Replace `dockerComposePull`<br>with `#dockerComposePull`
-
-You can now start or restart Bitwarden as normal and the modified api will be used. <b>It is now ready to accept self-issued licenses.</b>
+---
 
 ## Generating Signed Licenses
 
