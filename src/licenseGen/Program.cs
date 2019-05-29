@@ -33,6 +33,128 @@ namespace bitwardenSelfLicensor
                        certExists() && coreExists();
             }
 
+            app.Command("interactive", config =>
+            {
+                string buff="", licensetype="", name="", email="", guid="", installid="", key="", businessname="";
+
+                config.OnExecute(() =>
+                {
+                    if (!verifyTopOptions())
+                    {
+                        if (!coreExists())
+                        {
+                            config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
+                        }
+                        if (!certExists())
+                        {
+                            config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
+                        }
+
+                        config.ShowHelp();
+                        return 1;
+                    }
+                    else if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email))
+                    {
+                        config.Error.WriteLine($"Some arguments are missing: Name='{name}' Email='{email}'");
+                        config.ShowHelp("user");
+                        return 1;
+                    }
+
+                    WriteLine("Interactive license mode...");
+
+                    while (licensetype == "")
+                    {
+                        WriteLine("What would you like to generate, a [u]ser license or an [o]rg license?");
+                        buff = Console.ReadLine();
+
+                        if(buff == "u")
+                        {
+                            licensetype = "user";
+                            WriteLineOver("Okay, we will generate a user license.");
+                            WriteLine("Please provide the user's guid — refer to the Readme for details on how to retrieve this. [GUID]:");
+
+                            while (guid == "")
+                            {
+                                WriteLineOver("Please provide the user's guid — refer to the Readme for details on how to retrieve this. [GUID]:");
+                                buff = Console.ReadLine();
+                                if ( checkGUID(buff) ) guid = buff;
+                            }
+                        }
+                        else if (buff == "o")
+                        {
+                            licensetype = "org";
+                            WriteLineOver("Okay, we will generate an organization license.");
+                            WriteLine("Please provide your Bitwarden Install-ID — refer to the Readme for details on how to retrieve this. [Install-ID]:");
+
+                            while (installid == "")
+                            {
+                                WriteLineOver("Please provide your Bitwarden Install-ID — refer to the Readme for details on how to retrieve this. [Install-ID]:");
+                                buff = Console.ReadLine();
+                                if ( checkGUID(buff) ) installid = buff;
+                            }
+
+                            while (businessname == "")
+                            {
+                                WriteLineOver("Please enter an option business name, default is BitBetter. [Business Name]:");
+                                buff = Console.ReadLine();
+                                if (buff == "")                     businessname = "BitBetter";
+                                else if (checkBusinessName(buff))   businessname = buff;
+                            }
+                        }
+                        else
+                        {
+                            WriteLineOver("Unrecognized option \'" + buff + "\'. ");
+                        }
+                    }
+
+                    while (name == "")
+                    {
+                        WriteLineOver("Please provide the username this license will be registered to. [username]:");
+                        buff = Console.ReadLine();
+                        if ( checkUsername(buff) )   name = buff;                   
+                    }
+
+                    while (email == "")
+                    {
+                        WriteLineOver("Please provide the email address for the user " + name + ". [email]");
+                        buff = Console.ReadLine();
+                        if ( checkEmail(buff) )   email = buff;                   
+                    }
+
+
+                    if (licensetype == "user")
+                    {
+                        WriteLineOver("Confirm creation of \"user\" license for username: \"" + name + "\", email: \"" + email + "\", User-GUID: \"" + guid + "\"? Y/n");
+                        buff = Console.ReadLine();
+                        if ( buff == "" || buff == "y" || buff == "Y" )
+                        {
+                            WriteLine("Okay.");
+                        }
+                        else
+                        {
+                            WriteLineOver("Exiting...");
+                            return 0;
+                        }
+                    }
+                    else if (licensetype == "org")
+                    {
+                        WriteLineOver("Confirm creation of \"organization\" license for business name: \"" + businessname + "\", username: \"" + name + "\", email: \"" + email + "\", Install-ID: \"" + installid + "\"? Y/n");
+                        buff = Console.ReadLine();
+                        if ( buff == "" || buff == "y" || buff == "Y" )
+                        {
+                            WriteLine("Okay.");
+                        }
+                        else
+                        {
+                            WriteLineOver("Exiting...");
+                            return 0;
+                        }
+                    }
+
+                    return 0;
+                });
+            });
+
             app.Command("user", config =>
             {
                 var name = config.Argument("Name", "your name");
@@ -141,6 +263,69 @@ namespace bitwardenSelfLicensor
                 Console.Error.WriteLine("Oops: {0}", e);
                 return 100;
             }
+        }
+
+        // checkGUID Checks that the user-guid matches the correct format
+        static bool checkGUID(string s)
+        {
+            if (s == "") {
+                WriteLineOver("The User-GUID provided appears to be malformed.");
+                return false;
+            }
+            return true;    // TODO: Actually validate
+        }
+
+        // checkInstallID Checks that the Install-ID matches the correct format
+        static bool checkInstallID(string s)
+        {
+            if (s == "") {
+                WriteLineOver("The Install-ID provided appears to be malformed.");
+                return false;
+            }
+            return true;    // TODO: Actually validate
+        }
+
+        // checkUsername Checks that the username is a valid username
+        static bool checkUsername(string s)
+        {
+            if (s == "") {
+                WriteLineOver("The username provided doesn't appear to be valid.");
+                return false;
+            }
+            return true;    // TODO: Actually validate
+        }
+
+        // checkBusinessName Checks that the Business Name is a valid username
+        static bool checkBusinessName(string s)
+        {
+            if (s == "Microsoft") {
+                WriteLineOver("The Business Name provided doesn't appear to be valid.");
+                return false;
+            }
+            return true;    // TODO: Actually validate
+        }
+
+        // checkEmail Checks that the email address is a valid email address
+        static bool checkEmail(string s)
+        {
+            if (s == "") {
+                WriteLineOver("The email provided doesn't appear to be valid.");
+                return false;
+            }
+            return true;    // TODO: Actually validate
+        }
+
+        // WriteLineOver Writes a new line to console over last line.
+        static void WriteLineOver(string s)
+        {
+            Console.SetCursorPosition(0, Console.CursorTop -1);
+            Console.WriteLine(s);
+        }
+
+        // WriteLine This wrapper is just here so that console writes all look similar.
+        static void WriteLine(string s)
+        {
+            Console.WriteLine(s);
         }
 
         static void GenerateUserLicense(X509Certificate2 cert, string corePath,
