@@ -35,28 +35,19 @@ namespace bitwardenSelfLicensor
 
             app.Command("interactive", config =>
             {
-                string buff="", licensetype="", name="", email="", guid="", installid="", key="", businessname="";
+                string buff="", licensetype="", name="", email="", businessname="";
+
+                bool valid_guid = false, valid_installid = false;
+                Guid guid, installid;
 
                 config.OnExecute(() =>
                 {
                     if (!verifyTopOptions())
                     {
-                        if (!coreExists())
-                        {
-                            config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
-                        }
-                        if (!certExists())
-                        {
-                            config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
-                        }
+                        if (!coreExists()) config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
+                        if (!certExists()) config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
 
                         config.ShowHelp();
-                        return 1;
-                    }
-                    else if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email))
-                    {
-                        config.Error.WriteLine($"Some arguments are missing: Name='{name}' Email='{email}'");
-                        config.ShowHelp("user");
                         return 1;
                     }
 
@@ -71,31 +62,33 @@ namespace bitwardenSelfLicensor
                         {
                             licensetype = "user";
                             WriteLineOver("Okay, we will generate a user license.");
-                            WriteLine("Please provide the user's guid — refer to the Readme for details on how to retrieve this. [GUID]:");
 
-                            while (guid == "")
+                            while (valid_guid == false)
                             {
-                                WriteLineOver("Please provide the user's guid — refer to the Readme for details on how to retrieve this. [GUID]:");
+                                WriteLine("Please provide the user's guid — refer to the Readme for details on how to retrieve this. [GUID]:");
                                 buff = Console.ReadLine();
-                                if ( checkGUID(buff) ) guid = buff;
+
+                                if (Guid.TryParse(buff, out guid))valid_guid = true;
+                                else WriteLineOver("The user-guid provided does not appear to be valid.");
                             }
                         }
                         else if (buff == "o")
                         {
                             licensetype = "org";
                             WriteLineOver("Okay, we will generate an organization license.");
-                            WriteLine("Please provide your Bitwarden Install-ID — refer to the Readme for details on how to retrieve this. [Install-ID]:");
 
-                            while (installid == "")
+                            while (valid_installid == false)
                             {
-                                WriteLineOver("Please provide your Bitwarden Install-ID — refer to the Readme for details on how to retrieve this. [Install-ID]:");
+                                WriteLine("Please provide your Bitwarden Install-ID — refer to the Readme for details on how to retrieve this. [Install-ID]:");
                                 buff = Console.ReadLine();
-                                if ( checkGUID(buff) ) installid = buff;
+
+                                if (Guid.TryParse(buff, out installid)) valid_installid = true;
+                                else WriteLineOver("The install-id provided does not appear to be valid.");
                             }
 
                             while (businessname == "")
                             {
-                                WriteLineOver("Please enter an option business name, default is BitBetter. [Business Name]:");
+                                WriteLineOver("Please enter a business name, default is BitBetter. [Business Name]:");
                                 buff = Console.ReadLine();
                                 if (buff == "")                     businessname = "BitBetter";
                                 else if (checkBusinessName(buff))   businessname = buff;
@@ -128,7 +121,7 @@ namespace bitwardenSelfLicensor
                         buff = Console.ReadLine();
                         if ( buff == "" || buff == "y" || buff == "Y" )
                         {
-                            WriteLine("Okay.");
+                            GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, guid, null);
                         }
                         else
                         {
@@ -142,7 +135,7 @@ namespace bitwardenSelfLicensor
                         buff = Console.ReadLine();
                         if ( buff == "" || buff == "y" || buff == "Y" )
                         {
-                            WriteLine("Okay.");
+                            GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, installid, businessname, null);
                         }
                         else
                         {
@@ -204,6 +197,7 @@ namespace bitwardenSelfLicensor
                 var name = config.Argument("Name", "your name");
                 var email = config.Argument("Email", "your email");
                 var installId = config.Argument("InstallId", "your installation id (GUID)");
+                var businessName = config.Argument("BusinessName", "name For the organization (optional)");
                 var key = config.Argument("Key", "your key id (optional)");
                 var help = config.HelpOption("--help | -h | -?");
 
@@ -240,7 +234,7 @@ namespace bitwardenSelfLicensor
                         return 1;
                     }
 
-                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, installationId, key.Value);
+                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, installationId, businessName.Value, key.Value);
 
                     return 0;
                 });
@@ -265,31 +259,11 @@ namespace bitwardenSelfLicensor
             }
         }
 
-        // checkGUID Checks that the user-guid matches the correct format
-        static bool checkGUID(string s)
-        {
-            if (s == "") {
-                WriteLineOver("The User-GUID provided appears to be malformed.");
-                return false;
-            }
-            return true;    // TODO: Actually validate
-        }
-
-        // checkInstallID Checks that the Install-ID matches the correct format
-        static bool checkInstallID(string s)
-        {
-            if (s == "") {
-                WriteLineOver("The Install-ID provided appears to be malformed.");
-                return false;
-            }
-            return true;    // TODO: Actually validate
-        }
-
         // checkUsername Checks that the username is a valid username
         static bool checkUsername(string s)
         {
-            if (s == "") {
-                WriteLineOver("The username provided doesn't appear to be valid.");
+            if ( string.IsNullOrWhiteSpace(s) ) {
+                WriteLineOver("The username provided doesn't appear to be valid.\n");
                 return false;
             }
             return true;    // TODO: Actually validate
@@ -298,8 +272,8 @@ namespace bitwardenSelfLicensor
         // checkBusinessName Checks that the Business Name is a valid username
         static bool checkBusinessName(string s)
         {
-            if (s == "Microsoft") {
-                WriteLineOver("The Business Name provided doesn't appear to be valid.");
+            if ( string.IsNullOrWhiteSpace(s) ) {
+                WriteLineOver("The Business Name provided doesn't appear to be valid.\n");
                 return false;
             }
             return true;    // TODO: Actually validate
@@ -308,8 +282,8 @@ namespace bitwardenSelfLicensor
         // checkEmail Checks that the email address is a valid email address
         static bool checkEmail(string s)
         {
-            if (s == "") {
-                WriteLineOver("The email provided doesn't appear to be valid.");
+            if ( string.IsNullOrWhiteSpace(s) ) {
+                WriteLineOver("The email provided doesn't appear to be valid.\n");
                 return false;
             }
             return true;    // TODO: Actually validate
@@ -361,7 +335,7 @@ namespace bitwardenSelfLicensor
         }
 
         static void GenerateOrgLicense(X509Certificate2 cert, string corePath,
-            string userName, string email, Guid instalId, string key)
+            string userName, string email, Guid instalId, string businessName, string key)
         {
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
@@ -379,7 +353,7 @@ namespace bitwardenSelfLicensor
             set("Id", Guid.NewGuid());
             set("Name", userName);
             set("BillingEmail", email);
-            set("BusinessName", "BitBetter");
+            set("BusinessName", string.IsNullOrWhiteSpace(businessName) ? "BitBetter" : businessName);
             set("Enabled", true);
             set("Plan", "Custom");
             set("PlanType", (byte)6);

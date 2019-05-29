@@ -42,14 +42,14 @@ dotnet add package Newtonsoft.Json --version 11.0.0
 ```
 ## Building BitBetter
 
-Now that you've set up your build environment, you can run the main `BitBetter/build.sh` script to generate a modified version of the `bitwarden/api` and `bitwarden/identity` docker images.
+Now that you've set up your build environment, you can **run the main build script** to generate a modified version of the `bitwarden/api` and `bitwarden/identity` docker images.
 
 From the BitBetter directory, simply run:
 ```bash
 ./build.sh
 ```
 
-This will create a new self-signed certificate in the `.keys` directory one does not already exist and then create a modified version of the official `bitwarden/api` called `bitbetter/api` and a modified version of the `bitwarden/identity` called `bitbetter/identity`. You may now simply edit your bitwarden docker-compose.yml to utilize the modified image.
+This will create a new self-signed certificate in the `.keys` directory one does not already exist and then create a modified version of the official `bitwarden/api` called `bitbetter/api` and a modified version of the `bitwarden/identity` called `bitbetter/identity`. You may **now simply edit your bitwarden docker-compose.yml to utilize the modified image**.
 
 Edit your  `/path/to/bwdata/docker/docker-compose.yml`.
 
@@ -61,10 +61,10 @@ You'll also want to edit the `/path/to/bwdata/scripts/run.sh` file. In the `func
 
 > Replace `dockerComposePull`<br>with `#dockerComposePull`
 
-You can now start or restart Bitwarden as normal and the modified api will be used. <b>It is now ready to accept self-issued licenses.</b>
+You can now start or restart Bitwarden as normal and the modified api will be used. **It is now ready to accept self-issued licenses.**
 
 ---
-**Note: Manually generating Certificate & Key**
+### Note: Manually generating Certificate & Key
 
 If you wish to generate your self-signed cert & key manually, you can run the following commands.
 
@@ -74,7 +74,7 @@ openssl x509 -inform DER -in cert.cert -out cert.pem
 openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:test -passout pass:test
 ```
 
-Note that the password here must be `test`.<sup>[1](#f1)</sup>
+> Note that the password here must be `test`.<sup>[1](#f1)</sup>
 
 ---
 
@@ -82,22 +82,41 @@ Note that the password here must be `test`.<sup>[1](#f1)</sup>
 
 There is a tool included in the directory `src/licenseGen/` that will generate new individual and organization licenses. These licenses will be accepted by the modified Bitwarden because they will be signed by the certificate you generated in earlier steps.
 
-First, from the `BitBetter/src/licenseGen` directory, build the license generator.<sup>[2](#f2)</sup>
+First, from the `BitBetter` directory, **build the license generator**.<sup>[2](#f2)</sup>
 
 ```bash
-./build.sh
+./src/licenseGen/build.sh
 ```
 
-Now, from the `BitBetter/src/licenseGen` directory, you can run the tool to generate licenses.
+In order to run the tool and generate a license you'll need to get a **user's GUID** in order to generate an **invididual license** or the server's **install ID** to generate an **Organization license**. These can be retrieved most easily through the Bitwarden [Admin Portal](https://help.bitwarden.com/article/admin-portal/).
 
-You'll need to get a user's <b>GUID</b> in order to generate an <b>invididual license</b> and the server's <b>install ID</b> to generate an <b>Organization license</b>. These can be retrieved most easily through the Bitwarden [Admin Portal](https://help.bitwarden.com/article/admin-portal/).
+If you generated your keys in the default `BitBetter/.keys` directory, you can **simply run the license gen in interactive mode** from the `Bitbetter` directory and **follow the prompts to generate your license**.
 
 ```bash
-./run.sh ~/BitBetter/.keys/cert.pfx user "Name" "EMail" "User-GUID"
-./run.sh ~/BitBetter/.keys/cert.pfx org "Name" "EMail" "Install-ID used to install the server"
+./src/licenseGen/run.sh interactive
 ```
 
-<b>The license generator will spit out a JSON-formatted license which can then be used within the Bitwarden web front-end to license your user or org!</b>
+**The license generator will spit out a JSON-formatted license which can then be used within the Bitwarden web front-end to license your user or org!**
+
+---
+
+### Note: Alternative Ways to Generate License
+
+If you wish to run the license gen from a directory aside from the root `BitBetter` one, you'll have to provide the absolute path to your cert.pfx.
+
+```bash
+./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx interactive
+```
+
+Additional, instead of interactive mode, you can also pass the parameters directly to the command as follows.
+
+```bash
+./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx user "Name" "EMail" "User-GUID"
+./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx org "Name" "EMail" "Install-ID used to install the server"
+```
+
+---
+
 
 # FAQ: Questions (you might have?)
 
