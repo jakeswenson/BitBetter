@@ -35,10 +35,10 @@ First, we need to add the correct version of Newtonsoft.Json to the license gene
 
 ```bash
 cd BitBetter/src/licenseGen/
-dotnet add package Newtonsoft.Json --version 11.0.0 
+dotnet add package Newtonsoft.Json --version 12.0.1 
 
 cd ../bitBetter
-dotnet add package Newtonsoft.Json --version 11.0.0 
+dotnet add package Newtonsoft.Json --version 12.0.1 
 ```
 ## Building BitBetter
 
@@ -85,7 +85,7 @@ There is a tool included in the directory `src/licenseGen/` that will generate n
 First, from the `BitBetter` directory, **build the license generator**.<sup>[2](#f2)</sup>
 
 ```bash
-./src/licenseGen/build.sh
+./build.sh
 ```
 
 In order to run the tool and generate a license you'll need to get a **user's GUID** in order to generate an **invididual license** or the server's **install ID** to generate an **Organization license**. These can be retrieved most easily through the Bitwarden [Admin Portal](https://help.bitwarden.com/article/admin-portal/).
