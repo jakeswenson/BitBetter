@@ -78,21 +78,6 @@ openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:te
 
 ---
 
----
-**Note: Manually generating Certificate & Key**
-
-If you wish to generate your self-signed cert & key manually, you can run the following commands.
-
-```bash
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cert -days 36500 -outform DER -passout pass:test
-openssl x509 -inform DER -in cert.cert -out cert.pem
-openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:test -passout pass:test
-```
-
-Note that the password here must be `test`.<sup>[1](#f1)</sup>
-
----
-
 ## Generating Signed Licenses
 
 There is a tool included in the directory `src/licenseGen/` that will generate new individual and organization licenses. These licenses will be accepted by the modified Bitwarden because they will be signed by the certificate you generated in earlier steps.
