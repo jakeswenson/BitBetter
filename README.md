@@ -35,10 +35,10 @@ First, we need to add the correct version of Newtonsoft.Json to the license gene
 
 ```bash
 cd BitBetter/src/licenseGen/
-dotnet add package Newtonsoft.Json --version 11.0.0 
+dotnet add package Newtonsoft.Json --version 12.0.1 
 
 cd ../bitBetter
-dotnet add package Newtonsoft.Json --version 11.0.0 
+dotnet add package Newtonsoft.Json --version 12.0.1 
 ```
 
 Next, we need to generate the self-signed certificate we will use to sign any licenses we generate.
