@@ -28,7 +28,7 @@ Aside from docker, which you also need for Bitwarden, BitBetter requires the fol
 With your pre-requisites installed, begin the installation of BitBetter by downloading it through Github or using the git command:
 
 ```bash
-git clone https://github.com/online-stuff/BitBetter.git
+git clone https://github.com/jakeswenson/BitBetter.git
 ```
 
 First, we need to add the correct version of Newtonsoft.Json to the license generator and the BitBetter docker directories.
