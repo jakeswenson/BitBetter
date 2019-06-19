@@ -5,6 +5,7 @@
 
 [ -e ./src/bitBetter/api/.keys ]  || mkdir ./src/bitBetter/api/.keys
 [ -e ./src/bitBetter/identity/.keys ]  || mkdir ./src/bitBetter/identity/.keys
+
 cp .keys/cert.cert ./src/bitBetter/api/.keys
 cp .keys/cert.cert ./src/bitBetter/identity/.keys
 
