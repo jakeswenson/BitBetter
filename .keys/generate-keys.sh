@@ -3,7 +3,8 @@
 # Check for openssl
 command -v openssl >/dev/null 2>&1 || { echo >&2 "openssl required but not found.  Aborting."; exit 1; }
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DIR=`dirname "$0"`
+DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /usr/bin/pwd || /bin/pwd || pwd`
 
 # Remove any existing key files
 [ ! -e "$DIR/cert.pem" ]  || rm "$DIR/cert.pem"
