@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../.. && pwd)"
 
 # Grab the absolute path to the default pfx location
 cert_path="$DIR/.keys/cert.pfx"
