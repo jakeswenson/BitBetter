@@ -2,7 +2,7 @@
 
 script_dir=`cd $(dirname $0); pwd`
 
-cd $script_dir
+cd "$script_dir"
 
 dotnet restore
 dotnet publish
