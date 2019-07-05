@@ -14,5 +14,5 @@ elif [ "$#" -ge "2" ]; then
     shift
 fi
 
-docker run -it -v "$cert_path:/cert.pfx" bitbetter/licensegen "$@"
+docker run -it --rm -v "$cert_path:/cert.pfx" bitbetter/licensegen "$@"
 
