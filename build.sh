@@ -11,13 +11,10 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cp "$DIR/.keys/cert.cert" "$DIR/src/bitBetter/api/.keys"
 cp "$DIR/.keys/cert.cert" "$DIR/src/bitBetter/identity/.keys"
 
-cd "$DIR/src/bitBetter"
+docker run -v "$DIR/src/bitBetter:/bitBetter" -w=/bitBetter mcr.microsoft.com/dotnet/core/sdk:2.1 sh build.sh
 
-dotnet restore
-dotnet publish
+cp -r "$DIR/src/bitBetter/bin" "$DIR/src/bitBetter/api/"
+cp -r "$DIR/src/bitBetter/bin" "$DIR/src/bitBetter/identity/"
 
-cp -r ./bin ./api/
-cp -r ./bin ./identity/
-
-docker build -t bitbetter/api ./api # --squash
-docker build -t bitbetter/identity ./identity # --squash
+docker build -t bitbetter/api "$DIR/src/bitBetter/api" # --squash
+docker build -t bitbetter/identity "$DIR/src/bitBetter/identity" # --squash
