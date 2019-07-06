@@ -10,7 +10,7 @@ DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /us
 
 cp "$DIR/.keys/cert.cert" "$DIR/src/bitBetter/.keys"
 
-docker run -v "$DIR/src/bitBetter:/bitBetter" -w=/bitBetter mcr.microsoft.com/dotnet/core/sdk:2.1 sh build.sh
+docker run --rm -v "$DIR/src/bitBetter:/bitBetter" -w=/bitBetter mcr.microsoft.com/dotnet/core/sdk:2.1 sh build.sh
 
 docker build --build-arg BITWARDEN_TAG=bitwarden/api -t bitbetter/api "$DIR/src/bitBetter" # --squash
 docker build --build-arg BITWARDEN_TAG=bitwarden/identity -t bitbetter/identity "$DIR/src/bitBetter" # --squash
