@@ -1,24 +1,18 @@
-#!/bin/bash
+#!/bin/sh
+
+DIR=`dirname "$0"`
+DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /usr/bin/pwd || /bin/pwd || pwd`
 
 # If there aren't any keys, generate them first.
-[ -e ./.keys/cert.cert ] || ./.keys/generate-keys.sh
+[ -e "$DIR/.keys/cert.cert" ] || "$DIR/.keys/generate-keys.sh"
 
-[ -e ./src/bitBetter/api/.keys ]  || mkdir ./src/bitBetter/api/.keys
-[ -e ./src/bitBetter/identity/.keys ]  || mkdir ./src/bitBetter/identity/.keys
+[ -e "$DIR/src/bitBetter/.keys" ] || mkdir "$DIR/src/bitBetter/.keys"
 
-cp .keys/cert.cert ./src/bitBetter/api/.keys
-cp .keys/cert.cert ./src/bitBetter/identity/.keys
+cp "$DIR/.keys/cert.cert" "$DIR/src/bitBetter/.keys"
 
-cd ./src/bitBetter
+docker run --rm -v "$DIR/src/bitBetter:/bitBetter" -w=/bitBetter mcr.microsoft.com/dotnet/core/sdk:2.1 sh build.sh
 
-dotnet restore
-dotnet publish
+docker build --build-arg BITWARDEN_TAG=bitwarden/api -t bitbetter/api "$DIR/src/bitBetter" # --squash
+docker build --build-arg BITWARDEN_TAG=bitwarden/identity -t bitbetter/identity "$DIR/src/bitBetter" # --squash
 
-cp -r bin/ api/
-cp -r bin/ identity/
 
-cd ./api
-docker build --pull . -t bitbetter/api # --squash
-
-cd ../identity
-docker build --pull . -t bitbetter/identity # --squash

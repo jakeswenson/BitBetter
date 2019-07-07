@@ -4,7 +4,7 @@ BitBetter is is a tool to modify bitwardens core dll to allow you to generate yo
 
 _Beware! BitBetter does janky IL magic to rewrite the bitwarden core dll and install a self signed certificate. Use at your own risk!_
 
-Credit to https://github.com/h44z/BitBetter and https://github.com/jakeswenson/BitBetter 
+Credit to https://github.com/h44z/BitBetter and https://github.com/jakeswenson/BitBetter
 
 # Table of Contents
 1. [Getting Started](#getting-started)
@@ -22,7 +22,6 @@ The following instructions are for unix-based systems (Linux, BSD, macOS), it is
 Aside from docker, which you also need for Bitwarden, BitBetter requires the following:
 
 * openssl (probably already installed on most Linux or WSL systems)
-* dotnet-sdk-2.1 (install instructions can be found [here](https://dotnet.microsoft.com/download/linux-package-manager/rhel/sdk-2.1.604))
 
 ## Setting up BitBetter
 With your pre-requisites installed, begin the installation of BitBetter by downloading it through Github or using the git command:
@@ -31,15 +30,6 @@ With your pre-requisites installed, begin the installation of BitBetter by downl
 git clone https://github.com/jakeswenson/BitBetter.git
 ```
 
-First, we need to add the correct version of Newtonsoft.Json to the license generator and the BitBetter docker directories.
-
-```bash
-cd BitBetter/src/licenseGen/
-dotnet add package Newtonsoft.Json --version 12.0.1 
-
-cd ../bitBetter
-dotnet add package Newtonsoft.Json --version 12.0.1 
-```
 ## Building BitBetter
 
 Now that you've set up your build environment, you can **run the main build script** to generate a modified version of the `bitwarden/api` and `bitwarden/identity` docker images.
@@ -125,13 +115,13 @@ I'll work on updates in the next couple weeks, right now, I just wanted somethin
 ## But why? Its open source?
 
 Yes, bitwarden is great. If I didn't care about it i wouldn't be doing this.
-I was bothered that if i want to host bitwarden myself, at my house, 
+I was bothered that if i want to host bitwarden myself, at my house,
 for my family to use (with the ability to share access) I would still have to pay a monthly ENTERPRISE organization fee.
 To host it myself. And maintain it myself. Basically WTH was bitwarden doing that I was paying them for?
 
 ## You should have reached out to bitwarden
 
-Thanks, good idea. And I did. Currently they're not focused on solving this issue - yet. 
+Thanks, good idea. And I did. Currently they're not focused on solving this issue - yet.
 To be clear i'm totally happy to give them my money. Offer a perpetual server license, and i'd pay for it.  Let me license the server, period.  Allow an orginzation to have Premium for all users..  500 seats, let the 500 users in the orginzation have the Premium features too.
 
 I'm still in the testing/evaluating phase.  If I am hosting the server/data, let me license the server, period.  How many licenses does one user need to have...

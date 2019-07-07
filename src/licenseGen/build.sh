@@ -1,11 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-script_dir=`cd $(dirname $0); pwd`
+DIR=`dirname "$0"`
+DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /usr/bin/pwd || /bin/pwd || pwd`
 
-cd $script_dir
-
-dotnet restore
-dotnet publish
-
-docker build . -t bitbetter/licensegen # --squash
-
+docker build -t bitbetter/licensegen "$DIR" # --squash

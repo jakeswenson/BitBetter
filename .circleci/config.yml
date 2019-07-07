@@ -1,15 +1,12 @@
 version: 2
 jobs:
   build:
-    docker:
-      - image: microsoft/dotnet:2-sdk
+    machine: true
     steps:
       - checkout
       - run:
           name: Print the Current Time
           command: date
-      - setup_remote_docker
-      - run: { name: 'Get docker', command: 'curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh' }
       - run:
           name: Generate Keys
           command: ./.keys/generate-keys.sh
