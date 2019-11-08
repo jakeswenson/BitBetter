@@ -1,14 +1,16 @@
 # BitBetter
 
-BitBetter is is a tool to modify bitwardens core dll to allow you to generate your own individual and organisation licenses. Please see the FAQ below for details on why this software was created.
+BitBetter is is a tool to modify Bitwarden's core dll to allow you to generate your own individual and organisation licenses. **You must have an existing installation of Bitwarden for BitBetter to modify.**
 
-_Beware! BitBetter does janky IL magic to rewrite the bitwarden core dll and install a self signed certificate. Use at your own risk!_
+Please see the FAQ below for details on why this software was created.
+
+_Beware! BitBetter does janky stuff to rewrite the bitwarden core dll and allow the installation of a self signed certificate. Use at your own risk!_
 
 Credit to https://github.com/h44z/BitBetter and https://github.com/jakeswenson/BitBetter
 
 # Table of Contents
 1. [Getting Started](#getting-started)
-    + [Pre-requisites](#pre-requisites)
+    + [Dependencies](#dependencies)
     + [Setting up BitBetter](#setting-up-bitbetter)
     + [Building BitBetter](#building-bitbetter)
     + [Generating Signed Licenses](#generating-signed-licenses)
@@ -18,13 +20,14 @@ Credit to https://github.com/h44z/BitBetter and https://github.com/jakeswenson/B
 # Getting Started
 The following instructions are for unix-based systems (Linux, BSD, macOS), it is possible to use a Windows systems assuming you are able to enable and install [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
-## Pre-requisites
+## Dependencies
 Aside from docker, which you also need for Bitwarden, BitBetter requires the following:
 
-* openssl (probably already installed on most Linux or WSL systems)
+* Bitwarden (tested up to 1.31.1)
+* openssl (probably already installed on most Linux or WSL systems, any version should work)
 
 ## Setting up BitBetter
-With your pre-requisites installed, begin the installation of BitBetter by downloading it through Github or using the git command:
+With your dependencies installed, begin the installation of BitBetter by downloading it through Github or using the git command:
 
 ```bash
 git clone https://github.com/jakeswenson/BitBetter.git
@@ -108,26 +111,20 @@ Additional, instead of interactive mode, you can also pass the parameters direct
 ---
 
 
-# FAQ: Questions (you might have?)
+# FAQ: Questions you might have.
 
-I'll work on updates in the next couple weeks, right now, I just wanted something to start with.
+## Why build a license generator for open source software?
 
-## But why? Its open source?
+We agree that Bitwarden is great. If we didn't care about it then we wouldn't be doing this. We believe that if a user wants to host Bitwarden themselves, in their house, for their family to use amd with the ability to share access, they would still have to pay a **monthly** enterprise organization fee. When hosting and maintaining the software yourself there is no need to pay for the level of service that an enterprise customer needs.
 
-Yes, bitwarden is great. If I didn't care about it i wouldn't be doing this.
-I was bothered that if i want to host bitwarden myself, at my house,
-for my family to use (with the ability to share access) I would still have to pay a monthly ENTERPRISE organization fee.
-To host it myself. And maintain it myself. Basically WTH was bitwarden doing that I was paying them for?
+Unfortunately, Bitwarden doesn't seem to have any method for receiving donations so we recommend making a one-time donation to your open source project of choice for each BitBetter license you generate if you can afford to do so.
 
-## You should have reached out to bitwarden
+## Shouldn't you have reached out to Bitwarden to ask them for alternative licensing structures?
 
-Thanks, good idea. And I did. Currently they're not focused on solving this issue - yet.
-To be clear i'm totally happy to give them my money. Offer a perpetual server license, and i'd pay for it.  Let me license the server, period.  Allow an orginzation to have Premium for all users..  500 seats, let the 500 users in the orginzation have the Premium features too.
-
-I'm still in the testing/evaluating phase.  If I am hosting the server/data, let me license the server, period.  How many licenses does one user need to have...
+In the past we have done so but they were not focused on the type of customer that would want a one-time license and would be happy to sacrifice customer service. We believe the features that are currently behind this subscription paywall to be critical ones and believe they should be available to users who can't afford an enterprise payment structure. We'd even be happy to see a move towards a Gitlab-like model where premium features are rolled out *first* to the enterprise subscribers before being added to the fully free version.
 
 # Footnotes
 
-<a name="#f1"><sup>1</sup></a> If you wish to change this you'll need to change the value that `src/licenseGen/Program.cs` uses for it's `GenerateUserLicense` and `GenerateOrgLicense` calls, but this is really unnecessary as this certificate does not represent any type of security issue.
+<a name="#f1"><sup>1</sup></a> If you wish to change this you'll need to change the value that `src/licenseGen/Program.cs` uses for its `GenerateUserLicense` and `GenerateOrgLicense` calls. Remember, this is really unnecessary as this certificate does not represent any type of security-related certificate.
 
-<a name="#f2"><sup>2</sup></a>This tool build ontop of the `bitbetter/api` container image so make sure you've built that above using the root `./build.sh` script.
+<a name="#f2"><sup>2</sup></a>This tool builds on top of the `bitbetter/api` container image so make sure you've built that above using the root `./build.sh` script.
