@@ -4,7 +4,7 @@ DIR=`dirname "$0"`
 DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /usr/bin/pwd || /bin/pwd || pwd`
 
 # Grab the absolute path to the default pfx location
-cert_path="$DIR/.keys/cert.pfx"
+cert_path="$DIR/../../.keys/cert.pfx"
 
 if [ "$#" -lt "1" ]; then
     echo "USAGE: $0 <ABSOLUTE PATH TO CERT.PFX> [License Gen args...]"
@@ -14,6 +14,8 @@ elif [ "$#" -ge "2" ]; then
     cert_path="$1"
     shift
 fi
+
+echo "$cert_path"
 
 docker run -it --rm -v "$cert_path:/cert.pfx" bitbetter/licensegen "$@"
 
