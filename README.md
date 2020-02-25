@@ -42,15 +42,7 @@ From the BitBetter directory, simply run:
 ./build.sh
 ```
 
-This will create a new self-signed certificate in the `.keys` directory one does not already exist and then create a modified version of the official `bitwarden/api` called `bitbetter/api` and a modified version of the `bitwarden/identity` called `bitbetter/identity`. You may **now simply edit your bitwarden docker-compose.yml to utilize the modified image**.
-
-Edit your  `/path/to/bwdata/docker/docker-compose.yml`.
-
-> Replace `image: bitwarden/api:x.xx.x`<br>with `image: bitbetter/api`
-
-> Replace `image: bitwarden/identity:x.xx.x`<br>with `image: bitbetter/identity`
-
-Alternatively you can add `/path/to/bwdata/docker/docker-compose.override.yml` with the following content. This change will not be overwritten when updating BitWarden. Please note that you still need to comment out the `dockerComposePull` in `run.sh` after updating (see below).
+This will create a new self-signed certificate in the `.keys` directory one does not already exist and then create a modified version of the official `bitwarden/api` called `bitbetter/api` and a modified version of the `bitwarden/identity` called `bitbetter/identity`. You may now simply create the file `/path/to/bwdata/docker/docker-compose.override.yml` with the following content to utilize the modified images.
 
 ```yaml
 version: '3'
