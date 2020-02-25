@@ -23,7 +23,7 @@ The following instructions are for unix-based systems (Linux, BSD, macOS), it is
 ## Dependencies
 Aside from docker, which you also need for Bitwarden, BitBetter requires the following:
 
-* Bitwarden (tested up to 1.31.1)
+* Bitwarden (tested up to 1.32.0)
 * openssl (probably already installed on most Linux or WSL systems, any version should work)
 
 ## Setting up BitBetter
@@ -49,6 +49,19 @@ Edit your  `/path/to/bwdata/docker/docker-compose.yml`.
 > Replace `image: bitwarden/api:x.xx.x`<br>with `image: bitbetter/api`
 
 > Replace `image: bitwarden/identity:x.xx.x`<br>with `image: bitbetter/identity`
+
+Alternatively you can add `/path/to/bwdata/docker/docker-compose.override.yml` with the following content. This change will not be overwritten when updating BitWarden. Please note that you still need to comment out the `dockerComposePull` in `run.sh` after updating (see below).
+
+```yaml
+version: '3'
+
+services:
+  api:
+    image: bitbetter/api
+
+  identity:
+    image: bitbetter/identity
+```
 
 You'll also want to edit the `/path/to/bwdata/scripts/run.sh` file. In the `function restart()` block, comment out the call to `dockerComposePull`.
 
