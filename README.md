@@ -23,7 +23,7 @@ The following instructions are for unix-based systems (Linux, BSD, macOS), it is
 ## Dependencies
 Aside from docker, which you also need for Bitwarden, BitBetter requires the following:
 
-* Bitwarden (tested up to 1.31.1)
+* Bitwarden (tested up to 1.32.0)
 * openssl (probably already installed on most Linux or WSL systems, any version should work)
 
 ## Setting up BitBetter
@@ -42,13 +42,20 @@ From the BitBetter directory, simply run:
 ./build.sh
 ```
 
-This will create a new self-signed certificate in the `.keys` directory one does not already exist and then create a modified version of the official `bitwarden/api` called `bitbetter/api` and a modified version of the `bitwarden/identity` called `bitbetter/identity`. You may **now simply edit your bitwarden docker-compose.yml to utilize the modified image**.
+This will create a new self-signed certificate in the `.keys` directory one does not already exist and then create a modified version of the official `bitwarden/api` called `bitbetter/api` and a modified version of the `bitwarden/identity` called `bitbetter/identity`.
 
-Edit your  `/path/to/bwdata/docker/docker-compose.yml`.
+You may now simply create the file `/path/to/bwdata/docker/docker-compose.override.yml` with the following contents to utilize the modified images.
 
-> Replace `image: bitwarden/api:x.xx.x`<br>with `image: bitbetter/api`
+```yaml
+version: '3'
 
-> Replace `image: bitwarden/identity:x.xx.x`<br>with `image: bitbetter/identity`
+services:
+  api:
+    image: bitbetter/api
+
+  identity:
+    image: bitbetter/identity
+```
 
 You'll also want to edit the `/path/to/bwdata/scripts/run.sh` file. In the `function restart()` block, comment out the call to `dockerComposePull`.
 
