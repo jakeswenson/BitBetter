@@ -1,7 +1,7 @@
 ARG BITWARDEN_TAG
 FROM ${BITWARDEN_TAG}
 
-COPY bin/Debug/netcoreapp2.0/publish/* /bitBetter/
+COPY bin/Debug/netcoreapp3.1/publish/* /bitBetter/
 COPY ./.keys/cert.cert /newLicensing.cer
 
 RUN set -e; set -x; \

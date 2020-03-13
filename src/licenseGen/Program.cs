@@ -38,7 +38,7 @@ namespace bitwardenSelfLicensor
                 string buff="", licensetype="", name="", email="", businessname="";
 
                 bool valid_guid = false, valid_installid = false;
-                Guid guid, installid;
+                Guid guid = new Guid(), installid = new Guid();
 
                 config.OnExecute(() =>
                 {
@@ -104,16 +104,15 @@ namespace bitwardenSelfLicensor
                     {
                         WriteLineOver("Please provide the username this license will be registered to. [username]:");
                         buff = Console.ReadLine();
-                        if ( checkUsername(buff) )   name = buff;                   
+                        if ( checkUsername(buff) )   name = buff;
                     }
 
                     while (email == "")
                     {
                         WriteLineOver("Please provide the email address for the user " + name + ". [email]");
                         buff = Console.ReadLine();
-                        if ( checkEmail(buff) )   email = buff;                   
+                        if ( checkEmail(buff) )   email = buff;
                     }
-
 
                     if (licensetype == "user")
                     {
