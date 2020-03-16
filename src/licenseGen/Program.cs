@@ -358,6 +358,7 @@ namespace bitwardenSelfLicensor
             set("PlanType", (byte)6);
             set("Seats", (short)32767);
             set("MaxCollections", short.MaxValue);
+            set("UsePolicies", true);
             set("UseGroups", true);
             set("UseEvents", true);
             set("UseDirectory", true);
@@ -366,7 +367,7 @@ namespace bitwardenSelfLicensor
             set("MaxStorageGb", short.MaxValue);
             set("SelfHost", true);
             set("UsersGetPremium", true);
-            set("Version", 4);
+            set("Version", 6);
             set("Issued", DateTime.UtcNow);
             set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
             set("Expires", DateTime.UtcNow.AddYears(100));
