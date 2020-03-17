@@ -23,7 +23,7 @@ The following instructions are for unix-based systems (Linux, BSD, macOS), it is
 ## Dependencies
 Aside from docker, which you also need for Bitwarden, BitBetter requires the following:
 
-* Bitwarden (tested up to 1.32.0)
+* Bitwarden (tested with 1.33.0, might work on lower versions)
 * openssl (probably already installed on most Linux or WSL systems, any version should work)
 
 ## Setting up BitBetter
