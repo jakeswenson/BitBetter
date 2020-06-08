@@ -51,10 +51,10 @@ namespace bitwardenSelfLicensor
 
             var existingCert = new X509Certificate2(x.GetResourceData());
 
-            Console.WriteLine($"Existing Cert Thumbprin: {existingCert.Thumbprint}");
+            Console.WriteLine($"Existing Cert Thumbprint: {existingCert.Thumbprint}");
             X509Certificate2 certificate = new X509Certificate2(cert);
 
-            Console.WriteLine($"New cert Thumbprint: {certificate.Thumbprint}");
+            Console.WriteLine($"New Cert Thumbprint: {certificate.Thumbprint}");
 
             var ctor = licensingType.GetConstructors().Single();
 
