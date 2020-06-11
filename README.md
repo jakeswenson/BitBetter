@@ -64,7 +64,6 @@ You'll also want to edit the `/path/to/bwdata/scripts/run.sh` file. In the `func
 
 You can now start or restart Bitwarden as normal and the modified api will be used. **It is now ready to accept self-issued licenses.**
 
-To update Bitwarden, the provided `update-bitwarden.sh` script can be used. It will rebuild the BitBetter images and automatically update Bitwarden afterwards. Docker pull errors can be ignored for api and identity images.
 ---
 ### Note: Manually generating Certificate & Key
 
