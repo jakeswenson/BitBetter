@@ -13,6 +13,7 @@ Credit to https://github.com/h44z/BitBetter and https://github.com/jakeswenson/B
     + [Dependencies](#dependencies)
     + [Setting up BitBetter](#setting-up-bitbetter)
     + [Building BitBetter](#building-bitbetter)
+    + [Updating Bitwarden and BitBetter](#updating-bitwarden-and-bitbetter)
     + [Generating Signed Licenses](#generating-signed-licenses)
 2. [FAQ](#faq-questions-you-might-have-)
 3. [Footnotes](#footnotes)
@@ -23,7 +24,7 @@ The following instructions are for unix-based systems (Linux, BSD, macOS), it is
 ## Dependencies
 Aside from docker, which you also need for Bitwarden, BitBetter requires the following:
 
-* Bitwarden (tested with 1.33.0, might work on lower versions)
+* Bitwarden (tested with 1.34.0, might work on lower versions)
 * openssl (probably already installed on most Linux or WSL systems, any version should work)
 
 ## Setting up BitBetter
@@ -63,7 +64,6 @@ You'll also want to edit the `/path/to/bwdata/scripts/run.sh` file. In the `func
 
 You can now start or restart Bitwarden as normal and the modified api will be used. **It is now ready to accept self-issued licenses.**
 
-To update Bitwarden, the provided `update-bitwarden.sh` script can be used. It will rebuild the BitBetter images and automatically update Bitwarden afterwards. Docker pull errors can be ignored for api and identity images.
 ---
 ### Note: Manually generating Certificate & Key
 
@@ -78,6 +78,10 @@ openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:te
 > Note that the password here must be `test`.<sup>[1](#f1)</sup>
 
 ---
+
+## Updating Bitwarden and BitBetter
+
+To update Bitwarden, the provided `update-bitwarden.sh` script can be used. It will rebuild the BitBetter images and automatically update Bitwarden afterwards. Docker pull errors can be ignored for api and identity images.
 
 ## Generating Signed Licenses
 
