@@ -40,8 +40,15 @@ else
 fi
 
 # Check if user wants to rebuild the bitbetter images
+docker images bitbetter/api --format="{{ .Tag }}" | grep -F -- "${BW_VERSION}" > /dev/null
+retval=$?
 REBUILD_BB="n"
-read -p "Rebuild BitBetter images? [y/N]: " tmprebuild
+REBUILD_BB_DESCR="[y/N]"
+if [ $retval -ne 0 ]; then
+    REBUILD_BB="y"
+    REBUILD_BB_DESCR="[Y/n]"
+fi
+read -p "Rebuild BitBetter images? $REBUILD_BB_DESCR: " tmprebuild
 REBUILD_BB=${tmprebuild:-$REBUILD_BB}
 
 if [[ $REBUILD_BB =~ ^[Yy]$ ]]
