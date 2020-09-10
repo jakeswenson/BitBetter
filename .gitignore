@@ -5,3 +5,4 @@ obj/
 *.pem
 .vscode/
 *.pfx
+*.cert
