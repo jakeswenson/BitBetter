@@ -23,3 +23,6 @@ docker tag bitbetter/identity bitbetter/identity:latest
 docker tag bitbetter/api bitbetter/api:$BW_VERSION
 docker tag bitbetter/identity bitbetter/identity:$BW_VERSION
 
+# Remove old instances of the image after a successful build.
+ids=$( docker images bitbetter/* | grep -E -v -- "CREATED|latest|${BW_VERSION}" | awk '{ print $3 }' )
+[ -n "$ids" ] && docker rmi $ids
