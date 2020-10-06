@@ -43,7 +43,7 @@ From the BitBetter directory, simply run:
 ./build.sh
 ```
 
-This will create a new self-signed certificate in the `.keys` directory one does not already exist and then create a modified version of the official `bitwarden/api` called `bitbetter/api` and a modified version of the `bitwarden/identity` called `bitbetter/identity`.
+This will create a new self-signed certificate in the `.keys` directory if one does not already exist and then create a modified version of the official `bitwarden/api` called `bitbetter/api` and a modified version of the `bitwarden/identity` called `bitbetter/identity`.
 
 You may now simply create the file `/path/to/bwdata/docker/docker-compose.override.yml` with the following contents to utilize the modified images.
 
@@ -87,7 +87,7 @@ To update Bitwarden, the provided `update-bitwarden.sh` script can be used. It w
 
 There is a tool included in the directory `src/licenseGen/` that will generate new individual and organization licenses. These licenses will be accepted by the modified Bitwarden because they will be signed by the certificate you generated in earlier steps.
 
-First, from the `BitBetter` directory, **build the license generator**.<sup>[2](#f2)</sup>
+First, from the `licenseGen` directory, **build the license generator**.<sup>[2](#f2)</sup>
 
 ```bash
 ./build.sh
