@@ -87,7 +87,8 @@ To update Bitwarden, the provided `update-bitwarden.sh` script can be used. It w
 
 There is a tool included in the directory `src/licenseGen/` that will generate new individual and organization licenses. These licenses will be accepted by the modified Bitwarden because they will be signed by the certificate you generated in earlier steps.
 
-First, from the `licenseGen` directory, **build the license generator**.<sup>[2](#f2)</sup>
+
+First, from the `BitBetter/src/licenseGen` directory, **build the license generator**.<sup>[2](#f2)</sup>
 
 ```bash
 ./build.sh
