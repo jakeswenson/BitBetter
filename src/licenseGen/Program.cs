@@ -117,7 +117,7 @@ namespace bitwardenSelfLicensor
 
                     while (storage == 0)
                     {
-                        WriteLineOver("Extra storage space for the user " + name + ". (max.: " + short.MaxValue + ") [storage]");
+                        WriteLineOver("Extra storage space for the user " + name + ". (max.: " + short.MaxValue + "). Defaults to maximum value. [storage]");
                         buff = Console.ReadLine();
                         if (string.IsNullOrWhiteSpace(buff))
                         {
