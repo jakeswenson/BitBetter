@@ -119,12 +119,19 @@ namespace bitwardenSelfLicensor
                     {
                         WriteLineOver("Extra storage space for the user " + name + ". (max.: " + short.MaxValue + ") [storage]");
                         buff = Console.ReadLine();
-                        if (checkStorage(buff)) storage = short.Parse(buff);
+                        if (string.IsNullOrWhiteSpace(buff))
+                        {
+                            storage = short.MaxValue;
+                        }
+                        else
+                        {
+                            if (checkStorage(buff)) storage = short.Parse(buff);
+                        }
                     }
 
                     if (licensetype == "user")
                     {
-                        WriteLineOver("Confirm creation of \"user\" license for username: \"" + name + "\", email: \"" + email + "\", User-GUID: \"" + guid + "\"? Y/n");
+                        WriteLineOver("Confirm creation of \"user\" license for username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", User-GUID: \"" + guid + "\"? Y/n");
                         buff = Console.ReadLine();
                         if ( buff == "" || buff == "y" || buff == "Y" )
                         {
@@ -138,7 +145,7 @@ namespace bitwardenSelfLicensor
                     }
                     else if (licensetype == "org")
                     {
-                        WriteLineOver("Confirm creation of \"organization\" license for business name: \"" + businessname + "\", username: \"" + name + "\", email: \"" + email + "\", Install-ID: \"" + installid + "\"? Y/n");
+                        WriteLineOver("Confirm creation of \"organization\" license for business name: \"" + businessname + "\", username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", Install-ID: \"" + installid + "\"? Y/n");
                         buff = Console.ReadLine();
                         if ( buff == "" || buff == "y" || buff == "Y" )
                         {
