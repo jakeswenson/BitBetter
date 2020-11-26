@@ -36,6 +36,7 @@ namespace bitwardenSelfLicensor
             app.Command("interactive", config =>
             {
                 string buff="", licensetype="", name="", email="", businessname="";
+                short storage = 0;
 
                 bool valid_guid = false, valid_installid = false;
                 Guid guid = new Guid(), installid = new Guid();
@@ -114,13 +115,27 @@ namespace bitwardenSelfLicensor
                         if ( checkEmail(buff) )   email = buff;
                     }
 
+                    while (storage == 0)
+                    {
+                        WriteLineOver("Extra storage space for the user " + name + ". (max.: " + short.MaxValue + "). Defaults to maximum value. [storage]");
+                        buff = Console.ReadLine();
+                        if (string.IsNullOrWhiteSpace(buff))
+                        {
+                            storage = short.MaxValue;
+                        }
+                        else
+                        {
+                            if (checkStorage(buff)) storage = short.Parse(buff);
+                        }
+                    }
+
                     if (licensetype == "user")
                     {
-                        WriteLineOver("Confirm creation of \"user\" license for username: \"" + name + "\", email: \"" + email + "\", User-GUID: \"" + guid + "\"? Y/n");
+                        WriteLineOver("Confirm creation of \"user\" license for username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", User-GUID: \"" + guid + "\"? Y/n");
                         buff = Console.ReadLine();
                         if ( buff == "" || buff == "y" || buff == "Y" )
                         {
-                            GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, guid, null);
+                            GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, storage, guid, null);
                         }
                         else
                         {
@@ -130,11 +145,11 @@ namespace bitwardenSelfLicensor
                     }
                     else if (licensetype == "org")
                     {
-                        WriteLineOver("Confirm creation of \"organization\" license for business name: \"" + businessname + "\", username: \"" + name + "\", email: \"" + email + "\", Install-ID: \"" + installid + "\"? Y/n");
+                        WriteLineOver("Confirm creation of \"organization\" license for business name: \"" + businessname + "\", username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", Install-ID: \"" + installid + "\"? Y/n");
                         buff = Console.ReadLine();
                         if ( buff == "" || buff == "y" || buff == "Y" )
                         {
-                            GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, installid, businessname, null);
+                            GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, storage, installid, businessname, null);
                         }
                         else
                         {
@@ -152,6 +167,7 @@ namespace bitwardenSelfLicensor
                 var name = config.Argument("Name", "your name");
                 var email = config.Argument("Email", "your email");
                 var userIdArg = config.Argument("User ID", "your user id");
+                var storage = config.Argument("Storage", "Extra storage space in GB. Maximum is " + short.MaxValue + " (optional)");
                 var key = config.Argument("Key", "your key id (optional)");
                 var help = config.HelpOption("--help | -h | -?");
 
@@ -178,7 +194,6 @@ namespace bitwardenSelfLicensor
                         return 1;
                     }
 
-
                     if (string.IsNullOrWhiteSpace(userIdArg.Value) || !Guid.TryParse(userIdArg.Value, out Guid userId))
                     {
                         config.Error.WriteLine($"User ID not provided");
@@ -186,7 +201,16 @@ namespace bitwardenSelfLicensor
                         return 1;
                     }
 
-                    GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, userId, key.Value);
+                    if (double.Parse(storage.Value) > short.MaxValue ||
+                        double.Parse(storage.Value) < 0 ||
+                        string.IsNullOrWhiteSpace(storage.Value))
+                    {
+                        config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + short.MaxValue + "]");
+                        config.ShowHelp("org");
+                        return 1;
+                    }
+
+                    GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, short.Parse(storage.Value), userId, key.Value);
 
                     return 0;
                 });
@@ -196,6 +220,7 @@ namespace bitwardenSelfLicensor
                 var name = config.Argument("Name", "your name");
                 var email = config.Argument("Email", "your email");
                 var installId = config.Argument("InstallId", "your installation id (GUID)");
+                var storage = config.Argument("Storage", "Extra storage space in GB. Maximum is " + short.MaxValue + " (optional)");
                 var businessName = config.Argument("BusinessName", "name For the organization (optional)");
                 var key = config.Argument("Key", "your key id (optional)");
                 var help = config.HelpOption("--help | -h | -?");
@@ -233,7 +258,16 @@ namespace bitwardenSelfLicensor
                         return 1;
                     }
 
-                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, installationId, businessName.Value, key.Value);
+                    if (double.Parse(storage.Value) > short.MaxValue ||
+                        double.Parse(storage.Value) < 0 ||
+                        string.IsNullOrWhiteSpace(storage.Value))
+                    {
+                        config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + short.MaxValue + "]");
+                        config.ShowHelp("org");
+                        return 1;
+                    }
+
+                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, short.Parse(storage.Value), installationId, businessName.Value, key.Value);
 
                     return 0;
                 });
@@ -288,6 +322,22 @@ namespace bitwardenSelfLicensor
             return true;    // TODO: Actually validate
         }
 
+        // checkStorage Checks that the storage is in a valid range
+        static bool checkStorage(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s))
+            {
+                WriteLineOver("The storage provided doesn't appear to be valid.\n");
+                return false;
+            }
+            if (double.Parse(s) > short.MaxValue || double.Parse(s) < 0)
+            {
+                WriteLineOver("The storage value provided is outside the accepted range of [0-" + short.MaxValue + "].\n");
+                return false;
+            }
+            return true;
+        }
+
         // WriteLineOver Writes a new line to console over last line.
         static void WriteLineOver(string s)
         {
@@ -301,8 +351,7 @@ namespace bitwardenSelfLicensor
             Console.WriteLine(s);
         }
 
-        static void GenerateUserLicense(X509Certificate2 cert, string corePath,
-            string userName, string email, Guid userId, string key)
+        static void GenerateUserLicense(X509Certificate2 cert, string corePath, string userName, string email, short storage, Guid userId, string key)
         {
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
@@ -319,7 +368,7 @@ namespace bitwardenSelfLicensor
             set("Id", userId);
             set("Name", userName);
             set("Email", email);
-            set("MaxStorageGb", short.MaxValue);
+            set("MaxStorageGb", storage);
             set("Premium", true);
             set("Version", 1);
             set("Issued", DateTime.UtcNow);
@@ -333,8 +382,7 @@ namespace bitwardenSelfLicensor
             Console.WriteLine(JsonConvert.SerializeObject(license, Formatting.Indented));
         }
 
-        static void GenerateOrgLicense(X509Certificate2 cert, string corePath,
-            string userName, string email, Guid instalId, string businessName, string key)
+        static void GenerateOrgLicense(X509Certificate2 cert, string corePath, string userName, string email, short storage, Guid instalId, string businessName, string key)
         {
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
@@ -365,7 +413,7 @@ namespace bitwardenSelfLicensor
             set("UseDirectory", true);
             set("UseTotp", true);
             set("Use2fa", true);
-            set("MaxStorageGb", short.MaxValue);
+            set("MaxStorageGb", storage);
             set("SelfHost", true);
             set("UsersGetPremium", true);
             set("Version", 6);
