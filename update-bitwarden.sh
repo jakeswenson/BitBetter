@@ -1,11 +1,11 @@
 #!/bin/bash
-ask()
-{
-  declare -g $1="$2"
-  if [ -z "${!1}" ]; then
-    echo "$3"
-    read $1
+ask () {
+  local __resultVar=$1
+  local __result="$2"
+  if [ -z "$2" ]; then
+    read -p "$3" __result
   fi
+  eval $__resultVar="'$__result'"
 }
 
 SCRIPT_BASE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"

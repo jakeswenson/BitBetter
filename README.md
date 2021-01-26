@@ -83,6 +83,16 @@ openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:te
 
 To update Bitwarden, the provided `update-bitwarden.sh` script can be used. It will rebuild the BitBetter images and automatically update Bitwarden afterwards. Docker pull errors can be ignored for api and identity images.
 
+You can either run this script without providing any parameters in interactive mode (`./update-bitwarden.sh`) or by setting the parameters as follows, to run the script in non-interactive mode:
+```bash
+./update-bitwarden.sh param1 param2 param3
+```
+`param1`: The path to the directory containing your bwdata directory
+
+`param2`: If you want the docker-compose file to be overwritten (either `y` or `n`)
+
+`param3`: If you want the bitbetter images to be rebuild (either `y` or `n`)
+
 ## Generating Signed Licenses
 
 There is a tool included in the directory `src/licenseGen/` that will generate new individual and organization licenses. These licenses will be accepted by the modified Bitwarden because they will be signed by the certificate you generated in earlier steps.
@@ -141,3 +151,4 @@ In the past we have done so but they were not focused on the type of customer th
 <a name="#f1"><sup>1</sup></a> If you wish to change this you'll need to change the value that `src/licenseGen/Program.cs` uses for its `GenerateUserLicense` and `GenerateOrgLicense` calls. Remember, this is really unnecessary as this certificate does not represent any type of security-related certificate.
 
 <a name="#f2"><sup>2</sup></a>This tool builds on top of the `bitbetter/api` container image so make sure you've built that above using the root `./build.sh` script.
+
