@@ -77,5 +77,9 @@ echo "Patching bitwarden.sh completed..."
 
 ./bitwarden.sh update
 
+# Prune Docker images without at least one container associated to them.
+echo "Pruning Docker images without at least one container associated to them..."
+docker image prune -a
+
 cd $SCRIPT_BASE
 echo "Bitwarden update completed!"
