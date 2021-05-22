@@ -4,7 +4,7 @@ BitBetter is is a tool to modify Bitwarden's core dll to allow you to generate y
 
 Please see the FAQ below for details on why this software was created.
 
-_Beware! BitBetter does janky stuff to rewrite the bitwarden core dll and allow the installation of a self signed certificate. Use at your own risk!_
+_Beware! BitBetter does janky stuff (jakey stuff?) to rewrite the bitwarden core dll and allow the installation of a self signed certificate. Use at your own risk!_
 
 Credit to https://github.com/h44z/BitBetter and https://github.com/jakeswenson/BitBetter
 
