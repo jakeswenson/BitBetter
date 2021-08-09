@@ -404,7 +404,7 @@ namespace bitwardenSelfLicensor
             set("Enabled", true);
             set("Plan", "Custom");
             set("PlanType", (byte)6);
-            set("Seats", (short)32767);
+            set("Seats", (int)32767);
             set("MaxCollections", short.MaxValue);
             set("UsePolicies", true);
             set("UseSso", true);
