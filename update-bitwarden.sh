@@ -61,7 +61,7 @@ REBUILD_BB=${tmprebuild:-$REBUILD_BB}
 
 if [[ $REBUILD_BB =~ ^[Yy]$ ]]
 then
-    ./build.sh
+    $BITWARDEN_BASE/BitBetter/build.sh
     echo "BitBetter images updated to version: $BW_VERSION"
 fi
 
