@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk as build
+FROM mcr.microsoft.com/dotnet/sdk as build:5.0
 
 WORKDIR /licenseGen
 
