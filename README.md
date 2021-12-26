@@ -127,8 +127,8 @@ If you wish to run the license gen from a directory aside from the root `BitBett
 Additional, instead of interactive mode, you can also pass the parameters directly to the command as follows.
 
 ```bash
-./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx user "Name" "EMail" "User-GUID"
-./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx org "Name" "EMail" "Install-ID used to install the server"
+./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx user "Name" "EMail" "User-GUID" "Additional Storage in GB(max 32767)"
+./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx org "Name" "EMail" "Install-ID used to install the server" "Additional Storage in GB(max 32767)" "Org Name"
 ```
 
 ---
