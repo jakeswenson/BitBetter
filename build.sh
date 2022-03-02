@@ -2,7 +2,7 @@
 
 DIR=`dirname "$0"`
 DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /usr/bin/pwd || /bin/pwd || pwd`
-BW_VERSION="$(curl --silent https://raw.githubusercontent.com/bitwarden/server/master/scripts/bitwarden.sh | grep 'COREVERSION="' | sed 's/^[^"]*"//; s/".*//')"
+BW_VERSION="$(curl --silent https://raw.githubusercontent.com/bitwarden/self-host/master/bitwarden.sh | grep 'COREVERSION="' | sed 's/^[^"]*"//; s/".*//')"
 
 echo "Building BitBetter for BitWarden version $BW_VERSION"
 
