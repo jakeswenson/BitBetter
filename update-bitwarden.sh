@@ -9,7 +9,7 @@ ask () {
 }
 
 SCRIPT_BASE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-BW_VERSION="$(curl --silent https://raw.githubusercontent.com/bitwarden/server/master/scripts/bitwarden.sh | grep 'COREVERSION="' | sed 's/^[^"]*"//; s/".*//')"
+BW_VERSION="$(curl --silent https://raw.githubusercontent.com/bitwarden/self-host/master/bitwarden.sh | grep 'COREVERSION="' | sed 's/^[^"]*"//; s/".*//')"
 
 echo "Starting Bitwarden update, newest server version: $BW_VERSION"
 
@@ -71,7 +71,7 @@ cd $BITWARDEN_BASE
 ./bitwarden.sh updateself
 
 # Update the bitwarden.sh: automatically patch run.sh to fix docker-compose pull errors for private images
-awk '1;/function downloadRunFile/{c=6}c&&!--c{print "sed -i '\''s/docker-compose pull/docker-compose pull --ignore-pull-failures || true/g'\'' $SCRIPTS_DIR/run.sh"}' $BITWARDEN_BASE/bitwarden.sh > tmp_bw.sh && mv tmp_bw.sh $BITWARDEN_BASE/bitwarden.sh
+awk '1;/function downloadRunFile/{c=6}c&&!--c{print "sed -i '\''s/dccmd pull/dccmd pull --ignore-pull-failures || true/g'\'' $SCRIPTS_DIR/run.sh"}' $BITWARDEN_BASE/bitwarden.sh > tmp_bw.sh && mv tmp_bw.sh $BITWARDEN_BASE/bitwarden.sh 
 chmod +x $BITWARDEN_BASE/bitwarden.sh
 echo "Patching bitwarden.sh completed..."
 
