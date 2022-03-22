@@ -24,7 +24,7 @@ The following instructions are for unix-based systems (Linux, BSD, macOS), it is
 ## Dependencies
 Aside from docker, which you also need for Bitwarden, BitBetter requires the following:
 
-* Bitwarden (tested with 1.37.0, might work on lower versions)
+* Bitwarden (tested with 1.47.1, might work on lower versions)
 * openssl (probably already installed on most Linux or WSL systems, any version should work)
 
 ## Setting up BitBetter
@@ -93,6 +93,8 @@ You can either run this script without providing any parameters in interactive m
 
 `param3`: If you want the bitbetter images to be rebuild (either `y` or `n`)
 
+If you are updating from versions <= 1.46.2, you may need to run `update-bitwarden.sh` twice to complete the update process.
+
 ## Generating Signed Licenses
 
 There is a tool included in the directory `src/licenseGen/` that will generate new individual and organization licenses. These licenses will be accepted by the modified Bitwarden because they will be signed by the certificate you generated in earlier steps.
@@ -138,13 +140,16 @@ Additional, instead of interactive mode, you can also pass the parameters direct
 
 ## Why build a license generator for open source software?
 
-We agree that Bitwarden is great. If we didn't care about it then we wouldn't be doing this. We believe that if a user wants to host Bitwarden themselves, in their house, for their family to use amd with the ability to share access, they would still have to pay a **monthly** enterprise organization fee. When hosting and maintaining the software yourself there is no need to pay for the level of service that an enterprise customer needs.
+We agree that Bitwarden is great. If we didn't care about it then we wouldn't be doing this. We believe that if a user wants to host Bitwarden themselves, in their house, for their family to use and with the ability to share access, they would still have to pay a **monthly** enterprise organization fee. When hosting and maintaining the software yourself there is no need to pay for the level of service that an enterprise customer needs.
 
 Unfortunately, Bitwarden doesn't seem to have any method for receiving donations so we recommend making a one-time donation to your open source project of choice for each BitBetter license you generate if you can afford to do so.
 
 ## Shouldn't you have reached out to Bitwarden to ask them for alternative licensing structures?
 
 In the past we have done so but they were not focused on the type of customer that would want a one-time license and would be happy to sacrifice customer service. We believe the features that are currently behind this subscription paywall to be critical ones and believe they should be available to users who can't afford an enterprise payment structure. We'd even be happy to see a move towards a Gitlab-like model where premium features are rolled out *first* to the enterprise subscribers before being added to the fully free version.
+
+UPDATE: Bitwarden now offers a cheap license called [Families Organization](https://bitwarden.com/pricing/) that provides premium features and the ability to self-host Bitwarden for six persons.
+
 
 # Footnotes
 
