@@ -9,7 +9,7 @@ ask () {
 }
 
 SCRIPT_BASE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-BW_VERSION="$(curl --silent https://raw.githubusercontent.com/bitwarden/self-host/master/bitwarden.sh | grep 'COREVERSION="' | sed 's/^[^"]*"//; s/".*//')"
+BW_VERSION=$(curl -sL https://go.btwrdn.co/bw-sh-versions | grep '^ *"'coreVersion'":' | awk -F\: '{ print $2 }' | sed -e 's/,$//' -e 's/^"//' -e 's/"$//')
 
 echo "Starting Bitwarden update, newest server version: $BW_VERSION"
 
