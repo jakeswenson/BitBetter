@@ -108,6 +108,8 @@ First, from the `BitBetter/src/licenseGen` directory, **build the license genera
 
 In order to run the tool and generate a license you'll need to get a **user's GUID** in order to generate an **invididual license** or the server's **install ID** to generate an **Organization license**. These can be retrieved most easily through the Bitwarden [Admin Portal](https://help.bitwarden.com/article/admin-portal/).
 
+**The user must have a verified email address at the time of license import, otherwise Bitwarden will reject the license key. Nevertheless, the license key can be generated even before the user's email is verified.**
+
 If you generated your keys in the default `BitBetter/.keys` directory, you can **simply run the license gen in interactive mode** from the `Bitbetter` directory and **follow the prompts to generate your license**.
 
 ```bash
