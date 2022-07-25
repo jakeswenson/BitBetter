@@ -364,6 +364,7 @@ namespace bitwardenSelfLicensor
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
             var type = core.GetType("Bit.Core.Models.Business.UserLicense");
+            var licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
 
             var license = Activator.CreateInstance(type);
 
@@ -376,13 +377,14 @@ namespace bitwardenSelfLicensor
             set("Id", userId);
             set("Name", userName);
             set("Email", email);
-            set("MaxStorageGb", storage == 0 ? short.MaxValue : storage);
             set("Premium", true);
+            set("MaxStorageGb", storage == 0 ? short.MaxValue : storage);
             set("Version", 1);
             set("Issued", DateTime.UtcNow);
             set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
             set("Expires", DateTime.UtcNow.AddYears(100));
             set("Trial", false);
+            set("LicenseType", Enum.Parse(licenseTypeEnum, "User"));
 
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
             set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
@@ -395,6 +397,8 @@ namespace bitwardenSelfLicensor
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
             var type = core.GetType("Bit.Core.Models.Business.OrganizationLicense");
+            var licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
+            var planTypeEnum = core.GetType("Bit.Core.Enums.PlanType");
 
             var license = Activator.CreateInstance(type);
 
@@ -411,25 +415,29 @@ namespace bitwardenSelfLicensor
             set("BusinessName", string.IsNullOrWhiteSpace(businessName) ? "BitBetter" : businessName);
             set("Enabled", true);
             set("Plan", "Custom");
-            set("PlanType", (byte)6);
-            set("Seats", (int)32767);
+            set("PlanType", Enum.Parse(planTypeEnum, "Custom"));
+            set("Seats", (int)short.MaxValue);
             set("MaxCollections", short.MaxValue);
             set("UsePolicies", true);
             set("UseSso", true);
+            set("UseKeyConnector", true);
+            //set("UseScim", true); // available in version 10, which is not released yet
             set("UseGroups", true);
             set("UseEvents", true);
             set("UseDirectory", true);
             set("UseTotp", true);
             set("Use2fa", true);
+            set("UseApi", true);
+            set("UseResetPassword", true);
             set("MaxStorageGb", storage == 0 ? short.MaxValue : storage);
             set("SelfHost", true);
             set("UsersGetPremium", true);
-            set("Version", 6);
+            set("Version", 9);
             set("Issued", DateTime.UtcNow);
             set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
             set("Expires", DateTime.UtcNow.AddYears(100));
             set("Trial", false);
-            set("UseApi", true);
+            set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
 
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
             set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
