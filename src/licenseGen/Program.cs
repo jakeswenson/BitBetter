@@ -167,7 +167,7 @@ namespace bitwardenSelfLicensor
                 var name = config.Argument("Name", "your name");
                 var email = config.Argument("Email", "your email");
                 var userIdArg = config.Argument("User ID", "your user id");
-                var storage = config.Argument("Storage", "Extra storage space in GB. Maximum is " + short.MaxValue + " (optional)");
+                var storage = config.Argument("Storage", "extra storage space in GB. Maximum is " + short.MaxValue + " (optional, default = max)");
                 var key = config.Argument("Key", "your key id (optional)");
                 var help = config.HelpOption("--help | -h | -?");
 
@@ -201,16 +201,20 @@ namespace bitwardenSelfLicensor
                         return 1;
                     }
 
-                    if (double.Parse(storage.Value) > short.MaxValue ||
-                        double.Parse(storage.Value) < 0 ||
-                        string.IsNullOrWhiteSpace(storage.Value))
+                    short storageShort = 0;
+                    if (!string.IsNullOrWhiteSpace(storage.Value))
                     {
-                        config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + short.MaxValue + "]");
-                        config.ShowHelp("org");
-                        return 1;
+                        var parsedStorage = double.Parse(storage.Value);
+                        if (parsedStorage > short.MaxValue || parsedStorage < 0)
+                        {
+                            config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + short.MaxValue + "]");
+                            config.ShowHelp("org");
+                            return 1;
+                        }
+                        storageShort = (short) parsedStorage;
                     }
 
-                    GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, short.Parse(storage.Value), userId, key.Value);
+                    GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, storageShort, userId, key.Value);
 
                     return 0;
                 });
@@ -220,8 +224,8 @@ namespace bitwardenSelfLicensor
                 var name = config.Argument("Name", "your name");
                 var email = config.Argument("Email", "your email");
                 var installId = config.Argument("InstallId", "your installation id (GUID)");
-                var storage = config.Argument("Storage", "Extra storage space in GB. Maximum is " + short.MaxValue + " (optional)");
-                var businessName = config.Argument("BusinessName", "name For the organization (optional)");
+                var storage = config.Argument("Storage", "extra storage space in GB. Maximum is " + short.MaxValue + " (optional, default = max)");
+                var businessName = config.Argument("BusinessName", "name for the organization (optional)");
                 var key = config.Argument("Key", "your key id (optional)");
                 var help = config.HelpOption("--help | -h | -?");
 
@@ -258,16 +262,20 @@ namespace bitwardenSelfLicensor
                         return 1;
                     }
 
-                    if (double.Parse(storage.Value) > short.MaxValue ||
-                        double.Parse(storage.Value) < 0 ||
-                        string.IsNullOrWhiteSpace(storage.Value))
+                    short storageShort = 0;
+                    if (!string.IsNullOrWhiteSpace(storage.Value))
                     {
-                        config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + short.MaxValue + "]");
-                        config.ShowHelp("org");
-                        return 1;
+                        var parsedStorage = double.Parse(storage.Value);
+                        if (parsedStorage > short.MaxValue || parsedStorage < 0)
+                        {
+                            config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + short.MaxValue + "]");
+                            config.ShowHelp("org");
+                            return 1;
+                        }
+                        storageShort = (short) parsedStorage;
                     }
 
-                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, short.Parse(storage.Value), installationId, businessName.Value, key.Value);
+                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, storageShort, installationId, businessName.Value, key.Value);
 
                     return 0;
                 });
@@ -356,6 +364,7 @@ namespace bitwardenSelfLicensor
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
             var type = core.GetType("Bit.Core.Models.Business.UserLicense");
+            var licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
 
             var license = Activator.CreateInstance(type);
 
@@ -368,13 +377,14 @@ namespace bitwardenSelfLicensor
             set("Id", userId);
             set("Name", userName);
             set("Email", email);
-            set("MaxStorageGb", storage);
             set("Premium", true);
+            set("MaxStorageGb", storage == 0 ? short.MaxValue : storage);
             set("Version", 1);
             set("Issued", DateTime.UtcNow);
             set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
             set("Expires", DateTime.UtcNow.AddYears(100));
             set("Trial", false);
+            set("LicenseType", Enum.Parse(licenseTypeEnum, "User"));
 
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
             set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
@@ -387,6 +397,8 @@ namespace bitwardenSelfLicensor
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
             var type = core.GetType("Bit.Core.Models.Business.OrganizationLicense");
+            var licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
+            var planTypeEnum = core.GetType("Bit.Core.Enums.PlanType");
 
             var license = Activator.CreateInstance(type);
 
@@ -403,25 +415,29 @@ namespace bitwardenSelfLicensor
             set("BusinessName", string.IsNullOrWhiteSpace(businessName) ? "BitBetter" : businessName);
             set("Enabled", true);
             set("Plan", "Custom");
-            set("PlanType", (byte)6);
-            set("Seats", (int)32767);
+            set("PlanType", Enum.Parse(planTypeEnum, "Custom"));
+            set("Seats", (int)short.MaxValue);
             set("MaxCollections", short.MaxValue);
             set("UsePolicies", true);
             set("UseSso", true);
+            set("UseKeyConnector", true);
+            //set("UseScim", true); // available in version 10, which is not released yet
             set("UseGroups", true);
             set("UseEvents", true);
             set("UseDirectory", true);
             set("UseTotp", true);
             set("Use2fa", true);
-            set("MaxStorageGb", storage);
+            set("UseApi", true);
+            set("UseResetPassword", true);
+            set("MaxStorageGb", storage == 0 ? short.MaxValue : storage);
             set("SelfHost", true);
             set("UsersGetPremium", true);
-            set("Version", 6);
+            set("Version", 9);
             set("Issued", DateTime.UtcNow);
             set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
             set("Expires", DateTime.UtcNow.AddYears(100));
             set("Trial", false);
-            set("UseApi", true);
+            set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
 
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
             set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
