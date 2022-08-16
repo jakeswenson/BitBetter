@@ -9,14 +9,20 @@ _Beware! BitBetter does janky stuff to rewrite the bitwarden core dll and allow 
 Credit to https://github.com/h44z/BitBetter and https://github.com/jakeswenson/BitBetter
 
 # Table of Contents
-1. [Getting Started](#getting-started)
-    + [Dependencies](#dependencies)
-    + [Setting up BitBetter](#setting-up-bitbetter)
-    + [Building BitBetter](#building-bitbetter)
-    + [Updating Bitwarden and BitBetter](#updating-bitwarden-and-bitbetter)
-    + [Generating Signed Licenses](#generating-signed-licenses)
-2. [FAQ](#faq-questions-you-might-have-)
-3. [Footnotes](#footnotes)
+- [BitBetter](#bitbetter)
+- [Table of Contents](#table-of-contents)
+- [Getting Started](#getting-started)
+  - [Dependencies](#dependencies)
+  - [Setting up BitBetter](#setting-up-bitbetter)
+  - [Building BitBetter](#building-bitbetter)
+    - [Note: Manually generating Certificate & Key](#note-manually-generating-certificate--key)
+  - [Updating Bitwarden and BitBetter](#updating-bitwarden-and-bitbetter)
+  - [Generating Signed Licenses](#generating-signed-licenses)
+    - [Note: Alternative Ways to Generate License](#note-alternative-ways-to-generate-license)
+- [FAQ: Questions you might have.](#faq-questions-you-might-have)
+  - [Why build a license generator for open source software?](#why-build-a-license-generator-for-open-source-software)
+  - [Shouldn't you have reached out to Bitwarden to ask them for alternative licensing structures?](#shouldnt-you-have-reached-out-to-bitwarden-to-ask-them-for-alternative-licensing-structures)
+- [Footnotes](#footnotes)
 
 # Getting Started
 The following instructions are for unix-based systems (Linux, BSD, macOS), it is possible to use a Windows systems assuming you are able to enable and install [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
@@ -131,8 +137,8 @@ If you wish to run the license gen from a directory aside from the root `BitBett
 Additional, instead of interactive mode, you can also pass the parameters directly to the command as follows.
 
 ```bash
-./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx user "Name" "EMail" "User-GUID"
-./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx org "Name" "EMail" "Install-ID used to install the server"
+./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx user "Name" "E-Mail" "User-GUID" ["Storage Space in GB"] ["Custom LicenseKey"]
+./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx org "Name" "E-Mail" "Install-ID used to install the server" ["Storage Space in GB"] ["Custom LicenseKey"]
 ```
 
 ---
