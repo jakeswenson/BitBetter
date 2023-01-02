@@ -117,6 +117,6 @@ UPDATE: Bitwarden now offers a cheap license called [Families Organization](http
 
 # Footnotes
 
-<a name="#f1"><sup>2</sup></a>This tool builds on top of the `bitbetter/api` container image so make sure you've built that above using the root `./build.sh` script.
+<a name="#f1"><sup>1</sup></a>This tool builds on top of the `bitbetter/api` container image so make sure you've built that above using the root `./build.sh` script.
 
-<a name="#f2"><sup>1</sup></a> If you wish to change this you'll need to change the value that `licenseGen/Program.cs` uses for its `GenerateUserLicense` and `GenerateOrgLicense` calls. Remember, this is really unnecessary as this certificate does not represent any type of security-related certificate.
+<a name="#f2"><sup>2</sup></a> If you wish to change this you'll need to change the value that `licenseGen/Program.cs` uses for its `GenerateUserLicense` and `GenerateOrgLicense` calls. Remember, this is really unnecessary as this certificate does not represent any type of security-related certificate.
