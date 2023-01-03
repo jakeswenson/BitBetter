@@ -46,6 +46,7 @@ Now that you've set up your build environment, we need to specify which servers 
 The scripts supports running and patching multi instances.
 
 Edit the .servers/serverlist.txt file and fill in the missing values, they can be replaced with existing installation values.
+This file may be empty, but there will be no containers will be spun up automatically.
 
 Now it is time to **run the main build script** to generate a modified version of the `bitwarden/self-host` docker image and the license generator.
 
