@@ -45,16 +45,14 @@ internal class Program
             TypeDef type = services.First(t => t.Name == "LicensingService");
             MethodDef constructor = type.FindConstructors().First();
             
-            Instruction instToReplace =
+            Instruction instructionToPatch =
                 constructor.Body.Instructions
                     .FirstOrDefault(i => i.OpCode == OpCodes.Ldstr
                                          && String.Equals((String)i.Operand, existingCert.Thumbprint, StringComparison.InvariantCultureIgnoreCase));
             
-            if (instToReplace != null)
+            if (instructionToPatch != null)
             {
-                Int32 index = constructor.Body.Instructions.IndexOf(instToReplace);
-                constructor.Body.Instructions.Remove(instToReplace);
-                constructor.Body.Instructions.Insert(index, Instruction.Create(OpCodes.Ldstr, certificate.Thumbprint));
+                instructionToPatch.Operand = certificate.Thumbprint;
             }
             else
             {
