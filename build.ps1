@@ -43,7 +43,7 @@ foreach ($instance in $oldinstances) {
 }
 
 # update bitwarden itself
-$confirmation = Read-Host "Update bitwarden source container"
+$confirmation = Read-Host "Update (or get) bitwarden source container"
 if ($confirmation -eq 'y') {
     docker pull bitwarden/self-host:beta
 }
