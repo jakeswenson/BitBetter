@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.Writer;
@@ -18,8 +17,6 @@ internal class Program
         const String certFile = "/app/cert.cert";
         String[] files = Directory.GetFiles("/app/mount", "Core.dll", SearchOption.AllDirectories);
 
-        Console.WriteLine(files.Length.ToString());
-            
         foreach (String file in files)
         {
             Console.WriteLine(file);
@@ -61,7 +58,7 @@ internal class Program
             }
             else
             {
-                Console.WriteLine("Cant find inst");
+                Console.WriteLine("Can't find constructor to patch");
             }
 
             ModuleWriterOptions moduleWriterOptions = new(moduleDefMd);
