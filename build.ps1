@@ -47,15 +47,15 @@ foreach ($component in $components) {
 docker run -v "$pwd\temp:/app/mount" --rm bitbetter/bitbetter
 
 foreach ($component in $components) {
-	docker cp -a "$pwd\temp\$component\Core.dll" $patchinstance`:/app/$component/Core.dll
+	docker cp "$pwd\temp\$component\Core.dll" $patchinstance`:/app/$component/Core.dll
 }
-
-Copy-Item "$pwd\temp\Identity\Core.dll" -Destination "$pwd\licenseGen"
-Remove-Item "$pwd\temp" -Recurse -Force
 
 docker commit $patchinstance bitwarden-patch
 docker stop bitwarden-patch
 docker rm bitwarden-patch
+
+Copy-Item "$pwd\temp\Identity\Core.dll" -Destination "$pwd\licenseGen"
+Remove-Item "$pwd\temp" -Recurse -Force
 
 $newinstances = @()
 foreach($line in Get-Content "$pwd\.servers\serverlist.txt") {
