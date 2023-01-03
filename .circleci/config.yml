@@ -1,0 +1,15 @@
+version: 2.1
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Print the Current Time
+          command: date
+      - run:
+          name: Generate Keys
+          command: ./generateKeys.sh
+      - run:
+          name: Build script
+          command: ./build.sh
