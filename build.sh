@@ -46,12 +46,17 @@ for INSTANCE in ${OLDINSTANCES[@]}; do
 done
 
 # update bitwarden itself
-read -p "Update (or get) bitwarden source container: " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
-    docker pull bitwarden/self-host:beta
+if [ "$1" = "y" ]; then
+	docker pull bitwarden/self-host:beta
+else
+	read -p "Update (or get) bitwarden source container: " -n 1 -r
+	echo
+	if [[ $REPLY =~ ^[Yy]$ ]]
+	then
+		docker pull bitwarden/self-host:beta
+	fi
 fi
+
 
 # stop and remove previous existing patch(ed) container
 docker stop bitwarden-patch

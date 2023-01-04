@@ -12,4 +12,4 @@ jobs:
           command: ./generateKeys.sh
       - run:
           name: Build script
-          command: ./build.sh
+          command: ./build.sh y

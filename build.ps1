@@ -43,9 +43,16 @@ foreach ($instance in $oldinstances) {
 }
 
 # update bitwarden itself
-$confirmation = Read-Host "Update (or get) bitwarden source container"
-if ($confirmation -eq 'y') {
-    docker pull bitwarden/self-host:beta
+if ($args[0] -eq 'y')
+{
+	docker pull bitwarden/self-host:beta
+}
+else
+{
+	$confirmation = Read-Host "Update (or get) bitwarden source container"
+	if ($confirmation -eq 'y') {
+		docker pull bitwarden/self-host:beta
+	}
 }
 
 # stop and remove previous existing patch(ed) container
