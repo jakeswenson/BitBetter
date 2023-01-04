@@ -52,72 +52,81 @@ internal class Program
                     return 1;
                 }
 
-                WriteLine("Interactive license mode...");
-
+                Console.WriteLine("Interactive license mode...");
+                
                 while (licensetype == "")
                 {
-                    WriteLine("What would you like to generate, a [u]ser license or an [o]rg license?");
+                    Console.WriteLine("What would you like to generate, a [u]ser license or an [o]rg license: ");
                     buff = Console.ReadLine();
 
                     if(buff == "u")
                     {
                         licensetype = "user";
-                        WriteLineOver("Okay, we will generate a user license.");
+                        Console.WriteLine("Okay, we will generate a user license.");
 
                         while (validGuid == false)
                         {
-                            WriteLine("Please provide the user's guid — refer to the Readme for details on how to retrieve this. [GUID]:");
+                            Console.WriteLine("Please provide the user's guid — refer to the Readme for details on how to retrieve this. [GUID]: ");
                             buff = Console.ReadLine();
 
                             if (Guid.TryParse(buff, out guid))validGuid = true;
-                            else WriteLineOver("The user-guid provided does not appear to be valid.");
+                            else Console.WriteLine("The user-guid provided does not appear to be valid!");
                         }
                     }
                     else if (buff == "o")
                     {
                         licensetype = "org";
-                        WriteLineOver("Okay, we will generate an organization license.");
+                        Console.WriteLine("Okay, we will generate an organization license.");
 
                         while (validInstallid == false)
                         {
-                            WriteLine("Please provide your Bitwarden Install-ID — refer to the Readme for details on how to retrieve this. [Install-ID]:");
+                            Console.WriteLine("Please provide your Bitwarden Install-ID — refer to the Readme for details on how to retrieve this. [Install-ID]: ");
                             buff = Console.ReadLine();
 
                             if (Guid.TryParse(buff, out installid)) validInstallid = true;
-                            else WriteLineOver("The install-id provided does not appear to be valid.");
+                            else Console.WriteLine("The install-id provided does not appear to be valid.");
                         }
 
                         while (businessname == "")
                         {
-                            WriteLineOver("Please enter a business name, default is BitBetter. [Business Name]:");
+                            Console.WriteLine("Please enter a business name, default is BitBetter. [Business Name]: ");
                             buff = Console.ReadLine();
-                            if (buff == "")                     businessname = "BitBetter";
-                            else if (CheckBusinessName(buff))   businessname = buff;
+                            if (buff == "")
+                            {
+                                businessname = "BitBetter";
+                            }
+                            else if (CheckBusinessName(buff))
+                            {
+                                businessname = buff;
+                            }
                         }
                     }
                     else
                     {
-                        WriteLineOver("Unrecognized option \'" + buff + "\'. ");
+                        Console.WriteLine("Unrecognized option \'" + buff + "\'.");
                     }
                 }
 
                 while (name == "")
                 {
-                    WriteLineOver("Please provide the username this license will be registered to. [username]:");
+                    Console.WriteLine("Please provide the username this license will be registered to. [username]: ");
                     buff = Console.ReadLine();
                     if ( CheckUsername(buff) )   name = buff;
                 }
 
                 while (email == "")
                 {
-                    WriteLineOver("Please provide the email address for the user " + name + ". [email]");
+                    Console.WriteLine("Please provide the email address for the user " + name + ". [email]: ");
                     buff = Console.ReadLine();
-                    if ( CheckEmail(buff) )   email = buff;
+                    if (CheckEmail(buff))
+                    {
+                        email = buff;
+                    }
                 }
 
                 while (storage == 0)
                 {
-                    WriteLineOver("Extra storage space for the user " + name + ". (max.: " + Int16.MaxValue + "). Defaults to maximum value. [storage]");
+                    Console.WriteLine("Extra storage space for the user " + name + ". (max.: " + Int16.MaxValue + "). Defaults to maximum value. [storage]");
                     buff = Console.ReadLine();
                     if (String.IsNullOrWhiteSpace(buff))
                     {
@@ -125,35 +134,38 @@ internal class Program
                     }
                     else
                     {
-                        if (CheckStorage(buff)) storage = Int16.Parse(buff);
+                        if (CheckStorage(buff))
+                        {
+                            storage = Int16.Parse(buff);
+                        }
                     }
                 }
 
                 if (licensetype == "user")
                 {
-                    WriteLineOver("Confirm creation of \"user\" license for username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", User-GUID: \"" + guid + "\"? Y/n");
+                    Console.WriteLine("Confirm creation of \"user\" license for username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", User-GUID: \"" + guid + "\"? Y/n");
                     buff = Console.ReadLine();
-                    if ( buff == "" || buff == "y" || buff == "Y" )
+                    if ( buff is "" or "y" or "Y" )
                     {
                         GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, storage, guid, null);
                     }
                     else
                     {
-                        WriteLineOver("Exiting...");
+                        Console.WriteLine("Exiting...");
                         return 0;
                     }
                 }
                 else if (licensetype == "org")
                 {
-                    WriteLineOver("Confirm creation of \"organization\" license for business name: \"" + businessname + "\", username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", Install-ID: \"" + installid + "\"? Y/n");
+                    Console.WriteLine("Confirm creation of \"organization\" license for business name: \"" + businessname + "\", username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", Install-ID: \"" + installid + "\"? Y/n");
                     buff = Console.ReadLine();
-                    if ( buff == "" || buff == "y" || buff == "Y" )
+                    if ( buff is "" or "y" or "Y" )
                     {
                         GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, storage, installid, businessname, null);
                     }
                     else
                     {
-                        WriteLineOver("Exiting...");
+                        Console.WriteLine("Exiting...");
                         return 0;
                     }
                 }
@@ -186,7 +198,8 @@ internal class Program
                     config.ShowHelp();
                     return 1;
                 }
-                else if (String.IsNullOrWhiteSpace(name.Value) || String.IsNullOrWhiteSpace(email.Value))
+
+                if (String.IsNullOrWhiteSpace(name.Value) || String.IsNullOrWhiteSpace(email.Value))
                 {
                     config.Error.WriteLine($"Some arguments are missing: Name='{name.Value}' Email='{email.Value}'");
                     config.ShowHelp("user");
@@ -204,7 +217,7 @@ internal class Program
                 if (!String.IsNullOrWhiteSpace(storage.Value))
                 {
                     Double parsedStorage = Double.Parse(storage.Value);
-                    if (parsedStorage > Int16.MaxValue || parsedStorage < 0)
+                    if (parsedStorage is > Int16.MaxValue or < 0)
                     {
                         config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + Int16.MaxValue + "]");
                         config.ShowHelp("org");
@@ -243,9 +256,10 @@ internal class Program
                     config.ShowHelp();
                     return 1;
                 }
-                else if (String.IsNullOrWhiteSpace(name.Value) ||
-                         String.IsNullOrWhiteSpace(email.Value) ||
-                         String.IsNullOrWhiteSpace(installId.Value))
+
+                if (String.IsNullOrWhiteSpace(name.Value) ||
+                    String.IsNullOrWhiteSpace(email.Value) ||
+                    String.IsNullOrWhiteSpace(installId.Value))
                 {
                     config.Error.WriteLine($"Some arguments are missing: Name='{name.Value}' Email='{email.Value}' InstallId='{installId.Value}'");
                     config.ShowHelp("org");
@@ -264,7 +278,7 @@ internal class Program
                 if (!String.IsNullOrWhiteSpace(storage.Value))
                 {
                     Double parsedStorage = Double.Parse(storage.Value);
-                    if (parsedStorage > Int16.MaxValue || parsedStorage < 0)
+                    if (parsedStorage is > Int16.MaxValue or < 0)
                     {
                         config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + Int16.MaxValue + "]");
                         config.ShowHelp("org");
@@ -301,31 +315,31 @@ internal class Program
     // checkUsername Checks that the username is a valid username
     private static Boolean CheckUsername(String s)
     {
-        if ( String.IsNullOrWhiteSpace(s) ) {
-            WriteLineOver("The username provided doesn't appear to be valid.\n");
-            return false;
-        }
-        return true;    // TODO: Actually validate
+        // TODO: Actually validate
+        if (!String.IsNullOrWhiteSpace(s)) return true;
+
+        Console.WriteLine("The username provided doesn't appear to be valid!");
+        return false;
     }
 
     // checkBusinessName Checks that the Business Name is a valid username
     private static Boolean CheckBusinessName(String s)
     {
-        if ( String.IsNullOrWhiteSpace(s) ) {
-            WriteLineOver("The Business Name provided doesn't appear to be valid.\n");
-            return false;
-        }
-        return true;    // TODO: Actually validate
+        // TODO: Actually validate
+        if (!String.IsNullOrWhiteSpace(s)) return true;
+
+        Console.WriteLine("The Business Name provided doesn't appear to be valid!");
+        return false;
     }
 
     // checkEmail Checks that the email address is a valid email address
     private static Boolean CheckEmail(String s)
     {
-        if ( String.IsNullOrWhiteSpace(s) ) {
-            WriteLineOver("The email provided doesn't appear to be valid.\n");
-            return false;
-        }
-        return true;    // TODO: Actually validate
+        // TODO: Actually validate
+        if (!String.IsNullOrWhiteSpace(s)) return true;
+
+        Console.WriteLine("The email provided doesn't appear to be valid!");
+        return false;
     }
 
     // checkStorage Checks that the storage is in a valid range
@@ -333,28 +347,14 @@ internal class Program
     {
         if (String.IsNullOrWhiteSpace(s))
         {
-            WriteLineOver("The storage provided doesn't appear to be valid.\n");
+            Console.WriteLine("The storage provided doesn't appear to be valid!");
             return false;
         }
-        if (Double.Parse(s) > Int16.MaxValue || Double.Parse(s) < 0)
-        {
-            WriteLineOver("The storage value provided is outside the accepted range of [0-" + Int16.MaxValue + "].\n");
-            return false;
-        }
-        return true;
-    }
 
-    // WriteLineOver Writes a new line to console over last line.
-    private static void WriteLineOver(String s)
-    {
-        Console.SetCursorPosition(0, Console.CursorTop -1);
-        Console.WriteLine(s);
-    }
+        if (!(Double.Parse(s) > Int16.MaxValue) && !(Double.Parse(s) < 0)) return true;
 
-    // WriteLine This wrapper is just here so that console writes all look similar.
-    private static void WriteLine(String s)
-    {
-        Console.WriteLine(s);
+        Console.WriteLine("The storage value provided is outside the accepted range of [0-" + Int16.MaxValue + "]!");
+        return false;
     }
 
     private static void GenerateUserLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid userId, String key)
