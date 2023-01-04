@@ -1,21 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
 # Check for openssl
 command -v openssl >/dev/null 2>&1 || { echo >&2 "openssl required but not found.  Aborting."; exit 1; }
 
-DIR=`dirname "$0"`
-DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /usr/bin/pwd || /bin/pwd || pwd`
-DIR="$DIR/.keys"
+DIR="$PWD/.keys"
 
-if [ ! -d "$DIR" ]; then
-        mkdir $DIR
+# if previous keys exist, remove them
+if [ -d "$DIR" ]; then
+	rm -rf "$DIR"
 fi
 
-# Remove any existing key files
-[ ! -e "$DIR/cert.pem" ]  || rm "$DIR/cert.pem"
-[ ! -e "$DIR/key.pem" ]   || rm "$DIR/key.pem"
-[ ! -e "$DIR/cert.cert" ] || rm "$DIR/cert.cert"
-[ ! -e "$DIR/cert.pfx" ]  || rm "$DIR/cert.pfx"
+# create new directory 
+mkdir "$DIR"
 
 # Generate new keys
 openssl	req -x509 -newkey rsa:4096 -keyout "$DIR/key.pem" -out "$DIR/cert.cert" -days 36500 -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US'  -outform DER -passout pass:test

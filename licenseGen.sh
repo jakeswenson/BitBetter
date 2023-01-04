@@ -1,9 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-DIR=`dirname "$0"`
-DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /usr/bin/pwd || /bin/pwd || pwd`
-
-if [ "$#" -lt "2" ]; then
+if [ $# -lt 1 ]; then
     echo "USAGE: <License Gen action> [License Gen args...]"
     echo "ACTIONS:"
     echo " interactive"
@@ -13,8 +10,7 @@ if [ "$#" -lt "2" ]; then
 fi
 
 if [ "$1" = "interactive" ]; then
-	shift
-    docker run -it --rm bitbetter/licensegen "$@"
+	docker run -it --rm bitbetter/licensegen interactive
 else
-    docker run --rm bitbetter/licensegen "$@"
+	docker run --rm bitbetter/licensegen "$@"
 fi
