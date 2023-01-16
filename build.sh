@@ -57,7 +57,6 @@ else
 	fi
 fi
 
-
 # stop and remove previous existing patch(ed) container
 docker stop bitwarden-patch
 docker rm bitwarden-patch
