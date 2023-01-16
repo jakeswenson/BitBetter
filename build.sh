@@ -11,16 +11,16 @@ if [ -d "$TEMPDIRECTORY" ]; then
 	rm -rf "$TEMPDIRECTORY"
 fi
 
-if [ -f "$PWD/licenseGen/Core.dll" ]; then
-    rm -f "$PWD/licenseGen/Core.dll"
+if [ -f "$PWD/src/licenseGen/Core.dll" ]; then
+    rm -f "$PWD/src/licenseGen/Core.dll"
 fi
 
-if [ -f "$PWD/licenseGen/cert.pfx" ]; then
-    rm -f "$PWD/licenseGen/cert.pfx"
+if [ -f "$PWD/src/licenseGen/cert.pfx" ]; then
+    rm -f "$PWD/src/licenseGen/cert.pfx"
 fi
 
-if [ -f "$PWD/bitBetter/cert.cert" ]; then
-    rm -f "$PWD/bitBetter/cert.cert"
+if [ -f "$PWD/src/bitBetter/cert.cert" ]; then
+    rm -f "$PWD/src/bitBetter/cert.cert"
 fi
 
 # generate keys if none are available
@@ -29,12 +29,12 @@ if [ ! -d "$PWD/.keys" ]; then
 fi
 
 # copy the key to bitBetter and licenseGen
-cp -f "$PWD/.keys/cert.cert" "$PWD/bitBetter"
-cp -f "$PWD/.keys/cert.pfx" "$PWD/licenseGen"
+cp -f "$PWD/.keys/cert.cert" "$PWD/src/bitBetter"
+cp -f "$PWD/.keys/cert.pfx" "$PWD/src/licenseGen"
 
 # build bitBetter and clean the source directory after
-docker build -t bitbetter/bitbetter "$PWD/bitBetter"
-rm -f "$PWD/bitBetter/cert.cert"
+docker build -t bitbetter/bitbetter "$PWD/src/bitBetter"
+rm -f "$PWD/src/bitBetter/cert.cert"
 
 # gather all running instances
 OLDINSTANCES=$(docker container ps --all -f Name=bitwarden --format '{{.ID}}')
@@ -77,20 +77,15 @@ done
 # run bitBetter, this applies our patches to the required files
 docker run -v "$TEMPDIRECTORY:/app/mount" --rm bitbetter/bitbetter
 
-# copy the patched files back into the temporary instance
-for COMPONENT in ${COMPONENTS[@]}; do
-	docker cp "$TEMPDIRECTORY/$COMPONENT/Core.dll" $PATCHINSTANCE:/app/$COMPONENT/Core.dll
-done
-
-# create a new image from our patched instanced
-docker commit $PATCHINSTANCE bitwarden-patch
+# create a new image with the patched files
+docker build . --tag bitwarden-patch --file "$PWD/src/bitBetter/Dockerfile-bitwarden-patch"
 
 # stop and remove our temporary container
 docker stop bitwarden-patch
 docker rm bitwarden-patch
 
 # copy our patched library to the licenseGen source directory
-cp -f "$TEMPDIRECTORY/Identity/Core.dll" "$PWD/licenseGen"
+cp -f "$TEMPDIRECTORY/Identity/Core.dll" "$PWD/src/licenseGen"
 
 # remove our temporary directory
 rm -rf "$TEMPDIRECTORY"
@@ -104,8 +99,8 @@ done
 docker image rm bitbetter/bitbetter
 
 # build the licenseGen
-docker build -t bitbetter/licensegen "$PWD/licenseGen"
+docker build -t bitbetter/licensegen "$PWD/src/licenseGen"
 
 # clean the licenseGen source directory
-rm -f "$PWD/licenseGen/Core.dll"
-rm -f "$PWD/licenseGen/cert.pfx"
+rm -f "$PWD/src/licenseGen/Core.dll"
+rm -f "$PWD/src/licenseGen/cert.pfx"

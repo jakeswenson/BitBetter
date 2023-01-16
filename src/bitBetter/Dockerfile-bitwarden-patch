@@ -1,0 +1,4 @@
+FROM bitwarden/self-host:beta
+
+COPY ./temp/Api/Core.dll /app/Api/Core.dll
+COPY ./temp/Identity/Core.dll /app/Identity/Core.dll
