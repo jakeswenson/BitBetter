@@ -1,93 +1,75 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using dnlib.IO;
 
-namespace bitwardenSelfLicensor
+namespace bitBetter;
+
+internal class Program
 {
-    class Program
+    private static Int32 Main(String[] args)
     {
-        static int Main(string[] args)
+        const String certFile = "/app/cert.cert";
+        String[] files = Directory.GetFiles("/app/mount", "Core.dll", SearchOption.AllDirectories);
+
+        foreach (String file in files)
         {
-            string cerFile;
-            string corePath;
+            Console.WriteLine(file);
+            ModuleDefMD moduleDefMd = ModuleDefMD.Load(file);
+            Byte[] cert = File.ReadAllBytes(certFile);
 
-            if(args.Length >= 2) {
-                cerFile = args[0];
-                corePath = args[1];
-            } else if (args.Length == 1) {
-                cerFile = args[0];
-                corePath = "/app/Core.dll";
-            }
-            else {
-                cerFile = "/newLicensing.cer";
-                corePath = "/app/Core.dll";
-            }
+            EmbeddedResource embeddedResourceToRemove = moduleDefMd.Resources
+                .OfType<EmbeddedResource>()
+                .First(r => r.Name.Equals("Bit.Core.licensing.cer"));
 
+            Console.WriteLine(embeddedResourceToRemove.Name);
 
-            var module =  ModuleDefinition.ReadModule(new MemoryStream(File.ReadAllBytes(corePath)));
-            var cert = File.ReadAllBytes(cerFile);
+            EmbeddedResource embeddedResourceToAdd = new("Bit.Core.licensing.cer", cert) {Attributes = embeddedResourceToRemove.Attributes };
+            moduleDefMd.Resources.Add(embeddedResourceToAdd);
+            moduleDefMd.Resources.Remove(embeddedResourceToRemove);
 
-            var x = module.Resources.OfType<EmbeddedResource>()
-                                    .Where(r => r.Name.Equals("Bit.Core.licensing.cer"))
-                                    .First();
-
-            Console.WriteLine(x.Name);
-
-            var e = new EmbeddedResource("Bit.Core.licensing.cer", x.Attributes, cert);
-
-            module.Resources.Add(e);
-            module.Resources.Remove(x);
-
-            var services = module.Types.Where(t => t.Namespace == "Bit.Core.Services");
+            DataReader reader = embeddedResourceToRemove.CreateReader();
+            X509Certificate2 existingCert = new(reader.ReadRemainingBytes());
             
-
-            var type = services.First(t => t.Name == "LicensingService");
-
-            var licensingType =  type.Resolve();
-
-            var existingCert = new X509Certificate2(x.GetResourceData());
-
             Console.WriteLine($"Existing Cert Thumbprint: {existingCert.Thumbprint}");
-            X509Certificate2 certificate = new X509Certificate2(cert);
+            X509Certificate2 certificate = new(cert);
 
             Console.WriteLine($"New Cert Thumbprint: {certificate.Thumbprint}");
 
-            var ctor = licensingType.GetConstructors().Single();
-
-
-            var rewriter = ctor.Body.GetILProcessor();
-
-            var instToReplace = 
-                ctor.Body.Instructions.Where(i => i.OpCode == OpCodes.Ldstr
-                    && string.Equals((string)i.Operand, existingCert.Thumbprint, StringComparison.InvariantCultureIgnoreCase))
-                .FirstOrDefault();
-
-            if(instToReplace != null) {
-                rewriter.Replace(instToReplace, Instruction.Create(OpCodes.Ldstr, certificate.Thumbprint));
+            IEnumerable<TypeDef> services = moduleDefMd.Types.Where(t => t.Namespace == "Bit.Core.Services");
+            TypeDef type = services.First(t => t.Name == "LicensingService");
+            MethodDef constructor = type.FindConstructors().First();
+            
+            Instruction instructionToPatch =
+                constructor.Body.Instructions
+                    .FirstOrDefault(i => i.OpCode == OpCodes.Ldstr
+                                         && String.Equals((String)i.Operand, existingCert.Thumbprint, StringComparison.InvariantCultureIgnoreCase));
+            
+            if (instructionToPatch != null)
+            {
+                instructionToPatch.Operand = certificate.Thumbprint;
             }
-            else {
-                Console.WriteLine("Cant find inst");
+            else
+            {
+                Console.WriteLine("Can't find constructor to patch");
             }
 
-            // foreach (var inst in ctor.Body.Instructions)
-            // {
-            //     Console.Write(inst.OpCode.Name + " " + inst.Operand?.GetType() + " = ");
-            //     if(inst.OpCode.FlowControl == FlowControl.Call) {
-            //         Console.WriteLine(inst.Operand);
-            //     }
-            //     else if(inst.OpCode == OpCodes.Ldstr) {
-            //         Console.WriteLine(inst.Operand);
-            //     }
-            //     else {Console.WriteLine();}
-            // }
+            ModuleWriterOptions moduleWriterOptions = new(moduleDefMd);
+            moduleWriterOptions.MetadataOptions.Flags |= MetadataFlags.KeepOldMaxStack;
+            moduleWriterOptions.MetadataOptions.Flags |= MetadataFlags.PreserveAll;
+            moduleWriterOptions.MetadataOptions.Flags |= MetadataFlags.PreserveRids;
 
-            module.Write("modified.dll");
-
-            return 0;
+            moduleDefMd.Write(file + ".new");
+            moduleDefMd.Dispose();
+            File.Delete(file);
+            File.Move(file + ".new", file);
         }
+
+        return 0;
     }
 }

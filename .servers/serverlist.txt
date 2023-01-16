@@ -1,0 +1,3 @@
+docker run -d --name bitwarden -v <full-local-path>\logs:/var/log/bitwarden -v <full-local-path>\bwdata:/etc/bitwarden -p 80:8080 --env-file <full-local-path>\settings.env bitwarden-patch
+<OR>
+docker-compose -f <full-local-path>/docker-compose.yml up -d

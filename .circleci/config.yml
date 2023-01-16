@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   build:
     machine: true
@@ -9,7 +9,7 @@ jobs:
           command: date
       - run:
           name: Generate Keys
-          command: ./.keys/generate-keys.sh
+          command: ./generateKeys.sh
       - run:
           name: Build script
-          command: ./build.sh
+          command: ./build.sh y

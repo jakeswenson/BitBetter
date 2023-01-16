@@ -1,28 +1,106 @@
-#!/bin/sh
+#!/bin/bash
 
-DIR=`dirname "$0"`
-DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /usr/bin/pwd || /bin/pwd || pwd`
-BW_VERSION=$(curl -sL https://go.btwrdn.co/bw-sh-versions | grep '^ *"'coreVersion'":' | awk -F\: '{ print $2 }' | sed -e 's/,$//' -e 's/^"//' -e 's/"$//')
+# define temporary directory
+TEMPDIRECTORY="$PWD/temp"
 
-echo "Building BitBetter for BitWarden version $BW_VERSION"
+# define services to patch
+COMPONENTS=("Api" "Identity")
 
-# If there aren't any keys, generate them first.
-[ -e "$DIR/.keys/cert.cert" ] || "$DIR/.keys/generate-keys.sh"
+# delete old directories / files if applicable
+if [ -d "$TEMPDIRECTORY" ]; then
+	rm -rf "$TEMPDIRECTORY"
+fi
 
-[ -e "$DIR/src/bitBetter/.keys" ] || mkdir "$DIR/src/bitBetter/.keys"
+if [ -f "$PWD/src/licenseGen/Core.dll" ]; then
+    rm -f "$PWD/src/licenseGen/Core.dll"
+fi
 
-cp "$DIR/.keys/cert.cert" "$DIR/src/bitBetter/.keys"
+if [ -f "$PWD/src/licenseGen/cert.pfx" ]; then
+    rm -f "$PWD/src/licenseGen/cert.pfx"
+fi
 
-docker run --rm -v "$DIR/src/bitBetter:/bitBetter" -w=/bitBetter mcr.microsoft.com/dotnet/sdk:6.0 sh build.sh
+if [ -f "$PWD/src/bitBetter/cert.cert" ]; then
+    rm -f "$PWD/src/bitBetter/cert.cert"
+fi
 
-docker build --no-cache --build-arg BITWARDEN_TAG=bitwarden/api:$BW_VERSION --label com.bitwarden.product="bitbetter" -t bitbetter/api "$DIR/src/bitBetter" # --squash
-docker build --no-cache --build-arg BITWARDEN_TAG=bitwarden/identity:$BW_VERSION --label com.bitwarden.product="bitbetter" -t bitbetter/identity "$DIR/src/bitBetter" # --squash
+# generate keys if none are available
+if [ ! -d "$PWD/.keys" ]; then
+	./generateKeys.sh
+fi
 
-docker tag bitbetter/api bitbetter/api:latest
-docker tag bitbetter/identity bitbetter/identity:latest
-docker tag bitbetter/api bitbetter/api:$BW_VERSION
-docker tag bitbetter/identity bitbetter/identity:$BW_VERSION
+# copy the key to bitBetter and licenseGen
+cp -f "$PWD/.keys/cert.cert" "$PWD/src/bitBetter"
+cp -f "$PWD/.keys/cert.pfx" "$PWD/src/licenseGen"
 
-# Remove old instances of the image after a successful build.
-ids=$( docker images bitbetter/* | grep -E -v -- "CREATED|latest|${BW_VERSION}" | awk '{ print $3 }' )
-[ -n "$ids" ] && docker rmi $ids || true
+# build bitBetter and clean the source directory after
+docker build -t bitbetter/bitbetter "$PWD/src/bitBetter"
+rm -f "$PWD/src/bitBetter/cert.cert"
+
+# gather all running instances
+OLDINSTANCES=$(docker container ps --all -f Name=bitwarden --format '{{.ID}}')
+
+# stop all running instances
+for INSTANCE in ${OLDINSTANCES[@]}; do
+	docker stop $INSTANCE
+	docker rm $INSTANCE
+done
+
+# update bitwarden itself
+if [ "$1" = "y" ]; then
+	docker pull bitwarden/self-host:beta
+else
+	read -p "Update (or get) bitwarden source container: " -n 1 -r
+	echo
+	if [[ $REPLY =~ ^[Yy]$ ]]
+	then
+		docker pull bitwarden/self-host:beta
+	fi
+fi
+
+# stop and remove previous existing patch(ed) container
+docker stop bitwarden-patch
+docker rm bitwarden-patch
+docker image rm bitwarden-patch
+
+# start a new bitwarden instance so we can patch it
+PATCHINSTANCE=$(docker run -d --name bitwarden-patch bitwarden/self-host:beta)
+
+# create our temporary directory
+mkdir $TEMPDIRECTORY
+
+# extract the files that need to be patched from the services that need to be patched into our temporary directory
+for COMPONENT in ${COMPONENTS[@]}; do
+	mkdir "$TEMPDIRECTORY/$COMPONENT"
+	docker cp $PATCHINSTANCE:/app/$COMPONENT/Core.dll "$TEMPDIRECTORY/$COMPONENT/Core.dll"
+done
+
+# run bitBetter, this applies our patches to the required files
+docker run -v "$TEMPDIRECTORY:/app/mount" --rm bitbetter/bitbetter
+
+# create a new image with the patched files
+docker build . --tag bitwarden-patch --file "$PWD/src/bitBetter/Dockerfile-bitwarden-patch"
+
+# stop and remove our temporary container
+docker stop bitwarden-patch
+docker rm bitwarden-patch
+
+# copy our patched library to the licenseGen source directory
+cp -f "$TEMPDIRECTORY/Identity/Core.dll" "$PWD/src/licenseGen"
+
+# remove our temporary directory
+rm -rf "$TEMPDIRECTORY"
+
+# start all user requested instances
+cat "$PWD/.servers/serverlist.txt" | while read LINE; do
+	bash -c "$LINE"
+done
+
+# remove our bitBetter image
+docker image rm bitbetter/bitbetter
+
+# build the licenseGen
+docker build -t bitbetter/licensegen "$PWD/src/licenseGen"
+
+# clean the licenseGen source directory
+rm -f "$PWD/src/licenseGen/Core.dll"
+rm -f "$PWD/src/licenseGen/cert.pfx"
