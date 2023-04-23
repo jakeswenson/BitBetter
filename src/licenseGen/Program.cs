@@ -419,7 +419,7 @@ internal class Program
         set("UsePolicies", true);
         set("UseSso", true);
         set("UseKeyConnector", true);
-        //set("UseScim", true); // available in version 10, which is not released yet
+        set("UseScim", true);
         set("UseGroups", true);
         set("UseEvents", true);
         set("UseDirectory", true);
@@ -427,10 +427,11 @@ internal class Program
         set("Use2fa", true);
         set("UseApi", true);
         set("UseResetPassword", true);
+		set("UseCustomPermissions", true);
         set("MaxStorageGb", storage == 0 ? Int16.MaxValue : storage);
         set("SelfHost", true);
         set("UsersGetPremium", true);
-        set("Version", 9);
+        set("Version", 10);
         set("Issued", DateTime.UtcNow);
         set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
         set("Expires", DateTime.UtcNow.AddYears(100));
