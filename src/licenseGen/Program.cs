@@ -416,7 +416,7 @@ namespace bitwardenSelfLicensor
             set("Enabled", true);
             set("Plan", "Custom");
             set("PlanType", Enum.Parse(planTypeEnum, "Custom"));
-            set("Seats", (int)short.MaxValue);
+            set("Seats", int.MaxValue);
             set("MaxCollections", short.MaxValue);
             set("UsePolicies", true);
             set("UseSso", true);
@@ -435,8 +435,8 @@ namespace bitwardenSelfLicensor
             set("UsersGetPremium", true);
             set("UsePasswordManager", true);
             set("UseSecretsManager", true);
-            set("SmSeats", (int)short.MaxValue);
-            set("SmServiceAccounts", (int)short.MaxValue);
+            set("SmSeats", int.MaxValue);
+            set("SmServiceAccounts", int.MaxValue);
             set("Version", 12);
             set("Issued", DateTime.UtcNow);
             set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
