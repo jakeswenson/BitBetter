@@ -414,7 +414,7 @@ internal class Program
         set("Enabled", true);
         set("Plan", "Custom");
         set("PlanType", Enum.Parse(planTypeEnum, "Custom"));
-        set("Seats", (Int32)Int16.MaxValue);
+        set("Seats", Int32.MaxValue);
         set("MaxCollections", Int16.MaxValue);
         set("UsePolicies", true);
         set("UseSso", true);
@@ -431,7 +431,11 @@ internal class Program
         set("MaxStorageGb", storage == 0 ? Int16.MaxValue : storage);
         set("SelfHost", true);
         set("UsersGetPremium", true);
-        set("Version", 10);
+        set("UsePasswordManager", true);
+        set("UseSecretsManager", true);
+        set("SmSeats", Int32.MaxValue);
+        set("SmServiceAccounts", Int32.MaxValue);
+        set("Version", 12);
         set("Issued", DateTime.UtcNow);
         set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
         set("Expires", DateTime.UtcNow.AddYears(100));
