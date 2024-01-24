@@ -408,8 +408,8 @@ internal class Program
         Set("BillingEmail", email);
         Set("BusinessName", String.IsNullOrWhiteSpace(businessName) ? "BitBetter" : businessName);
         Set("Enabled", true);
-        Set("Plan", "Custom");
-        Set("PlanType", Enum.Parse(planTypeEnum, "Custom"));
+		Set("Plan", "Enterprise (Annually)");
+		Set("PlanType", Enum.Parse(planTypeEnum, "EnterpriseAnnually"));
         Set("Seats", Int32.MaxValue);
         Set("MaxCollections", Int16.MaxValue);
         Set("UsePolicies", true);
@@ -431,12 +431,13 @@ internal class Program
         Set("UseSecretsManager", true);
         Set("SmSeats", Int32.MaxValue);
         Set("SmServiceAccounts", Int32.MaxValue);
-        Set("Version", 12);
+        Set("Version", 14); //This is set to 14 to use LimitCollectionCreationDeletion can be changed to 13 to just use Secrets Manager
         Set("Issued", DateTime.UtcNow);
         Set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
         Set("Expires", DateTime.UtcNow.AddYears(100));
         Set("Trial", false);
         Set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
+		Set("LimitCollectionCreationDeletion", true); //This will be used in the new version of BitWarden but can be applied now
 
         Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, Array.Empty<Object>())));
         Set("Signature", Convert.ToBase64String((Byte[])type.GetMethod("Sign").Invoke(license, new Object[] { cert })));
