@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 as build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
 
 WORKDIR /licenseGen
 
@@ -12,6 +12,6 @@ RUN set -e; set -x; \
 
 FROM bitbetter/api
 
-COPY --from=build /licenseGen/bin/Debug/netcoreapp6.0/publish/* /app/
+COPY --from=build /licenseGen/bin/Release/netcoreapp8.0/publish/* /app/
 
 ENTRYPOINT [ "dotnet", "/app/licenseGen.dll", "--core", "/app/Core.dll", "--cert", "/cert.pfx" ]
