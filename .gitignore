@@ -1,8 +1,11 @@
 .idea/
 bin/
 obj/
+src/licenseGen/.vs/*
+src/bitBetter/.vs/*
 *.dll
 *.pem
 .vscode/
 *.pfx
 *.cert
+*.vsidx

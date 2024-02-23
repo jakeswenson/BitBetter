@@ -366,11 +366,6 @@ internal class Program
 
         Object license = Activator.CreateInstance(type);
 
-        void Set(String name, Object value)
-        {
-            type.GetProperty(name).SetValue(license, value);
-        }
-
         Set("LicenseKey", String.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key);
         Set("Id", userId);
         Set("Name", userName);
@@ -384,10 +379,16 @@ internal class Program
         Set("Trial", false);
         Set("LicenseType", Enum.Parse(licenseTypeEnum, "User"));
 
-        Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, new Object[0])));
+        Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, Array.Empty<Object>())));
         Set("Signature", Convert.ToBase64String((Byte[])type.GetMethod("Sign").Invoke(license, new Object[] { cert })));
 
         Console.WriteLine(JsonConvert.SerializeObject(license, Formatting.Indented));
+        return;
+
+        void Set(String name, Object value)
+        {
+            type.GetProperty(name)?.SetValue(license, value);
+        }
     }
 
     private static void GenerateOrgLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid instalId, String businessName, String key)
@@ -400,47 +401,53 @@ internal class Program
 
         Object license = Activator.CreateInstance(type);
 
-        void set(String name, Object value)
-        {
-            type.GetProperty(name).SetValue(license, value);
-        }
+        Set("LicenseKey", String.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key);
+        Set("InstallationId", instalId);
+        Set("Id", Guid.NewGuid());
+        Set("Name", userName);
+        Set("BillingEmail", email);
+        Set("BusinessName", String.IsNullOrWhiteSpace(businessName) ? "BitBetter" : businessName);
+        Set("Enabled", true);
+		Set("Plan", "Enterprise (Annually)");
+		Set("PlanType", Enum.Parse(planTypeEnum, "EnterpriseAnnually"));
+        Set("Seats", Int32.MaxValue);
+        Set("MaxCollections", Int16.MaxValue);
+        Set("UsePolicies", true);
+        Set("UseSso", true);
+        Set("UseKeyConnector", true);
+        Set("UseScim", true);
+        Set("UseGroups", true);
+        Set("UseEvents", true);
+        Set("UseDirectory", true);
+        Set("UseTotp", true);
+        Set("Use2fa", true);
+        Set("UseApi", true);
+        Set("UseResetPassword", true);
+		Set("UseCustomPermissions", true);
+        Set("MaxStorageGb", storage == 0 ? Int16.MaxValue : storage);
+        Set("SelfHost", true);
+        Set("UsersGetPremium", true);
+        Set("UsePasswordManager", true);
+        Set("UseSecretsManager", true);
+        Set("SmSeats", Int32.MaxValue);
+        Set("SmServiceAccounts", Int32.MaxValue);
+        Set("Version", 14); //This is set to 14 to use LimitCollectionCreationDeletion can be changed to 13 to just use Secrets Manager
+        Set("Issued", DateTime.UtcNow);
+        Set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
+        Set("Expires", DateTime.UtcNow.AddYears(100));
+        Set("Trial", false);
+        Set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
+		Set("LimitCollectionCreationDeletion", true); //This will be used in the new version of BitWarden but can be applied now
 
-        set("LicenseKey", String.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key);
-        set("InstallationId", instalId);
-        set("Id", Guid.NewGuid());
-        set("Name", userName);
-        set("BillingEmail", email);
-        set("BusinessName", String.IsNullOrWhiteSpace(businessName) ? "BitBetter" : businessName);
-        set("Enabled", true);
-        set("Plan", "Custom");
-        set("PlanType", Enum.Parse(planTypeEnum, "Custom"));
-        set("Seats", (Int32)Int16.MaxValue);
-        set("MaxCollections", Int16.MaxValue);
-        set("UsePolicies", true);
-        set("UseSso", true);
-        set("UseKeyConnector", true);
-        set("UseScim", true);
-        set("UseGroups", true);
-        set("UseEvents", true);
-        set("UseDirectory", true);
-        set("UseTotp", true);
-        set("Use2fa", true);
-        set("UseApi", true);
-        set("UseResetPassword", true);
-		set("UseCustomPermissions", true);
-        set("MaxStorageGb", storage == 0 ? Int16.MaxValue : storage);
-        set("SelfHost", true);
-        set("UsersGetPremium", true);
-        set("Version", 10);
-        set("Issued", DateTime.UtcNow);
-        set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
-        set("Expires", DateTime.UtcNow.AddYears(100));
-        set("Trial", false);
-        set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
-
-        set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, new Object[0])));
-        set("Signature", Convert.ToBase64String((Byte[])type.GetMethod("Sign").Invoke(license, new Object[] { cert })));
+        Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, Array.Empty<Object>())));
+        Set("Signature", Convert.ToBase64String((Byte[])type.GetMethod("Sign").Invoke(license, new Object[] { cert })));
 
         Console.WriteLine(JsonConvert.SerializeObject(license, Formatting.Indented));
+        return;
+
+        void Set(String name, Object value)
+        {
+            type.GetProperty(name)?.SetValue(license, value);
+        }
     }
 }
