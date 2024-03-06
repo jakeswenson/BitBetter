@@ -12,6 +12,6 @@ RUN set -e; set -x; \
 
 FROM bitbetter/api
 
-COPY --from=build /licenseGen/bin/Release/netcoreapp8.0/publish/* /app/
+COPY --from=build /licenseGen/bin/Release/net8.0/publish/* /app/
 
 ENTRYPOINT [ "dotnet", "/app/licenseGen.dll", "--core", "/app/Core.dll", "--cert", "/cert.pfx" ]
