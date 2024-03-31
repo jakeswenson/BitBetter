@@ -45,8 +45,8 @@ internal class Program
             {
                 if (!VerifyTopOptions())
                 {
-                    if (!CoreExists()) config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
-                    if (!CertExists()) config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
+                    if (!CoreExists()) config.Error.WriteLine($"Can't find core dll at: {coreDll.Value()}");
+                    if (!CertExists()) config.Error.WriteLine($"Can't find certificate at: {cert.Value()}");
 
                     config.ShowHelp();
                     return 1;
@@ -173,7 +173,6 @@ internal class Program
                 return 0;
             });
         });
-
         app.Command("user", config =>
         {
             CommandArgument name = config.Argument("Name", "your name");
@@ -188,11 +187,11 @@ internal class Program
                 {
                     if (!CoreExists())
                     {
-                        config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
+                        config.Error.WriteLine($"Can't find core dll at: {coreDll.Value()}");
                     }
                     if (!CertExists())
                     {
-                        config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
+                        config.Error.WriteLine($"Can't find certificate at: {cert.Value()}");
                     }
 
                     config.ShowHelp();
@@ -246,11 +245,11 @@ internal class Program
                 {
                     if (!CoreExists())
                     {
-                        config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
+                        config.Error.WriteLine($"Can't find core dll at: {coreDll.Value()}");
                     }
                     if (!CertExists())
                     {
-                        config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
+                        config.Error.WriteLine($"Can't find certificate at: {cert.Value()}");
                     }
 
                     config.ShowHelp();
