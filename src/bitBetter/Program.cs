@@ -12,7 +12,7 @@ namespace bitBetter;
 
 internal class Program
 {
-    private static Int32 Main(String[] args)
+    private static Int32 Main()
     {
         const String certFile = "/app/cert.cert";
         String[] files = Directory.GetFiles("/app/mount", "Core.dll", SearchOption.AllDirectories);
