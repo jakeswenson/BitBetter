@@ -35,7 +35,7 @@ internal class Program
 
         app.Command("interactive", config =>
         {
-            String buff, licensetype="", name="", email="", businessname="";
+            String buff, licenseType = "", name = "", email = "", businessName="";
             Int16 storage = 0;
 
             Boolean validGuid = false, validInstallid = false;
@@ -54,14 +54,14 @@ internal class Program
 
                 Console.WriteLine("Interactive license mode...");
                 
-                while (licensetype == "")
+                while (licenseType == "")
                 {
                     Console.WriteLine("What would you like to generate, a [u]ser license or an [o]rg license: ");
                     buff = Console.ReadLine();
 
                     if(buff == "u")
                     {
-                        licensetype = "user";
+                        licenseType = "user";
                         Console.WriteLine("Okay, we will generate a user license.");
 
                         while (validGuid == false)
@@ -75,7 +75,7 @@ internal class Program
                     }
                     else if (buff == "o")
                     {
-                        licensetype = "org";
+                        licenseType = "org";
                         Console.WriteLine("Okay, we will generate an organization license.");
 
                         while (validInstallid == false)
@@ -87,17 +87,17 @@ internal class Program
                             else Console.WriteLine("The install-id provided does not appear to be valid.");
                         }
 
-                        while (businessname == "")
+                        while (businessName == "")
                         {
                             Console.WriteLine("Please enter a business name, default is BitBetter. [Business Name]: ");
                             buff = Console.ReadLine();
                             if (buff == "")
                             {
-                                businessname = "BitBetter";
+                                businessName = "BitBetter";
                             }
                             else if (CheckBusinessName(buff))
                             {
-                                businessname = buff;
+                                businessName = buff;
                             }
                         }
                     }
@@ -141,7 +141,7 @@ internal class Program
                     }
                 }
 
-                if (licensetype == "user")
+                if (licenseType == "user")
                 {
                     Console.WriteLine("Confirm creation of \"user\" license for username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", User-GUID: \"" + guid + "\"? Y/n");
                     buff = Console.ReadLine();
@@ -155,13 +155,13 @@ internal class Program
                         return 0;
                     }
                 }
-                else if (licensetype == "org")
+                else if (licenseType == "org")
                 {
-                    Console.WriteLine("Confirm creation of \"organization\" license for business name: \"" + businessname + "\", username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", Install-ID: \"" + installid + "\"? Y/n");
+                    Console.WriteLine("Confirm creation of \"organization\" license for business name: \"" + businessName + "\", username: \"" + name + "\", email: \"" + email + "\", Storage: \"" + storage + " GB\", Install-ID: \"" + installid + "\"? Y/n");
                     buff = Console.ReadLine();
                     if ( buff is "" or "y" or "Y" )
                     {
-                        GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, storage, installid, businessname, null);
+                        GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, storage, installid, businessName, null);
                     }
                     else
                     {
