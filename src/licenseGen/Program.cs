@@ -378,8 +378,8 @@ internal class Program
         Set("Trial", false);
         Set("LicenseType", Enum.Parse(licenseTypeEnum, "User"));
 
-        Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, Array.Empty<Object>())));
-        Set("Signature", Convert.ToBase64String((Byte[])type.GetMethod("Sign").Invoke(license, new Object[] { cert })));
+        Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, [])));
+        Set("Signature", Convert.ToBase64String((Byte[])type.GetMethod("Sign").Invoke(license, [cert])));
 
         Console.WriteLine(JsonConvert.SerializeObject(license, Formatting.Indented));
         return;
@@ -438,8 +438,8 @@ internal class Program
         Set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
 		Set("LimitCollectionCreationDeletion", true); //This will be used in the new version of BitWarden but can be applied now
 
-        Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, Array.Empty<Object>())));
-        Set("Signature", Convert.ToBase64String((Byte[])type.GetMethod("Sign").Invoke(license, new Object[] { cert })));
+        Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, [])));
+        Set("Signature", Convert.ToBase64String((Byte[])type.GetMethod("Sign").Invoke(license, [cert])));
 
         Console.WriteLine(JsonConvert.SerializeObject(license, Formatting.Indented));
         return;
