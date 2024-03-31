@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 
 namespace licenseGen;
@@ -202,14 +202,14 @@ internal class Program
                 if (String.IsNullOrWhiteSpace(name.Value) || String.IsNullOrWhiteSpace(email.Value))
                 {
                     config.Error.WriteLine($"Some arguments are missing: Name='{name.Value}' Email='{email.Value}'");
-                    config.ShowHelp("user");
+                    config.ShowHelp(true);
                     return 1;
                 }
 
                 if (String.IsNullOrWhiteSpace(userIdArg.Value) || !Guid.TryParse(userIdArg.Value, out Guid userId))
                 {
                     config.Error.WriteLine("User ID not provided");
-                    config.ShowHelp("user");
+                    config.ShowHelp(true);
                     return 1;
                 }
 
@@ -220,7 +220,7 @@ internal class Program
                     if (parsedStorage is > Int16.MaxValue or < 0)
                     {
                         config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + Int16.MaxValue + "]");
-                        config.ShowHelp("org");
+                        config.ShowHelp(true);
                         return 1;
                     }
                     storageShort = (Int16) parsedStorage;
@@ -262,7 +262,7 @@ internal class Program
                     String.IsNullOrWhiteSpace(installId.Value))
                 {
                     config.Error.WriteLine($"Some arguments are missing: Name='{name.Value}' Email='{email.Value}' InstallId='{installId.Value}'");
-                    config.ShowHelp("org");
+                    config.ShowHelp(true);
                     return 1;
                 }
 
@@ -270,7 +270,7 @@ internal class Program
                 {
                     config.Error.WriteLine("Unable to parse your installation id as a GUID");
                     config.Error.WriteLine($"Here's a new guid: {Guid.NewGuid()}");
-                    config.ShowHelp("org");
+                    config.ShowHelp(true);
                     return 1;
                 }
 
@@ -281,7 +281,7 @@ internal class Program
                     if (parsedStorage is > Int16.MaxValue or < 0)
                     {
                         config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + Int16.MaxValue + "]");
-                        config.ShowHelp("org");
+                        config.ShowHelp(true);
                         return 1;
                     }
                     storageShort = (Int16) parsedStorage;
