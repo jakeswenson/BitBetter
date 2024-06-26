@@ -396,7 +396,7 @@ internal class Program
 
         Type type = core.GetType("Bit.Core.Models.Business.OrganizationLicense");
         Type licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
-        Type planTypeEnum = core.GetType("Bit.Core.Enums.PlanType");
+        Type planTypeEnum = core.GetType("Bit.Core.Billing.Enums.PlanType");
 
         Object license = Activator.CreateInstance(type);
 
