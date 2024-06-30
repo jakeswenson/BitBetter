@@ -398,7 +398,7 @@ namespace bitwardenSelfLicensor
 
             var type = core.GetType("Bit.Core.Models.Business.OrganizationLicense");
             var licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
-            var planTypeEnum = core.GetType("Bit.Core.Enums.PlanType");
+            var planTypeEnum = core.GetType("Bit.Core.Billing.Enums.PlanType");
 
             var license = Activator.CreateInstance(type);
 
