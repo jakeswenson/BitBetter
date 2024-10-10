@@ -13,7 +13,7 @@ echo "Building BitBetter for BitWarden version $BW_VERSION"
 
 cp "$DIR/.keys/cert.cert" "$DIR/src/bitBetter/.keys"
 
-docker run --rm -v "$DIR/src/bitBetter:/bitBetter" -w=/bitBetter mcr.microsoft.com/dotnet/sdk:6.0 sh build.sh
+docker run --rm -v "$DIR/src/bitBetter:/bitBetter" -w=/bitBetter mcr.microsoft.com/dotnet/sdk:8.0 sh build.sh
 
 docker build --no-cache --build-arg BITWARDEN_TAG=bitwarden/api:$BW_VERSION --label com.bitwarden.product="bitbetter" -t bitbetter/api "$DIR/src/bitBetter" # --squash
 docker build --no-cache --build-arg BITWARDEN_TAG=bitwarden/identity:$BW_VERSION --label com.bitwarden.product="bitbetter" -t bitbetter/identity "$DIR/src/bitBetter" # --squash
