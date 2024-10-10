@@ -437,13 +437,14 @@ namespace bitwardenSelfLicensor
             set("UseSecretsManager", true);
             set("SmSeats", int.MaxValue);
             set("SmServiceAccounts", int.MaxValue);
-            set("Version", 14); //This is set to 14 to use LimitCollectionCreationDeletion can be changed to 13 to just use Secrets Manager
+            set("Version", 15); //This is set to 15 to use AllowAdminAccessToAllCollectionItems can be changed to 13 to just use Secrets Manager
             set("Issued", DateTime.UtcNow);
             set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
             set("Expires", DateTime.UtcNow.AddYears(100));
             set("Trial", false);
             set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
             set("LimitCollectionCreationDeletion", true); //This will be used in the new version of BitWarden but can be applied now
+            set("AllowAdminAccessToAllCollectionItems", true);
 
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
             set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
