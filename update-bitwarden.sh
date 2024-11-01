@@ -32,8 +32,6 @@ RECREATE_OV=${tmprecreate:-$RECREATE_OV}
 if [[ $RECREATE_OV =~ ^[Yy]$ ]]
 then
     {
-        echo "version: '3'"
-        echo ""
         echo "services:"
         echo "  api:"
         echo "    image: bitbetter/api:$BW_VERSION"
