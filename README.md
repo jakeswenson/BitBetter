@@ -54,8 +54,6 @@ This will create a new self-signed certificate in the `.keys` directory if one d
 You may now simply create the file `/path/to/bwdata/docker/docker-compose.override.yml` with the following contents to utilize the modified images.
 
 ```yaml
-version: '3'
-
 services:
   api:
     image: bitbetter/api
