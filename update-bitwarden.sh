@@ -69,7 +69,7 @@ cd $BITWARDEN_BASE
 ./bitwarden.sh updateself
 
 # Update the bitwarden.sh: automatically patch run.sh to fix docker-compose pull errors for private images
-awk '1;/function downloadRunFile/{c=13}c&&!--c{print "sed -i '\''s/dccmd pull/dccmd pull --ignore-pull-failures || true/g'\'' $SCRIPTS_DIR/run.sh"}' $BITWARDEN_BASE/bitwarden.sh > tmp_bw.sh && mv tmp_bw.sh $BITWARDEN_BASE/bitwarden.sh
+sed -i 's/chmod u+x $SCRIPTS_DIR\/run.sh/chmod u+x $SCRIPTS_DIR\/run.sh\n        sed -i \x27s\/dccmd pull\/dccmd pull --ignore-pull-failures || true\/g\x27 $SCRIPTS_DIR\/run.sh/g' -i $BITWARDEN_BASE/bitwarden.sh
 chmod +x $BITWARDEN_BASE/bitwarden.sh
 echo "Patching bitwarden.sh completed..."
 
