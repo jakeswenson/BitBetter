@@ -14,8 +14,8 @@ Credit to https://github.com/h44z/BitBetter and https://github.com/jakeswenson/B
 - [Getting Started](#getting-started)
   - [Dependencies](#dependencies)
   - [Setting up BitBetter](#setting-up-bitbetter)
+    - [Optional: Manually generating Certificate & Key](#optional-manually-generating-certificate--key)
   - [Building BitBetter](#building-bitbetter)
-    - [Note: Manually generating Certificate & Key](#note-manually-generating-certificate--key)
   - [Updating Bitwarden and BitBetter](#updating-bitwarden-and-bitbetter)
   - [Generating Signed Licenses](#generating-signed-licenses)
     - [Note: Alternative Ways to Generate License](#note-alternative-ways-to-generate-license)
@@ -39,6 +39,21 @@ With your dependencies installed, begin the installation of BitBetter by downloa
 ```bash
 git clone https://github.com/jakeswenson/BitBetter.git
 ```
+
+### Optional: Manually generating Certificate & Key
+
+If you wish to generate your self-signed cert & key manually, you can run the following commands.
+
+```bash
+cd .keys
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cert -days 36500 -outform DER -passout pass:test
+openssl x509 -inform DER -in cert.cert -out cert.pem
+openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:test -passout pass:test
+```
+
+> Note that the password here must be `test`.<sup>[1](#f1)</sup>
+
+---
 
 ## Building BitBetter
 
@@ -67,19 +82,6 @@ You'll also want to edit the `/path/to/bwdata/scripts/run.sh` file. In the `func
 > Replace `dockerComposePull`<br>with `#dockerComposePull`
 
 You can now start or restart Bitwarden as normal and the modified api will be used. **It is now ready to accept self-issued licenses.**
-
----
-### Note: Manually generating Certificate & Key
-
-If you wish to generate your self-signed cert & key manually, you can run the following commands.
-
-```bash
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cert -days 36500 -outform DER -passout pass:test
-openssl x509 -inform DER -in cert.cert -out cert.pem
-openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:test -passout pass:test
-```
-
-> Note that the password here must be `test`.<sup>[1](#f1)</sup>
 
 ---
 
