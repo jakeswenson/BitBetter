@@ -35,9 +35,11 @@ then
         echo "services:"
         echo "  api:"
         echo "    image: bitbetter/api:$BW_VERSION"
+        echo "    pull_policy: never"
         echo ""
         echo "  identity:"
         echo "    image: bitbetter/identity:$BW_VERSION"
+        echo "    pull_policy: never"        
         echo ""
     } > $BITWARDEN_BASE/bwdata/docker/docker-compose.override.yml
     echo "BitBetter docker-compose override created!"
