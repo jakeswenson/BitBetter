@@ -63,14 +63,14 @@ The scripts supports running and patching multi instances.
 Edit the .servers/serverlist.txt file and fill in the missing values, they can be replaced with existing installation values.
 This file may be empty, but there will be no containers will be spun up automatically.
 
-Now it is time to **run the main build script** to generate a modified version of the `bitwarden/self-host` docker image and the license generator.
+Now it is time to **run the main build script** to generate a modified version of the `ghcr.io/bitwarden/self-host` docker image and the license generator.
 
 From the BitBetter directory, simply run:
 ```
 ./build.[sh|ps1]
 ```
 
-This will create a new self-signed certificate in the `.keys` directory if one does not already exist and then create a modified version of the official `bitwarden/self-host` image called `bitwarden-patch`.
+This will create a new self-signed certificate in the `.keys` directory if one does not already exist and then create a modified version of the official `ghcr.io/bitwarden/self-host` image called `bitwarden-patch`.
 
 Afterwards it will automatically generate the license generator and start all previously specified containers which are **now ready to accept self-issued licenses.**
 

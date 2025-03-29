@@ -45,13 +45,13 @@ foreach ($instance in $oldinstances) {
 # update bitwarden itself
 if ($args[0] -eq 'y')
 {
-	docker pull bitwarden/self-host:beta
+	docker pull ghcr.io/bitwarden/self-host:beta
 }
 else
 {
 	$confirmation = Read-Host "Update (or get) bitwarden source container"
 	if ($confirmation -eq 'y') {
-		docker pull bitwarden/self-host:beta
+		docker pull ghcr.io/bitwarden/self-host:beta
 	}
 }
 
@@ -61,7 +61,7 @@ docker rm bitwarden-patch
 docker image rm bitwarden-patch
 
 # start a new bitwarden instance so we can patch it
-$patchinstance = docker run -d --name bitwarden-patch bitwarden/self-host:beta
+$patchinstance = docker run -d --name bitwarden-patch ghcr.io/bitwarden/self-host:beta
 
 # create our temporary directory
 New-item -ItemType Directory -Path $tempdirectory

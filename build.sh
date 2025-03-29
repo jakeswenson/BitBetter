@@ -47,13 +47,13 @@ done
 
 # update bitwarden itself
 if [ "$1" = "y" ]; then
-	docker pull bitwarden/self-host:beta
+	docker pull ghcr.io/bitwarden/self-host:beta
 else
 	read -p "Update (or get) bitwarden source container: " -n 1 -r
 	echo
 	if [[ $REPLY =~ ^[Yy]$ ]]
 	then
-		docker pull bitwarden/self-host:beta
+		docker pull ghcr.io/bitwarden/self-host:beta
 	fi
 fi
 
@@ -63,7 +63,7 @@ docker rm bitwarden-patch
 docker image rm bitwarden-patch
 
 # start a new bitwarden instance so we can patch it
-PATCHINSTANCE=$(docker run -d --name bitwarden-patch bitwarden/self-host:beta)
+PATCHINSTANCE=$(docker run -d --name bitwarden-patch ghcr.io/bitwarden/self-host:beta)
 
 # create our temporary directory
 mkdir $TEMPDIRECTORY
