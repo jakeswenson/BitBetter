@@ -91,7 +91,8 @@ cp -f "$TEMPDIRECTORY/Identity/Core.dll" "$PWD/src/licenseGen"
 rm -rf "$TEMPDIRECTORY"
 
 # start all user requested instances
-cat "$PWD/.servers/serverlist.txt" | while read LINE; do
+sed -i 's/\r$//' "$PWD/.servers/serverlist.txt"
+cat "$PWD/.servers/serverlist.txt" | while read -r LINE; do
 	bash -c "$LINE"
 done
 
