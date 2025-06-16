@@ -9,16 +9,17 @@ echo "Building BitBetter for BitWarden version $BW_VERSION"
 # If there aren't any keys, generate them first.
 [ -e "$DIR/.keys/cert.cert" ] || "$DIR/.keys/generate-keys.sh"
 
-# Prepare Bitwarden repository
+# Prepare Bitwarden server repository
 rm -rf $DIR/server
 git clone --branch "v${BW_VERSION}" --depth 1 https://github.com/bitwarden/server.git $DIR/server
+
+# Optional, replacing the thumbprint in code has no actual effect
 old_thumbprint=$(openssl x509 -fingerprint -noout -in $DIR/server/src/Core/licensing.cer | cut -d= -f2 | tr -d ':')
 new_thumbprint=$(openssl x509 -fingerprint -noout -in $DIR/.keys/cert.cert | cut -d= -f2 | tr -d ':')
-cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cer
-# Optional, has actually no effect
 sed -i -e "s/$old_thumbprint/$new_thumbprint/g" $DIR/server/src/Core/Services/Implementations/LicensingService.cs
-# Enable loose files for API, so Core.dll is accessible
-sed -i -e 's/PublishSingleFile=true/PublishSingleFile=false/g' $DIR/server/src/Api/Dockerfile
+
+# Replace certificate file
+cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cer
 
 docker build --no-cache --label com.bitwarden.product="bitbetter" $DIR/server -f $DIR/server/src/Api/Dockerfile -t bitbetter/api
 docker build --no-cache --label com.bitwarden.product="bitbetter" $DIR/server -f $DIR/server/src/Identity/Dockerfile -t bitbetter/identity
