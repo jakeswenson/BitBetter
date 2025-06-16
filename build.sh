@@ -11,8 +11,7 @@ echo "Building BitBetter for BitWarden version $BW_VERSION"
 
 # Prepare Bitwarden repository
 rm -rf $DIR/server
-git clone https://github.com/bitwarden/server.git
-git -C $DIR/server checkout tags/v${BW_VERSION}
+git clone --branch "v${BW_VERSION}" --depth 1 https://github.com/bitwarden/server.git $DIR/server
 old_thumbprint=$(openssl x509 -fingerprint -noout -in $DIR/server/src/Core/licensing.cer | cut -d= -f2 | tr -d ':')
 new_thumbprint=$(openssl x509 -fingerprint -noout -in $DIR/.keys/cert.cert | cut -d= -f2 | tr -d ':')
 cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cer
