@@ -12,15 +12,9 @@ echo "Building BitBetter for BitWarden version $BW_VERSION"
 # Prepare Bitwarden server repository
 rm -rf $DIR/server
 git clone --branch "v${BW_VERSION}" --depth 1 https://github.com/bitwarden/server.git $DIR/server
-
-# Optional, replacing the thumbprint in code has no actual effect
-old_thumbprint=$(openssl x509 -fingerprint -noout -in $DIR/server/src/Core/licensing.cer | cut -d= -f2 | tr -d ':')
-new_thumbprint=$(openssl x509 -fingerprint -noout -in $DIR/.keys/cert.cert | cut -d= -f2 | tr -d ':')
-sed -i -e "s/$old_thumbprint/$new_thumbprint/g" $DIR/server/src/Core/Services/Implementations/LicensingService.cs
-
-# Replace certificate file
 cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cer
 
+# Build docker images
 docker build --no-cache --label com.bitwarden.product="bitbetter" $DIR/server -f $DIR/server/src/Api/Dockerfile -t bitbetter/api
 docker build --no-cache --label com.bitwarden.product="bitbetter" $DIR/server -f $DIR/server/src/Identity/Dockerfile -t bitbetter/identity
 
