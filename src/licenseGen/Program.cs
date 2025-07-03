@@ -445,6 +445,9 @@ namespace bitwardenSelfLicensor
             set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
             set("LimitCollectionCreationDeletion", true); //This will be used in the new version of BitWarden but can be applied now
             set("AllowAdminAccessToAllCollectionItems", true);
+            set("UseRiskInsights", true);
+            set("UseOrganizationDomains", true);
+            set("UseAdminSponsoredFamilies", true);
 
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
             set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
