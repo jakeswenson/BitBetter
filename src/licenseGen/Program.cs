@@ -1,38 +1,40 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Runtime.Loader;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.CommandLineUtils;
-using Newtonsoft.Json;
-
-namespace bitwardenSelfLicensor
+namespace BitwardenSelfLicensor
 {
-    class Program
+    using Microsoft.Extensions.CommandLineUtils;
+    using Newtonsoft.Json;
+    using SingleFileExtractor.Core;
+    using System;
+    using System.IO;
+    using System.Runtime.Loader;
+    using System.Security.Cryptography.X509Certificates;
+
+    public static class Program
     {
-        static int Main(string[] args)
+        public static int Main(string[] args)
         {
-            var app = new Microsoft.Extensions.CommandLineUtils.CommandLineApplication();
+            var app = new CommandLineApplication();
             var cert = app.Option("--cert", "cert file", CommandOptionType.SingleValue);
             var coreDll = app.Option("--core", "path to core dll", CommandOptionType.SingleValue);
+            var exec = app.Option("--executable", "path to Bitwarden single file executable", CommandOptionType.SingleValue);
 
-            bool certExists()
+            bool ExecExists() => File.Exists(exec.Value());
+            bool CertExists() => File.Exists(cert.Value());
+            bool CoreExists() => File.Exists(coreDll.Value());
+            bool VerifyTopOptions() => 
+                !string.IsNullOrWhiteSpace(cert.Value()) &&
+                (!string.IsNullOrWhiteSpace(coreDll.Value()) || !string.IsNullOrWhiteSpace(exec.Value())) &&
+                CertExists() &&
+                (CoreExists() || ExecExists());
+            string GetExtractedDll()
             {
-                return File.Exists(cert.Value());
+                var coreDllPath = Path.Combine("extract", "Core.dll");
+                var reader = new ExecutableReader(exec.Value());
+                reader.ExtractToDirectory("extract");
+                var fileInfo = new FileInfo(coreDllPath);
+                return fileInfo.FullName;
             }
-
-            bool coreExists()
-            {
-                return File.Exists(coreDll.Value());
-            }
-
-            bool verifyTopOptions()
-            {
-                return !string.IsNullOrWhiteSpace(cert.Value()) &&
-                       !string.IsNullOrWhiteSpace(coreDll.Value()) &&
-                       certExists() && coreExists();
-            }
-
+            string GetCoreDllPath() => CoreExists() ? coreDll.Value() : GetExtractedDll();
+            
             app.Command("interactive", config =>
             {
                 string buff="", licensetype="", name="", email="", businessname="";
@@ -43,11 +45,11 @@ namespace bitwardenSelfLicensor
 
                 config.OnExecute(() =>
                 {
-                    if (!verifyTopOptions())
+                    if (!VerifyTopOptions())
                     {
-                        if (!coreExists()) config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
-                        if (!certExists()) config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
-
+                        if (!ExecExists() && !string.IsNullOrWhiteSpace(exec.Value())) config.Error.WriteLine($"Cant find single file executable at: {exec.Value()}");
+                        if (!CoreExists() && !string.IsNullOrWhiteSpace(coreDll.Value())) config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
+                        if (!CertExists()) config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
                         config.ShowHelp();
                         return 1;
                     }
@@ -92,7 +94,7 @@ namespace bitwardenSelfLicensor
                                 WriteLineOver("Please enter a business name, default is BitBetter. [Business Name]:");
                                 buff = Console.ReadLine();
                                 if (buff == "")                     businessname = "BitBetter";
-                                else if (checkBusinessName(buff))   businessname = buff;
+                                else if (CheckBusinessName(buff))   businessname = buff;
                             }
                         }
                         else
@@ -105,14 +107,14 @@ namespace bitwardenSelfLicensor
                     {
                         WriteLineOver("Please provide the username this license will be registered to. [username]:");
                         buff = Console.ReadLine();
-                        if ( checkUsername(buff) )   name = buff;
+                        if ( CheckUsername(buff) )   name = buff;
                     }
 
                     while (email == "")
                     {
                         WriteLineOver("Please provide the email address for the user " + name + ". [email]");
                         buff = Console.ReadLine();
-                        if ( checkEmail(buff) )   email = buff;
+                        if ( CheckEmail(buff) )   email = buff;
                     }
 
                     while (storage == 0)
@@ -125,7 +127,7 @@ namespace bitwardenSelfLicensor
                         }
                         else
                         {
-                            if (checkStorage(buff)) storage = short.Parse(buff);
+                            if (CheckStorage(buff)) storage = short.Parse(buff);
                         }
                     }
 
@@ -135,7 +137,7 @@ namespace bitwardenSelfLicensor
                         buff = Console.ReadLine();
                         if ( buff == "" || buff == "y" || buff == "Y" )
                         {
-                            GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, storage, guid, null);
+                            GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), GetCoreDllPath(), name, email, storage, guid, null);
                         }
                         else
                         {
@@ -149,7 +151,7 @@ namespace bitwardenSelfLicensor
                         buff = Console.ReadLine();
                         if ( buff == "" || buff == "y" || buff == "Y" )
                         {
-                            GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name, email, storage, installid, businessname, null);
+                            GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), GetCoreDllPath(), name, email, storage, installid, businessname, null);
                         }
                         else
                         {
@@ -173,17 +175,11 @@ namespace bitwardenSelfLicensor
 
                 config.OnExecute(() =>
                 {
-                    if (!verifyTopOptions())
+                    if (!VerifyTopOptions())
                     {
-                        if (!coreExists())
-                        {
-                            config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
-                        }
-                        if (!certExists())
-                        {
-                            config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
-                        }
-
+                        if (!ExecExists() && !string.IsNullOrWhiteSpace(exec.Value())) config.Error.WriteLine($"Cant find single file executable at: {exec.Value()}");
+                        if (!CoreExists() && !string.IsNullOrWhiteSpace(coreDll.Value())) config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
+                        if (!CertExists()) config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
                         config.ShowHelp();
                         return 1;
                     }
@@ -214,7 +210,7 @@ namespace bitwardenSelfLicensor
                         storageShort = (short) parsedStorage;
                     }
 
-                    GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, storageShort, userId, key.Value);
+                    GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), GetCoreDllPath(), name.Value, email.Value, storageShort, userId, key.Value);
 
                     return 0;
                 });
@@ -231,17 +227,11 @@ namespace bitwardenSelfLicensor
 
                 config.OnExecute(() =>
                 {
-                    if (!verifyTopOptions())
+                    if (!VerifyTopOptions())
                     {
-                        if (!coreExists())
-                        {
-                            config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
-                        }
-                        if (!certExists())
-                        {
-                            config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
-                        }
-
+                        if (!ExecExists() && !string.IsNullOrWhiteSpace(exec.Value())) config.Error.WriteLine($"Cant find single file executable at: {exec.Value()}");
+                        if (!CoreExists() && !string.IsNullOrWhiteSpace(coreDll.Value())) config.Error.WriteLine($"Cant find core dll at: {coreDll.Value()}");
+                        if (!CertExists()) config.Error.WriteLine($"Cant find certificate at: {cert.Value()}");
                         config.ShowHelp();
                         return 1;
                     }
@@ -275,7 +265,7 @@ namespace bitwardenSelfLicensor
                         storageShort = (short) parsedStorage;
                     }
 
-                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), coreDll.Value(), name.Value, email.Value, storageShort, installationId, businessName.Value, key.Value);
+                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), GetCoreDllPath(), name.Value, email.Value, storageShort, installationId, businessName.Value, key.Value);
 
                     return 0;
                 });
@@ -301,7 +291,7 @@ namespace bitwardenSelfLicensor
         }
 
         // checkUsername Checks that the username is a valid username
-        static bool checkUsername(string s)
+        private static bool CheckUsername(string s)
         {
             if ( string.IsNullOrWhiteSpace(s) ) {
                 WriteLineOver("The username provided doesn't appear to be valid.\n");
@@ -311,7 +301,7 @@ namespace bitwardenSelfLicensor
         }
 
         // checkBusinessName Checks that the Business Name is a valid username
-        static bool checkBusinessName(string s)
+        private static bool CheckBusinessName(string s)
         {
             if ( string.IsNullOrWhiteSpace(s) ) {
                 WriteLineOver("The Business Name provided doesn't appear to be valid.\n");
@@ -321,7 +311,7 @@ namespace bitwardenSelfLicensor
         }
 
         // checkEmail Checks that the email address is a valid email address
-        static bool checkEmail(string s)
+        private static bool CheckEmail(string s)
         {
             if ( string.IsNullOrWhiteSpace(s) ) {
                 WriteLineOver("The email provided doesn't appear to be valid.\n");
@@ -331,7 +321,7 @@ namespace bitwardenSelfLicensor
         }
 
         // checkStorage Checks that the storage is in a valid range
-        static bool checkStorage(string s)
+        private static bool CheckStorage(string s)
         {
             if (string.IsNullOrWhiteSpace(s))
             {
@@ -347,19 +337,16 @@ namespace bitwardenSelfLicensor
         }
 
         // WriteLineOver Writes a new line to console over last line.
-        static void WriteLineOver(string s)
+        private static void WriteLineOver(string s)
         {
             Console.SetCursorPosition(0, Console.CursorTop -1);
             Console.WriteLine(s);
         }
 
         // WriteLine This wrapper is just here so that console writes all look similar.
-        static void WriteLine(string s)
-        {
-            Console.WriteLine(s);
-        }
+        private static void WriteLine(string s) => Console.WriteLine(s);
 
-        static void GenerateUserLicense(X509Certificate2 cert, string corePath, string userName, string email, short storage, Guid userId, string key)
+        private static void GenerateUserLicense(X509Certificate2 cert, string corePath, string userName, string email, short storage, Guid userId, string key)
         {
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
@@ -392,7 +379,7 @@ namespace bitwardenSelfLicensor
             Console.WriteLine(JsonConvert.SerializeObject(license, Formatting.Indented));
         }
 
-        static void GenerateOrgLicense(X509Certificate2 cert, string corePath, string userName, string email, short storage, Guid instalId, string businessName, string key)
+        private static void GenerateOrgLicense(X509Certificate2 cert, string corePath, string userName, string email, short storage, Guid instalId, string businessName, string key)
         {
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 

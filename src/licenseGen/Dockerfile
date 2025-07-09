@@ -14,4 +14,4 @@ FROM bitbetter/api
 
 COPY --from=build /licenseGen/bin/Release/net8.0/publish/* /app/
 
-ENTRYPOINT [ "dotnet", "/app/licenseGen.dll", "--core", "/app/Core.dll", "--cert", "/cert.pfx" ]
+ENTRYPOINT [ "dotnet", "/app/licenseGen.dll", "--core", "/app/Core.dll", "--executable", "/app/Api", "--cert", "/cert.pfx" ]
