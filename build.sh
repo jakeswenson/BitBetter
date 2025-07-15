@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # define temporary directory
 TEMPDIRECTORY="$PWD/temp"
@@ -33,7 +34,7 @@ cp -f "$PWD/.keys/cert.cert" "$PWD/src/bitBetter"
 cp -f "$PWD/.keys/cert.pfx" "$PWD/src/licenseGen"
 
 # build bitBetter and clean the source directory after
-docker build -t bitbetter/bitbetter "$PWD/src/bitBetter"
+docker build --no-cache -t bitbetter/bitbetter "$PWD/src/bitBetter"
 rm -f "$PWD/src/bitBetter/cert.cert"
 
 # gather all running instances

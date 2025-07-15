@@ -1,3 +1,6 @@
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
+
 if ($($args.Count) -lt 1) {
     echo "USAGE: <License Gen action> [License Gen args...]"
     echo "ACTIONS:"

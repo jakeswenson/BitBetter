@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Check for openssl
 command -v openssl >/dev/null 2>&1 || { echo >&2 "openssl required but not found.  Aborting."; exit 1; }

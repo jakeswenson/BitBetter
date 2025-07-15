@@ -377,7 +377,6 @@ internal class Program
         Set("Expires", DateTime.UtcNow.AddYears(100));
         Set("Trial", false);
         Set("LicenseType", Enum.Parse(licenseTypeEnum, "User"));
-
         Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, [])));
         Set("Signature", Convert.ToBase64String((Byte[])type.GetMethod("Sign").Invoke(license, [cert])));
 
@@ -437,8 +436,11 @@ internal class Program
         Set("Trial", false);
         Set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
 		Set("LimitCollectionCreationDeletion", true); //This will be used in the new version of BitWarden but can be applied now
-		Set("AllowAdminAccessToAllCollectionItems", true); 
-	Set("UseRiskInsights", true);
+		Set("AllowAdminAccessToAllCollectionItems", true);
+		Set("UseRiskInsights", true);
+		Set("UseOrganizationDomains", true);
+		Set("UseAdminSponsoredFamilies", true);
+		Set("UseRiskInsights", true);
         Set("UseOrganizationDomains", true);
         Set("UseAdminSponsoredFamilies", true);
         Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, [])));
