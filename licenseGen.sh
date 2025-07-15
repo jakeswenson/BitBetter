@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 if [ $# -lt 1 ]; then
     echo "USAGE: <License Gen action> [License Gen args...]"

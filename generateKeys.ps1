@@ -1,3 +1,6 @@
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
+
 # get the basic openssl binary path
 $opensslbinary = "$Env:Programfiles\OpenSSL-Win64\bin\openssl.exe"
 

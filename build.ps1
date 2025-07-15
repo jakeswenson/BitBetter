@@ -1,3 +1,6 @@
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
+
 # define temporary directory
 $tempdirectory = "$pwd\temp"
 # define services to patch
@@ -30,7 +33,7 @@ Copy-Item "$pwd\.keys\cert.cert" -Destination "$pwd\src\bitBetter"
 Copy-Item "$pwd\.keys\cert.pfx" -Destination "$pwd\src\licenseGen"
 
 # build bitBetter and clean the source directory after
-docker build -t bitbetter/bitbetter "$pwd\src\bitBetter"
+docker build --no-cache -t bitbetter/bitbetter "$pwd\src\bitBetter"
 Remove-Item "$pwd\src\bitBetter\cert.cert" -Force
 
 # gather all running instances

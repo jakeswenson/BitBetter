@@ -29,7 +29,7 @@ internal class Program
 
             Console.WriteLine(embeddedResourceToRemove.Name);
 
-            EmbeddedResource embeddedResourceToAdd = new("Bit.Core.licensing.cer", cert) {Attributes = embeddedResourceToRemove.Attributes };
+            EmbeddedResource embeddedResourceToAdd = new("Bit.Core.licensing.cer", cert) { Attributes = embeddedResourceToRemove.Attributes };
             moduleDefMd.Resources.Add(embeddedResourceToAdd);
             moduleDefMd.Resources.Remove(embeddedResourceToRemove);
 
