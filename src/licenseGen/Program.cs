@@ -440,9 +440,6 @@ internal class Program
 		Set("UseRiskInsights", true);
 		Set("UseOrganizationDomains", true);
 		Set("UseAdminSponsoredFamilies", true);
-		Set("UseRiskInsights", true);
-        Set("UseOrganizationDomains", true);
-        Set("UseAdminSponsoredFamilies", true);
         Set("Hash", Convert.ToBase64String((Byte[])type.GetMethod("ComputeHash").Invoke(license, [])));
         Set("Signature", Convert.ToBase64String((Byte[])type.GetMethod("Sign").Invoke(license, [cert])));
 
