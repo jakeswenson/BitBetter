@@ -39,7 +39,7 @@ Remove-Item "$pwd\src\bitBetter\cert.cert" -Force
 # gather all running instances
 $oldinstances = docker container ps --all -f Name=bitwarden --format '{{.ID}}'
 
-# stop all running instances
+# stop and remove all running instances
 foreach ($instance in $oldinstances) {
 	docker stop $instance
 	docker rm $instance
@@ -58,10 +58,10 @@ else
 	}
 }
 
-# stop and remove previous existing patch(ed) container
-docker stop bitwarden-patch
-docker rm bitwarden-patch
-docker image rm bitwarden-patch
+# remove previous existing patch(ed) image
+if (docker image ls -q bitwarden-patch) {
+    docker image rm bitwarden-patch
+}
 
 # start a new bitwarden instance so we can patch it
 $patchinstance = docker run -d --name bitwarden-patch ghcr.io/bitwarden/self-host:beta

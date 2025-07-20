@@ -41,7 +41,7 @@ internal class Program
 
             Console.WriteLine($"New Cert Thumbprint: {certificate.Thumbprint}");
 
-            IEnumerable<TypeDef> services = moduleDefMd.Types.Where(t => t.Namespace == "Bit.Core.Services");
+            IEnumerable<TypeDef> services = moduleDefMd.Types.Where(t => t.Namespace == "Bit.Core.Billing.Services");
             TypeDef type = services.First(t => t.Name == "LicensingService");
             MethodDef constructor = type.FindConstructors().First();
             
