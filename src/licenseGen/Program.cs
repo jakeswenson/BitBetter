@@ -350,7 +350,7 @@ namespace BitwardenSelfLicensor
         {
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
-            var type = core.GetType("Bit.Core.Models.Business.UserLicense");
+            var type = core.GetType("Bit.Core.Billing.Models.Business.UserLicense");
             var licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
 
             var license = Activator.CreateInstance(type);
@@ -383,7 +383,7 @@ namespace BitwardenSelfLicensor
         {
             var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
-            var type = core.GetType("Bit.Core.Models.Business.OrganizationLicense");
+            var type = core.GetType("Bit.Core.Billing.Models.Business.OrganizationLicense");
             var licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
             var planTypeEnum = core.GetType("Bit.Core.Billing.Enums.PlanType");
 
