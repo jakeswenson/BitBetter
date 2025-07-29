@@ -40,7 +40,7 @@ rm -f "$PWD/src/bitBetter/cert.cert"
 # gather all running instances
 OLDINSTANCES=$(docker container ps --all -f Name=bitwarden --format '{{.ID}}')
 
-# stop all running instances
+# stop and remove all running instances
 for INSTANCE in ${OLDINSTANCES[@]}; do
 	docker stop $INSTANCE
 	docker rm $INSTANCE
@@ -58,10 +58,10 @@ else
 	fi
 fi
 
-# stop and remove previous existing patch(ed) container
-docker stop bitwarden-patch
-docker rm bitwarden-patch
-docker image rm bitwarden-patch
+# remove previous existing patch(ed) image
+if [ "$(docker image ls -q bitwarden-patch)" ]; then
+	docker image rm bitwarden-patch
+fi
 
 # start a new bitwarden instance so we can patch it
 PATCHINSTANCE=$(docker run -d --name bitwarden-patch ghcr.io/bitwarden/self-host:beta)
