@@ -13,3 +13,9 @@ jobs:
       - run:
           name: Build script
           command: ./build.sh y
+      - run:
+          name: Test generating user license
+          command: ./licenseGen.sh user TestName TestEmail@example.com 4a619d4a-522d-4c70-8596-affb5b607c23
+      - run:
+          name: Test generating organization license
+          command: ./licenseGen.sh org TestName TestEmail@example.com 4a619d4a-522d-4c70-8596-affb5b607c23
