@@ -393,7 +393,7 @@ internal class Program
     {
         Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
 
-        Type type = core.GetType("Bit.Core.Billing.Models.Business.OrganizationLicense");
+        Type type = core.GetType("Bit.Core.Billing.Organizations.Models.OrganizationLicense");
         Type licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
         Type planTypeEnum = core.GetType("Bit.Core.Billing.Enums.PlanType");
 
