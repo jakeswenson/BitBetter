@@ -89,8 +89,12 @@ Copy-Item "$tempdirectory\Identity\Core.dll" -Destination "$pwd\src\licenseGen"
 Remove-Item "$tempdirectory" -Recurse -Force
 
 # start all user requested instances
-foreach($line in Get-Content "$pwd\.servers\serverlist.txt") {
-	Invoke-Expression "& $line"
+if (Test-Path -Path "$pwd\.servers\serverlist.txt" -PathType Leaf) {
+	foreach($line in Get-Content "$pwd\.servers\serverlist.txt") {
+		if (!($line.StartsWith("#"))) {
+			Invoke-Expression "& $line"
+		}
+	}
 }
 
 # remove our bitBetter image

@@ -92,10 +92,14 @@ cp -f "$TEMPDIRECTORY/Identity/Core.dll" "$PWD/src/licenseGen"
 rm -rf "$TEMPDIRECTORY"
 
 # start all user requested instances
-sed -i 's/\r$//' "$PWD/.servers/serverlist.txt"
-cat "$PWD/.servers/serverlist.txt" | while read -r LINE; do
-	bash -c "$LINE"
-done
+if [ -f "$PWD/src/bitBetter/cert.cert" ]; then
+	sed -i 's/\r$//' "$PWD/.servers/serverlist.txt"
+	cat "$PWD/.servers/serverlist.txt" | while read -r LINE; do
+		if [[ $LINE == "#*" ]] ;
+			bash -c "$LINE"
+		fi
+	done
+fi
 
 # remove our bitBetter image
 docker image rm bitbetter/bitbetter
