@@ -35,7 +35,7 @@ Copy-Item "$pwd\.keys\cert.cert" -Destination "$pwd\src\bitBetter"
 docker build --no-cache -t bitbetter/bitbetter "$pwd\src\bitBetter"
 Remove-Item "$pwd\src\bitBetter\cert.cert" -Force
 
-# gather all running instances
+# gather all running instances, cannot run a wildcard filter on Ancestor= :(
 $oldinstances = docker container ps --all -f Name=bitwarden --format '{{.ID}}'
 
 # stop and remove all running instances
