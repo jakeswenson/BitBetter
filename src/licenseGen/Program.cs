@@ -185,14 +185,8 @@ internal class Program
             {
                 if (!VerifyTopOptions())
                 {
-                    if (!CoreExists())
-                    {
-                        config.Error.WriteLine($"Can't find core dll at: {coreDll.Value()}");
-                    }
-                    if (!CertExists())
-                    {
-                        config.Error.WriteLine($"Can't find certificate at: {cert.Value()}");
-                    }
+                    if (!CoreExists()) config.Error.WriteLine($"Can't find core dll at: {coreDll.Value()}");
+                    if (!CertExists()) config.Error.WriteLine($"Can't find certificate at: {cert.Value()}");
 
                     config.ShowHelp();
                     return 1;
@@ -243,14 +237,8 @@ internal class Program
             {
                 if (!VerifyTopOptions())
                 {
-                    if (!CoreExists())
-                    {
-                        config.Error.WriteLine($"Can't find core dll at: {coreDll.Value()}");
-                    }
-                    if (!CertExists())
-                    {
-                        config.Error.WriteLine($"Can't find certificate at: {cert.Value()}");
-                    }
+                    if (!CoreExists()) config.Error.WriteLine($"Can't find core dll at: {coreDll.Value()}");
+                    if (!CertExists()) config.Error.WriteLine($"Can't find certificate at: {cert.Value()}");
 
                     config.ShowHelp();
                     return 1;
