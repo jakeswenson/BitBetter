@@ -23,12 +23,7 @@ internal class Program
             ModuleDefMD moduleDefMd = ModuleDefMD.Load(file);
             Byte[] cert = File.ReadAllBytes(certFile);
 
-            EmbeddedResource embeddedResourceToRemove = moduleDefMd.Resources
-                .OfType<EmbeddedResource>()
-                .First(r => r.Name.Equals("Bit.Core.licensing.cer"));
-
-            Console.WriteLine(embeddedResourceToRemove.Name);
-
+            EmbeddedResource embeddedResourceToRemove = moduleDefMd.Resources.OfType<EmbeddedResource>().First(r => r.Name.Equals("Bit.Core.licensing.cer"));
             EmbeddedResource embeddedResourceToAdd = new("Bit.Core.licensing.cer", cert) { Attributes = embeddedResourceToRemove.Attributes };
             moduleDefMd.Resources.Add(embeddedResourceToAdd);
             moduleDefMd.Resources.Remove(embeddedResourceToRemove);
@@ -45,10 +40,7 @@ internal class Program
             TypeDef type = services.First(t => t.Name == "LicensingService");
             MethodDef constructor = type.FindConstructors().First();
             
-            Instruction instructionToPatch =
-                constructor.Body.Instructions
-                    .FirstOrDefault(i => i.OpCode == OpCodes.Ldstr
-                                         && String.Equals((String)i.Operand, existingCert.Thumbprint, StringComparison.InvariantCultureIgnoreCase));
+            Instruction instructionToPatch = constructor.Body.Instructions.FirstOrDefault(i => i.OpCode == OpCodes.Ldstr && String.Equals((String)i.Operand, existingCert.Thumbprint, StringComparison.InvariantCultureIgnoreCase));
             
             if (instructionToPatch != null)
             {
