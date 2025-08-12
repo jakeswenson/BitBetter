@@ -45,11 +45,11 @@ foreach ($instance in $oldinstances) {
 }
 
 # update bitwarden itself
-if ($args[0] -eq 'y') {
+if ($args[0] -eq 'update') {
 	docker pull ghcr.io/bitwarden/self-host:beta
 } else {
 	$confirmation = Read-Host "Update (or get) bitwarden source container (y/n)"
-	if ($confirmation -eq 'update') {
+	if ($confirmation -eq 'y') {
 		docker pull ghcr.io/bitwarden/self-host:beta
 	}
 }
