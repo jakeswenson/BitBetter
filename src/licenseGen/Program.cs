@@ -336,7 +336,7 @@ internal class Program
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private static void GenerateUserLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid userId, String key)
     {
-        Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
+        Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(corePath));
 
         Type type = core.GetType("Bit.Core.Billing.Models.Business.UserLicense");
         Type licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
@@ -387,7 +387,7 @@ internal class Program
     }
     private static void GenerateOrgLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid instalId, String businessName, String key)
     {
-        Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
+        Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(corePath));
         Type type = core.GetType("Bit.Core.Billing.Organizations.Models");
         Type licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
         Type planTypeEnum = core.GetType("Bit.Core.Billing.Enums.PlanType");
