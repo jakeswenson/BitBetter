@@ -24,6 +24,10 @@ if [ -f "$PWD/src/bitBetter/cert.cer" ]; then
     rm -f "$PWD/src/bitBetter/cert.cer"
 fi
 
+if [ -f "$PWD/.keys/cert.cert" ]; then
+    mv "$PWD/.keys/cert.cert" "$PWD/.keys/cert.cer"
+fi
+
 # generate keys if none are available
 if [ ! -d "$PWD/.keys" ]; then
 	./generateKeys.sh

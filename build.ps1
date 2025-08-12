@@ -7,7 +7,7 @@ $tempdirectory = "$pwd\temp"
 $components = "Api","Identity"
 
 # delete old directories / files if applicable
-if (Test-Path "$tempdirectory") {
+if (Test-Path "$tempdirectory" -PathType Container) {
 	Remove-Item "$tempdirectory" -Recurse -Force
 }
 
@@ -23,8 +23,13 @@ if (Test-Path -Path "$pwd\src\bitBetter\cert.cer" -PathType Leaf) {
 	Remove-Item "$pwd\src\bitBetter\cert.cer" -Force
 }
 
+if (Test-Path "$pwd\.keys\cert.cert" -PathType Leaf) {
+	Rename-Item -Path "$pwd\.keys\cert.cert" -NewName "$pwd\.keys\cert.cer"
+}
+
+
 # generate keys if none are available
-if (!(Test-Path "$pwd\.keys")) {
+if (!(Test-Path "$pwd\.keys" -PathType Container)) {
 	.\generateKeys.ps1
 }
 
