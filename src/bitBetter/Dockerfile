@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /bitBetter
 
 COPY . /bitBetter
-COPY cert.cert /app/
+COPY cert.cer /app/
 
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app --no-restore

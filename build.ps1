@@ -19,8 +19,8 @@ if (Test-Path -Path "$pwd\src\licenseGen\cert.pfx" -PathType Leaf) {
 	Remove-Item "$pwd\src\licenseGen\cert.pfx" -Force
 }
 
-if (Test-Path -Path "$pwd\src\bitBetter\cert.cert" -PathType Leaf) {
-	Remove-Item "$pwd\src\bitBetter\cert.cert" -Force
+if (Test-Path -Path "$pwd\src\bitBetter\cert.cer" -PathType Leaf) {
+	Remove-Item "$pwd\src\bitBetter\cert.cer" -Force
 }
 
 # generate keys if none are available
@@ -29,11 +29,11 @@ if (!(Test-Path "$pwd\.keys")) {
 }
 
 # copy the key to bitBetter
-Copy-Item "$pwd\.keys\cert.cert" -Destination "$pwd\src\bitBetter"
+Copy-Item "$pwd\.keys\cert.cer" -Destination "$pwd\src\bitBetter"
 
 # build bitBetter and clean the source directory after
 docker build --no-cache -t bitbetter/bitbetter "$pwd\src\bitBetter"
-Remove-Item "$pwd\src\bitBetter\cert.cert" -Force
+Remove-Item "$pwd\src\bitBetter\cert.cer" -Force
 
 # gather all running instances, cannot run a wildcard filter on Ancestor= :(
 $oldinstances = docker container ps --all -f Name=bitwarden --format '{{.ID}}'

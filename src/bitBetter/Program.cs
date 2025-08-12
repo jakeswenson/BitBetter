@@ -14,7 +14,7 @@ internal class Program
 {
     private static Int32 Main()
     {
-        const String certFile = "/app/cert.cert";
+        const String certFile = "/app/cert.cer";
         String[] files = Directory.GetFiles("/app/mount", "Core.dll", SearchOption.AllDirectories);
 
         foreach (String file in files)

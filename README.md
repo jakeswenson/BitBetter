@@ -46,8 +46,8 @@ If you wish to generate your self-signed cert & key manually, you can run the fo
 
 ```bash
 cd .keys
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cert -days 36500 -outform DER -passout pass:test
-openssl x509 -inform DER -in cert.cert -out cert.pem
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cer -days 36500 -outform DER -passout pass:test
+openssl x509 -inform DER -in cert.cer -out cert.pem
 openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:test -passout pass:test
 ```
 

@@ -20,8 +20,8 @@ if [ -f "$PWD/src/licenseGen/cert.pfx" ]; then
     rm -f "$PWD/src/licenseGen/cert.pfx"
 fi
 
-if [ -f "$PWD/src/bitBetter/cert.cert" ]; then
-    rm -f "$PWD/src/bitBetter/cert.cert"
+if [ -f "$PWD/src/bitBetter/cert.cer" ]; then
+    rm -f "$PWD/src/bitBetter/cert.cer"
 fi
 
 # generate keys if none are available
@@ -30,11 +30,11 @@ if [ ! -d "$PWD/.keys" ]; then
 fi
 
 # copy the key to bitBetter
-cp -f "$PWD/.keys/cert.cert" "$PWD/src/bitBetter"
+cp -f "$PWD/.keys/cert.cer" "$PWD/src/bitBetter"
 
 # build bitBetter and clean the source directory after
 docker build --no-cache -t bitbetter/bitbetter "$PWD/src/bitBetter"
-rm -f "$PWD/src/bitBetter/cert.cert"
+rm -f "$PWD/src/bitBetter/cert.cer"
 
 # gather all running instances, cannot run a wildcard filter on Ancestor= :(
 OLDINSTANCES=$(docker container ps --all -f Name=bitwarden --format '{{.ID}}')
@@ -98,7 +98,7 @@ docker run -v "$TEMPDIRECTORY:/app/mount" --rm bitbetter/bitbetter
 docker build . --tag bitwarden-patched --file "$PWD/src/bitBetter/Dockerfile-bitwarden-patch"
 
 # start all user requested instances
-if [ -f "$PWD/src/bitBetter/cert.cert" ]; then
+if [ -f "$PWD/src/bitBetter/cert.cer" ]; then
 	sed -i 's/\r$//' "$PWD/.servers/serverlist.txt"
 	cat "$PWD/.servers/serverlist.txt" | while read -r LINE; do
 		if [[ $LINE == "#*" ]]; then
