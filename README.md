@@ -70,7 +70,7 @@ From the BitBetter directory, simply run:
 ./build.[sh|ps1]
 ```
 
-This will create a new self-signed certificate in the `.keys` directory if one does not already exist and then create a modified version of the official `ghcr.io/bitwarden/self-host` image called `bitwarden-patch`.
+This will create a new self-signed certificate in the `.keys` directory if one does not already exist and then create a modified version of the official `ghcr.io/bitwarden/self-host` image called `bitwarden-patched`.
 
 Afterwards it will automatically generate the license generator and start all previously specified containers which are **now ready to accept self-issued licenses.**
 

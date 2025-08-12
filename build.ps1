@@ -55,12 +55,12 @@ if ($args[0] -eq 'y') {
 }
 
 # stop and remove previous existing patch(ed) container
-$oldinstances = docker container ps --all -f Ancestor=bitwarden-patch --format '{{.ID}}'
+$oldinstances = docker container ps --all -f Ancestor=bitwarden-patched --format '{{.ID}}'
 foreach ($instance in $oldinstances) {
 	docker stop $instance
 	docker rm $instance
 }
-$oldinstances = docker image ls bitwarden-patch --format '{{.ID}}'
+$oldinstances = docker image ls bitwarden-patched --format '{{.ID}}'
 foreach ($instance in $oldinstances) {
 	docker image rm $instance
 }
@@ -92,7 +92,7 @@ docker rm bitwarden-extract
 docker run -v "$tempdirectory`:/app/mount" --rm bitbetter/bitbetter
 
 # create a new image with the patched files
-docker build . --tag bitwarden-patch --file "$pwd\src\bitBetter\Dockerfile-bitwarden-patch"
+docker build . --tag bitwarden-patched --file "$pwd\src\bitBetter\Dockerfile-bitwarden-patch"
 
 # start all user requested instances
 if (Test-Path -Path "$pwd\.servers\serverlist.txt" -PathType Leaf) {

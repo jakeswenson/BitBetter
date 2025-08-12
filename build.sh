@@ -58,12 +58,12 @@ else
 fi
 
 # stop and remove previous existing patch(ed) container
-OLDINSTANCES=$(docker container ps --all -f Ancestor=bitwarden-patch --format '{{.ID}}')
+OLDINSTANCES=$(docker container ps --all -f Ancestor=bitwarden-patched --format '{{.ID}}')
 for INSTANCE in ${OLDINSTANCES[@]}; do
 	docker stop $INSTANCE
 	docker rm $INSTANCE
 done
-OLDINSTANCES=$(docker image ls bitwarden-patch --format '{{.ID}}')
+OLDINSTANCES=$(docker image ls bitwarden-patched --format '{{.ID}}')
 for INSTANCE in ${OLDINSTANCES[@]}; do
 	docker image rm $INSTANCE
 done
@@ -95,7 +95,7 @@ docker rm bitwarden-extract
 docker run -v "$TEMPDIRECTORY:/app/mount" --rm bitbetter/bitbetter
 
 # create a new image with the patched files
-docker build . --tag bitwarden-patch --file "$PWD/src/bitBetter/Dockerfile-bitwarden-patch"
+docker build . --tag bitwarden-patched --file "$PWD/src/bitBetter/Dockerfile-bitwarden-patch"
 
 # start all user requested instances
 if [ -f "$PWD/src/bitBetter/cert.cert" ]; then
