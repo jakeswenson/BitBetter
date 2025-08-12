@@ -27,7 +27,7 @@ internal class Program
             {
                 Check();
                 Console.WriteLine("Interactive license mode...");
-                
+
                 while (licenseType == "")
                 {
                     Console.WriteLine("What would you like to generate, a [u]ser license or an [o]rg license: ");
@@ -210,7 +210,7 @@ internal class Program
             CommandArgument storage = config.Argument("Storage", "extra storage space in GB. Maximum is " + Int16.MaxValue + " (optional, default = max)");
             CommandArgument businessName = config.Argument("BusinessName", "name for the organization (optional)");
             CommandArgument key = config.Argument("Key", "your key id (optional)");
-            
+
             config.OnExecute(() =>
             {
                 Check();

@@ -38,7 +38,7 @@ Remove-Item "$pwd\src\bitBetter\cert.cert" -Force
 # gather all running instances
 $oldinstances = docker container ps --all -f Name=bitwarden --format '{{.ID}}'
 
-# stop all running instances
+# stop and remove all running instances
 foreach ($instance in $oldinstances) {
 	docker stop $instance
 	docker rm $instance

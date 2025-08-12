@@ -39,7 +39,7 @@ rm -f "$PWD/src/bitBetter/cert.cert"
 # gather all running instances
 OLDINSTANCES=$(docker container ps --all -f Name=bitwarden --format '{{.ID}}')
 
-# stop all running instances
+# stop and remove all running instances
 for INSTANCE in ${OLDINSTANCES[@]}; do
 	docker stop $INSTANCE
 	docker rm $INSTANCE
