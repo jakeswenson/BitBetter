@@ -16,36 +16,16 @@ internal class Program
 
     private static Int32 Main(String[] args)
     {
-        App.HelpOption("-? | -h | --help");
-
-        if (!File.Exists(Cert.Value()))
-        {
-            App.Error.WriteLine($"Can't find certificate at: {Cert.Value()}");
-            App.ShowHelp();
-            return 1;
-        }
-        if (!File.Exists(CoreDll.Value()))
-        {
-            App.Error.WriteLine($"Can't find core dll at: {CoreDll.Value()}");
-            App.ShowHelp();
-            return 1;
-        }
-        if (Cert == null || String.IsNullOrWhiteSpace(Cert.Value()) || CoreDll == null || String.IsNullOrWhiteSpace(CoreDll.Value()))
-        {
-            App.ShowHelp();
-            return 1;
-        }
-
         App.Command("interactive", config =>
         {
             String buff, licenseType = "", name = "", email = "", businessName="";
             Int16 storage = 0;
-
             Boolean validGuid = false, validInstallid = false;
             Guid guid = Guid.Empty, installid = Guid.Empty;
 
             config.OnExecute(() =>
             {
+                Check();
                 Console.WriteLine("Interactive license mode...");
                 
                 while (licenseType == "")
@@ -188,6 +168,8 @@ internal class Program
 
             config.OnExecute(() =>
             {
+                Check();
+
                 if (String.IsNullOrWhiteSpace(name.Value) || String.IsNullOrWhiteSpace(email.Value))
                 {
                     config.Error.WriteLine($"Some arguments are missing: Name='{name.Value}' Email='{email.Value}'");
@@ -231,6 +213,8 @@ internal class Program
             
             config.OnExecute(() =>
             {
+                Check();
+
                 if (String.IsNullOrWhiteSpace(name.Value) || String.IsNullOrWhiteSpace(email.Value) || String.IsNullOrWhiteSpace(installId.Value))
                 {
                     config.Error.WriteLine($"Some arguments are missing: Name='{name.Value}' Email='{email.Value}' InstallId='{installId.Value}'");
@@ -273,12 +257,34 @@ internal class Program
 
         try
         {
+            App.HelpOption("-? | -h | --help");
             return App.Execute(args);
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            Console.Error.WriteLine("Oops: {0}", e);
+            Console.Error.WriteLine("Oops: {0}", exception);
             return 100;
+        }
+    }
+
+    private static void Check()
+    {
+        if (!File.Exists(Cert.Value()))
+        {
+            App.Error.WriteLine($"Can't find certificate at: {Cert.Value()}");
+            App.ShowHelp();
+            Environment.Exit(1);
+        }
+        if (!File.Exists(CoreDll.Value()))
+        {
+            App.Error.WriteLine($"Can't find core dll at: {CoreDll.Value()}");
+            App.ShowHelp();
+            Environment.Exit(1);
+        }
+        if (Cert == null || String.IsNullOrWhiteSpace(Cert.Value()) || CoreDll == null || String.IsNullOrWhiteSpace(CoreDll.Value()))
+        {
+            App.ShowHelp();
+            Environment.Exit(1);
         }
     }
 
@@ -384,7 +390,6 @@ internal class Program
             type.GetProperty(name)?.SetValue(license, value);
         }
     }
-
     private static void GenerateOrgLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid instalId, String businessName, String key)
     {
         Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
