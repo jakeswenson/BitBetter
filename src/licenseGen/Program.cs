@@ -39,7 +39,7 @@ internal class Program
             Int16 storage = 0;
 
             Boolean validGuid = false, validInstallid = false;
-            Guid guid = new(), installid = new();
+            Guid guid = Guid.Empty, installid = Guid.Empty;
 
             config.OnExecute(() =>
             {
@@ -64,7 +64,7 @@ internal class Program
                         licenseType = "user";
                         Console.WriteLine("Okay, we will generate a user license.");
 
-                        while (validGuid == false)
+                        while (!validGuid)
                         {
                             Console.WriteLine("Please provide the user's guid — refer to the Readme for details on how to retrieve this. [GUID]: ");
                             buff = Console.ReadLine();
@@ -78,7 +78,7 @@ internal class Program
                         licenseType = "org";
                         Console.WriteLine("Okay, we will generate an organization license.");
 
-                        while (validInstallid == false)
+                        while (!validInstallid)
                         {
                             Console.WriteLine("Please provide your Bitwarden Install-ID — refer to the Readme for details on how to retrieve this. [Install-ID]: ");
                             buff = Console.ReadLine();
