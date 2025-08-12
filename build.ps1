@@ -55,9 +55,12 @@ if ($args[0] -eq 'y') {
 }
 
 # stop and remove previous existing patch(ed) container
-docker stop bitwarden-patch
-docker rm bitwarden-patch
-docker image rm bitwarden-patch
+$oldinstances = docker container ps --all -f Name=bitwarden-patch --format '{{.ID}}'
+foreach ($instance in $oldinstances) {
+	docker stop $instance
+	docker rm $instance
+	docker image rm $instance
+}
 
 # start a new bitwarden instance so we can patch it
 $patchinstance = docker run -d --name bitwarden-patch ghcr.io/bitwarden/self-host:beta
