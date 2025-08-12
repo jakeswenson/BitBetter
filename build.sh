@@ -46,7 +46,7 @@ for INSTANCE in ${OLDINSTANCES[@]}; do
 done
 
 # update bitwarden itself
-if [ "$1" = "y" ]; then
+if [ "$1" = "update" ]; then
 	docker pull ghcr.io/bitwarden/self-host:beta
 else
 	read -p "Update (or get) bitwarden source container (y/n): " -n 1 -r

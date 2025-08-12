@@ -12,7 +12,7 @@ jobs:
           command: ./generateKeys.sh
       - run:
           name: Build script
-          command: ./build.sh
+          command: ./build.sh update
       - run:
           name: Test generating user license
           command: ./licenseGen.sh user TestName TestEmail@example.com 4a619d4a-522d-4c70-8596-affb5b607c23
