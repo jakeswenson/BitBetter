@@ -11,8 +11,8 @@ namespace licenseGen;
 internal class Program
 {
     private static readonly CommandLineApplication App = new();
-    private static readonly CommandOption Cert = App.Option("--cert", "cert file", CommandOptionType.SingleValue);
-    private static readonly CommandOption CoreDll = App.Option("--core", "path to core dll", CommandOptionType.SingleValue);
+    private static readonly CommandOption Cert = App.Option("--cert", "Certifcate file", CommandOptionType.SingleValue);
+    private static readonly CommandOption CoreDll = App.Option("--core", "Path to Core.dll", CommandOptionType.SingleValue);
 
     private static Int32 Main(String[] args)
     {
