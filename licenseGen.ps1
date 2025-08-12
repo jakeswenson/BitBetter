@@ -10,7 +10,7 @@ if ($($args.Count) -lt 1) {
 	Exit 1
 }
 
-if ($args[0] = "interactive") {
+if ($args[0] -eq "interactive") {
     docker run -it --rm bitbetter/licensegen interactive
 } else {
     docker run bitbetter/licensegen $args
