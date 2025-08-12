@@ -29,9 +29,8 @@ if [ ! -d "$PWD/.keys" ]; then
 	./generateKeys.sh
 fi
 
-# copy the key to bitBetter and licenseGen
+# copy the key to bitBetter
 cp -f "$PWD/.keys/cert.cert" "$PWD/src/bitBetter"
-cp -f "$PWD/.keys/cert.pfx" "$PWD/src/licenseGen"
 
 # build bitBetter and clean the source directory after
 docker build --no-cache -t bitbetter/bitbetter "$PWD/src/bitBetter"
@@ -85,12 +84,6 @@ docker build . --tag bitwarden-patch --file "$PWD/src/bitBetter/Dockerfile-bitwa
 docker stop bitwarden-patch
 docker rm bitwarden-patch
 
-# copy our patched library to the licenseGen source directory
-cp -f "$TEMPDIRECTORY/Identity/Core.dll" "$PWD/src/licenseGen"
-
-# remove our temporary directory
-rm -rf "$TEMPDIRECTORY"
-
 # start all user requested instances
 if [ -f "$PWD/src/bitBetter/cert.cert" ]; then
 	sed -i 's/\r$//' "$PWD/.servers/serverlist.txt"
@@ -104,9 +97,16 @@ fi
 # remove our bitBetter image
 docker image rm bitbetter/bitbetter
 
+# copy our patched library to the licenseGen source directory
+cp -f "$TEMPDIRECTORY/Identity/Core.dll" "$PWD/src/licenseGen"
+cp -f "$PWD/.keys/cert.pfx" "$PWD/src/licenseGen"
+
 # build the licenseGen
 docker build -t bitbetter/licensegen "$PWD/src/licenseGen"
 
 # clean the licenseGen source directory
 rm -f "$PWD/src/licenseGen/Core.dll"
 rm -f "$PWD/src/licenseGen/cert.pfx"
+
+# remove our temporary directory
+rm -rf "$TEMPDIRECTORY"

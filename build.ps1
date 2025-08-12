@@ -28,9 +28,8 @@ if (!(Test-Path "$pwd\.keys")) {
 	.\generateKeys.ps1
 }
 
-# copy the key to bitBetter and licenseGen
+# copy the key to bitBetter
 Copy-Item "$pwd\.keys\cert.cert" -Destination "$pwd\src\bitBetter"
-Copy-Item "$pwd\.keys\cert.pfx" -Destination "$pwd\src\licenseGen"
 
 # build bitBetter and clean the source directory after
 docker build --no-cache -t bitbetter/bitbetter "$pwd\src\bitBetter"
@@ -82,12 +81,6 @@ docker build . --tag bitwarden-patch --file "$pwd\src\bitBetter\Dockerfile-bitwa
 docker stop bitwarden-patch
 docker rm bitwarden-patch
 
-# copy our patched library to the licenseGen source directory
-Copy-Item "$tempdirectory\Identity\Core.dll" -Destination "$pwd\src\licenseGen"
-
-# remove our temporary directory
-Remove-Item "$tempdirectory" -Recurse -Force
-
 # start all user requested instances
 if (Test-Path -Path "$pwd\.servers\serverlist.txt" -PathType Leaf) {
 	foreach($line in Get-Content "$pwd\.servers\serverlist.txt") {
@@ -100,9 +93,16 @@ if (Test-Path -Path "$pwd\.servers\serverlist.txt" -PathType Leaf) {
 # remove our bitBetter image
 docker image rm bitbetter/bitbetter
 
+# copy our patched library to the licenseGen source directory
+Copy-Item "$tempdirectory\Identity\Core.dll" -Destination "$pwd\src\licenseGen"
+Copy-Item "$pwd\.keys\cert.pfx" -Destination "$pwd\src\licenseGen"
+
 # build the licenseGen
 docker build -t bitbetter/licensegen "$pwd\src\licenseGen"
 
 # clean the licenseGen source directory
 Remove-Item "$pwd\src\licenseGen\Core.dll" -Force
 Remove-Item "$pwd\src\licenseGen\cert.pfx" -Force
+
+# remove our temporary directory
+Remove-Item "$tempdirectory" -Recurse -Force
