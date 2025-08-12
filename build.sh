@@ -50,7 +50,7 @@ done
 if [ "$1" = "y" ]; then
 	docker pull ghcr.io/bitwarden/self-host:beta
 else
-	read -p "Update (or get) bitwarden source container: " -n 1 -r
+	read -p "Update (or get) bitwarden source container (y/n): " -n 1 -r
 	echo
 	if [[ $REPLY =~ ^[Yy]$ ]]
 	then
