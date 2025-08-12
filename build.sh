@@ -58,15 +58,25 @@ else
 fi
 
 # stop and remove previous existing patch(ed) container
-OLDINSTANCES=$(docker container ps --all -f Name=bitwarden-patch --format '{{.ID}}')
+OLDINSTANCES=$(docker container ps --all -f Ancestor=bitwarden-patch --format '{{.ID}}')
 for INSTANCE in ${OLDINSTANCES[@]}; do
 	docker stop $INSTANCE
 	docker rm $INSTANCE
+done
+OLDINSTANCES=$(docker image ls bitwarden-patch --format '{{.ID}}')
+for INSTANCE in ${OLDINSTANCES[@]}; do
 	docker image rm $INSTANCE
 done
 
+# remove old extract containers
+OLDINSTANCES=$(docker container ps --all -f Name=bitwarden-extract --format '{{.ID}}')
+for INSTANCE in ${OLDINSTANCES[@]}; do
+	docker stop $INSTANCE
+	docker rm $INSTANCE
+done
+
 # start a new bitwarden instance so we can patch it
-PATCHINSTANCE=$(docker run -d --name bitwarden-patch ghcr.io/bitwarden/self-host:beta)
+PATCHINSTANCE=$(docker run -d --name bitwarden-extract ghcr.io/bitwarden/self-host:beta)
 
 # create our temporary directory
 mkdir $TEMPDIRECTORY
@@ -77,15 +87,15 @@ for COMPONENT in ${COMPONENTS[@]}; do
 	docker cp $PATCHINSTANCE:/app/$COMPONENT/Core.dll "$TEMPDIRECTORY/$COMPONENT/Core.dll"
 done
 
+# stop and remove our temporary container
+docker stop bitwarden-extract
+docker rm bitwarden-extract
+
 # run bitBetter, this applies our patches to the required files
 docker run -v "$TEMPDIRECTORY:/app/mount" --rm bitbetter/bitbetter
 
 # create a new image with the patched files
 docker build . --tag bitwarden-patch --file "$PWD/src/bitBetter/Dockerfile-bitwarden-patch"
-
-# stop and remove our temporary container
-docker stop bitwarden-patch
-docker rm bitwarden-patch
 
 # start all user requested instances
 if [ -f "$PWD/src/bitBetter/cert.cert" ]; then

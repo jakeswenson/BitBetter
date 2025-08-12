@@ -49,21 +49,31 @@ if ($args[0] -eq 'y') {
 	docker pull ghcr.io/bitwarden/self-host:beta
 } else {
 	$confirmation = Read-Host "Update (or get) bitwarden source container (y/n)"
-	if ($confirmation -eq 'y') {
+	if ($confirmation -eq 'update') {
 		docker pull ghcr.io/bitwarden/self-host:beta
 	}
 }
 
 # stop and remove previous existing patch(ed) container
-$oldinstances = docker container ps --all -f Name=bitwarden-patch --format '{{.ID}}'
+$oldinstances = docker container ps --all -f Ancestor=bitwarden-patch --format '{{.ID}}'
 foreach ($instance in $oldinstances) {
 	docker stop $instance
 	docker rm $instance
+}
+$oldinstances = docker image ls bitwarden-patch --format '{{.ID}}'
+foreach ($instance in $oldinstances) {
 	docker image rm $instance
 }
 
+# remove old extract containers
+$oldinstances = docker container ps --all -f Name=bitwarden-extract --format '{{.ID}}'
+foreach ($instance in $oldinstances) {
+	docker stop $instance
+	docker rm $instance
+}
+
 # start a new bitwarden instance so we can patch it
-$patchinstance = docker run -d --name bitwarden-patch ghcr.io/bitwarden/self-host:beta
+$patchinstance = docker run -d --name bitwarden-extract ghcr.io/bitwarden/self-host:beta
 
 # create our temporary directory
 New-item -ItemType Directory -Path $tempdirectory
@@ -74,15 +84,15 @@ foreach ($component in $components) {
 	docker cp $patchinstance`:/app/$component/Core.dll "$tempdirectory\$component\Core.dll"
 }
 
+# stop and remove our temporary container
+docker stop bitwarden-extract
+docker rm bitwarden-extract
+
 # run bitBetter, this applies our patches to the required files
 docker run -v "$tempdirectory`:/app/mount" --rm bitbetter/bitbetter
 
 # create a new image with the patched files
 docker build . --tag bitwarden-patch --file "$pwd\src\bitBetter\Dockerfile-bitwarden-patch"
-
-# stop and remove our temporary container
-docker stop bitwarden-patch
-docker rm bitwarden-patch
 
 # start all user requested instances
 if (Test-Path -Path "$pwd\.servers\serverlist.txt" -PathType Leaf) {
