@@ -91,7 +91,7 @@ docker rm bitwarden-patch
 if [ -f "$PWD/src/bitBetter/cert.cert" ]; then
 	sed -i 's/\r$//' "$PWD/.servers/serverlist.txt"
 	cat "$PWD/.servers/serverlist.txt" | while read -r LINE; do
-		if [[ $LINE == "#*" ]] ;
+		if [[ $LINE == "#*" ]]; then
 			bash -c "$LINE"
 		fi
 	done
