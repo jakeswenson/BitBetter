@@ -1,11 +1,10 @@
-using McMaster.Extensions.CommandLineUtils;
 using System;
-using System.ComponentModel;
 using System.IO;
+using System.Text.Json;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Security.Cryptography.X509Certificates;
-using System.Text.Json;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace licenseGen;
 
@@ -334,7 +333,7 @@ internal class Program
         return false;
     }
 
-    private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { WriteIndented = true };
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private static void GenerateUserLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid userId, String key)
     {
         Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
@@ -384,7 +383,7 @@ internal class Program
         Set(type, license, "Hash", Convert.ToBase64String(((Byte[])computeHash.Invoke(license, []))!));
         Set(type, license, "Signature", Convert.ToBase64String((Byte[])sign.Invoke(license, [cert])!));
 
-        Console.WriteLine(JsonSerializer.Serialize(license, _jsonOptions));
+        Console.WriteLine(JsonSerializer.Serialize(license, JsonOptions));
     }
     private static void GenerateOrgLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid instalId, String businessName, String key)
     {
@@ -472,7 +471,7 @@ internal class Program
         Set(type, license, "Hash", Convert.ToBase64String((Byte[])computeHash.Invoke(license, [])!));
         Set(type, license, "Signature", Convert.ToBase64String((Byte[])sign.Invoke(license, [cert])!));
 
-        Console.WriteLine(JsonSerializer.Serialize(license, _jsonOptions));
+        Console.WriteLine(JsonSerializer.Serialize(license, JsonOptions));
     }
     private static void Set(Type type, Object license, String name, Object value)
     {
