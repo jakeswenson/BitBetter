@@ -446,26 +446,24 @@ internal class Program
         Set(type, license, "Use2fa", true);
         Set(type, license, "UseApi", true);
         Set(type, license, "UseResetPassword", true);
-        Set(type, license, "UseCustomPermissions", true);
         Set(type, license, "MaxStorageGb", storage == 0 ? Int16.MaxValue : storage);
         Set(type, license, "SelfHost", true);
-        Set(type, license, "UsersGetPremium", true);
+        Set(type, license, "UsersGetPremium", true);        
+        Set(type, license, "UseCustomPermissions", true);
+        Set(type, license, "Version", 16);
+        Set(type, license, "Issued", DateTime.UtcNow);
+        Set(type, license, "Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
+        Set(type, license, "Expires", DateTime.UtcNow.AddYears(100));
+        Set(type, license, "ExpirationWithoutGracePeriod", DateTime.UtcNow.AddYears(100));
         Set(type, license, "UsePasswordManager", true);
         Set(type, license, "UseSecretsManager", true);
         Set(type, license, "SmSeats", Int32.MaxValue);
         Set(type, license, "SmServiceAccounts", Int32.MaxValue);
-        Set(type, license, "Version", 15); //This is set to 15 to use AllowAdminAccessToAllCollectionItems can be changed to 13 to just use Secrets Manager
-        Set(type, license, "Issued", DateTime.UtcNow);
-        Set(type, license, "Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
-        Set(type, license, "Expires", DateTime.UtcNow.AddYears(100));
+        Set(type, license, "UseRiskInsights", true);
+        Set(type, license, "LimitCollectionCreationDeletion", true);
+        Set(type, license, "AllowAdminAccessToAllCollectionItems", true);
         Set(type, license, "Trial", false);
         Set(type, license, "LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
-        Set(type, license, "LimitCollectionCreationDeletion", true); //This will be used in the new version of BitWarden but can be applied now
-        Set(type, license, "AllowAdminAccessToAllCollectionItems", true);
-        Set(type, license, "UseRiskInsights", true);
-        Set(type, license, "UseOrganizationDomains", true);
-        Set(type, license, "UseAdminSponsoredFamilies", true);
-        Set(type, license, "UseRiskInsights", true);
         Set(type, license, "UseOrganizationDomains", true);
         Set(type, license, "UseAdminSponsoredFamilies", true);
         Set(type, license, "Hash", Convert.ToBase64String((Byte[])computeHash.Invoke(license, [])!));
