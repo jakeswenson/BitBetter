@@ -11,4 +11,4 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0
 WORKDIR /app
 COPY --from=build /app .
 
-ENTRYPOINT [ "/app/bitBetter" ]
+ENTRYPOINT ["dotnet", "/app/bitBetter.dll"]
