@@ -388,7 +388,7 @@ internal class Program
     private static void GenerateOrgLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid instalId, String businessName, String key)
     {
         Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(corePath));
-        Type type = core.GetType("Bit.Core.Billing.Organizations.Models");
+        Type type = core.GetType("Bit.Core.Billing.Organizations.Models.OrganizationLicense");
         Type licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
         Type planTypeEnum = core.GetType("Bit.Core.Billing.Enums.PlanType");
 
