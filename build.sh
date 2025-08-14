@@ -105,7 +105,7 @@ docker build . --tag bitwarden-patched --file "$PWD/src/bitBetter/Dockerfile-bit
 if [ -f "$PWD/.servers/serverlist.txt" ]; then
 	sed -i 's/\r$//' "$PWD/.servers/serverlist.txt"
 	cat "$PWD/.servers/serverlist.txt" | while read -r LINE; do
-		if [[ $LINE == "#*" ]]; then
+		if [[ $LINE != "#"* ]]; then
 			bash -c "$LINE"
 		fi
 	done
