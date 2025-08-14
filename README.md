@@ -120,6 +120,7 @@ Proceed to stop the new container for now.
 Copy from the old to the new bwdata directory (do not copy/overwrite identity.pfx!):
  - bwdata/core/licenses to bwdata-new/licenses
  - bwdata/core/aspnet-dataprotection to bwdata-new/data-protection
+ - bwdata/core/attachments to bwdata-new/attachments (untested for now)
 
 Export data only from the old sql server database, if needed import the .bak file to a local mssql instance.
 
