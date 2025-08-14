@@ -1,4 +1,4 @@
 # Uncomment a line below and fill in the missing values or add your own. Every line in this file will be called by build.[sh|ps1] once the patched image is built.
-# docker run -d --name bitwarden -v <full-local-path>\logs:/var/log/bitwarden -v <full-local-path>\bwdata:/etc/bitwarden -p 80:8080 --env-file <full-local-path>\settings.env bitwarden-patched
+# docker run -d --name bitwarden --restart=always -v <full-local-path>\logs:/var/log/bitwarden -v <full-local-path>\bwdata:/etc/bitwarden -p 80:8080 --env-file <full-local-path>\settings.env bitwarden-patched
 # <OR>
 # docker-compose -f <full-local-path>/docker-compose.yml up -d
