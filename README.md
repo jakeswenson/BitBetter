@@ -101,8 +101,11 @@ If you ran the build script, you can **simply run the license gen in interactive
 ## Migrating from mssql to a real database
 
 Prepare a new database and bwdata directory, download and prepare the new settings.env (https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/docker-unified/settings.env)
+
 Make sure you can get the data from either the backup file or by connecting directly to the mssql database (navicat has a trial).
+
 If required (e.g. you cannot connect to your docker mssql server directly) download Microsoft SQL Server 2022 and SQL Server Management Studio (the latter can be used to import the .bak file)
+
 After cloning this repo and modifying .servers/serverlist.txt to suit your new environment do the following:
 
 ```
@@ -111,6 +114,7 @@ docker exec -i bitwarden-mssql /backup-db.sh
 ```
 
 Run build.sh and ensure your new instance serves a webpage AND has populated the new database with the tables (should be empty now)
+
 Proceed to stop the new container for now.
 
 Copy from the old to the new bwdata directory (do not copy/overwrite identity.pfx!):
@@ -118,7 +122,9 @@ Copy from the old to the new bwdata directory (do not copy/overwrite identity.pf
  - bwdata/core/aspnet-dataprotection to bwdata-new/data-protection
 
 Export data only from the old sql server database, if needed import the .bak file to a local mssql instance.
+
 Only export tables that have rows, makes it much quicker, .json is the easiest with navicat.
+
 Import the rows to the real database, start the new docker container.
 
 ---
