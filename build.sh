@@ -102,7 +102,7 @@ docker run -v "$TEMPDIRECTORY:/app/mount" --rm bitbetter/bitbetter
 docker build . --tag bitwarden-patched --file "$PWD/src/bitBetter/Dockerfile-bitwarden-patch"
 
 # start all user requested instances
-if [ -f "$PWD/src/bitBetter/cert.cer" ]; then
+if [ -f "$PWD/.servers/serverlist.txt" ]; then
 	sed -i 's/\r$//' "$PWD/.servers/serverlist.txt"
 	cat "$PWD/.servers/serverlist.txt" | while read -r LINE; do
 		if [[ $LINE == "#*" ]]; then
