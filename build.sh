@@ -40,7 +40,7 @@ cp -f "$PWD/.keys/cert.cer" "$PWD/src/bitBetter"
 docker build --no-cache -t bitbetter/bitbetter "$PWD/src/bitBetter"
 rm -f "$PWD/src/bitBetter/cert.cer"
 
-# gather all running instances, cannot run a wildcard filter on Ancestor= :(
+# gather all running instances, cannot run a wildcard filter on Ancestor= :(, does find all where name = *bitwarden*
 OLDINSTANCES=$(docker container ps --all -f Name=bitwarden --format '{{.ID}}')
 
 # stop and remove all running instances

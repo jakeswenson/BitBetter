@@ -27,7 +27,6 @@ if (Test-Path "$pwd\.keys\cert.cert" -PathType Leaf) {
 	Rename-Item -Path "$pwd\.keys\cert.cert" -NewName "$pwd\.keys\cert.cer"
 }
 
-
 # generate keys if none are available
 if (!(Test-Path "$pwd\.keys" -PathType Container)) {
 	.\generateKeys.ps1
@@ -40,7 +39,7 @@ Copy-Item "$pwd\.keys\cert.cer" -Destination "$pwd\src\bitBetter"
 docker build --no-cache -t bitbetter/bitbetter "$pwd\src\bitBetter"
 Remove-Item "$pwd\src\bitBetter\cert.cer" -Force
 
-# gather all running instances, cannot run a wildcard filter on Ancestor= :(
+# gather all running instances, cannot run a wildcard filter on Ancestor= :(, does find all where name = *bitwarden*
 $oldinstances = docker container ps --all -f Name=bitwarden --format '{{.ID}}'
 
 # stop and remove all running instances
