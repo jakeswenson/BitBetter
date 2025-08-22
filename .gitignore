@@ -7,5 +7,5 @@ src/bitBetter/.vs/*
 *.pem
 .vscode/
 *.pfx
-*.cert
+*.cer
 *.vsidx

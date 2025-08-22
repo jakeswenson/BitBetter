@@ -15,6 +15,6 @@ fi
 mkdir "$DIR"
 
 # Generate new keys
-openssl	req -x509 -newkey rsa:4096 -keyout "$DIR/key.pem" -out "$DIR/cert.cert" -days 36500 -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US'  -outform DER -passout pass:test
-openssl x509 -inform DER -in "$DIR/cert.cert" -out "$DIR/cert.pem"
+openssl	req -x509 -newkey rsa:4096 -keyout "$DIR/key.pem" -out "$DIR/cert.cer" -days 36500 -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US'  -outform DER -passout pass:test
+openssl x509 -inform DER -in "$DIR/cert.cer" -out "$DIR/cert.pem"
 openssl pkcs12 -export -out "$DIR/cert.pfx" -inkey "$DIR/key.pem" -in "$DIR/cert.pem" -passin pass:test -passout pass:test
