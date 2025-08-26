@@ -46,8 +46,8 @@ If you wish to generate your self-signed cert & key manually, you can run the fo
 
 ```bash
 cd .keys
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cert -days 36500 -outform DER -passout pass:test
-openssl x509 -inform DER -in cert.cert -out cert.pem
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.cer -days 36500 -outform DER -passout pass:test
+openssl x509 -inform DER -in cert.cer -out cert.pem
 openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem -passin pass:test -passout pass:test
 ```
 
@@ -70,7 +70,7 @@ From the BitBetter directory, simply run:
 ./build.[sh|ps1]
 ```
 
-This will create a new self-signed certificate in the `.keys` directory if one does not already exist and then create a modified version of the official `ghcr.io/bitwarden/self-host` image called `bitwarden-patch`.
+This will create a new self-signed certificate in the `.keys` directory if one does not already exist and then create a modified version of the official `ghcr.io/bitwarden/self-host` image called `bitwarden-patched`.
 
 Afterwards it will automatically generate the license generator and start all previously specified containers which are **now ready to accept self-issued licenses.**
 
@@ -98,6 +98,36 @@ If you ran the build script, you can **simply run the license gen in interactive
 **The license generator will spit out a JSON-formatted license which can then be used within the Bitwarden web front-end to license your user or org!**
 
 
+## Migrating from mssql to a real database
+
+Prepare a new database and bwdata directory, download and prepare the new settings.env (https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/docker-unified/settings.env)
+
+Make sure you can get the data from either the backup file or by connecting directly to the mssql database (navicat has a trial).
+
+If required (e.g. you cannot connect to your docker mssql server directly) download Microsoft SQL Server 2022 and SQL Server Management Studio (the latter can be used to import the .bak file)
+
+After cloning this repo and modifying .servers/serverlist.txt to suit your new environment do the following:
+
+```
+docker exec -i bitwarden-mssql /backup-db.sh
+./bitwarden.sh stop
+```
+
+Run build.sh and ensure your new instance serves a webpage AND has populated the new database with the tables (should be empty now)
+
+Proceed to stop the new container for now.
+
+Copy from the old to the new bwdata directory (do not copy/overwrite identity.pfx!):
+ - bwdata/core/licenses to bwdata-new/licenses
+ - bwdata/core/aspnet-dataprotection to bwdata-new/data-protection
+ - bwdata/core/attachments to bwdata-new/attachments
+
+Export data only from the old sql server database, if needed import the .bak file to a local mssql instance.
+
+Only export tables that have rows, makes it much quicker, .json is the easiest with navicat.
+
+Import the rows to the real database, start the new docker container.
+
 ---
 
 # FAQ: Questions you might have.
@@ -114,6 +144,17 @@ In the past we have done so but they were not focused on the type of customer th
 
 UPDATE: Bitwarden now offers a cheap license called [Families Organization](https://bitwarden.com/pricing/) that provides premium features and the ability to self-host Bitwarden for six persons.
 
+## 2fa doesn't work
+
+Unfortunately the new BitWarden container doesn't set the timezone and ignores TZ= from the environment, can be fixed by:
+
+```
+docker exec bitwarden ln -s /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
+```
+
+## Changes in settings.env
+
+Require a recreation of the docker container, build.sh will suffice too.
 
 # Footnotes
 
