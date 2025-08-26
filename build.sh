@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# detect buildx, set -e will ensure the script stops execution if not found
+docker buildx version
+
 # define temporary directory
 TEMPDIRECTORY="$PWD/temp"
 

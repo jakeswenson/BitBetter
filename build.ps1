@@ -1,6 +1,9 @@
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
+# detect buildx, ErrorActionPreference will ensure the script stops execution if not found
+docker buildx version
+
 # define temporary directory
 $tempdirectory = "$pwd\temp"
 # define services to patch
