@@ -269,20 +269,27 @@ internal class Program
 
     private static void Check()
     {
-        if (!File.Exists(Cert.Value()))
+        if (Cert == null || String.IsNullOrWhiteSpace(Cert.Value()))
+        {
+            App.Error.WriteLine("No certificate specified");
+            App.ShowHelp();
+            Environment.Exit(1);
+        }
+        else if (CoreDll == null || String.IsNullOrWhiteSpace(CoreDll.Value()))
+        {
+            App.Error.WriteLine("No core dll specified");
+            App.ShowHelp();
+            Environment.Exit(1);
+        }
+        else if (!File.Exists(Cert.Value()))
         {
             App.Error.WriteLine($"Can't find certificate at: {Cert.Value()}");
             App.ShowHelp();
             Environment.Exit(1);
         }
-        if (!File.Exists(CoreDll.Value()))
+        else if (!File.Exists(CoreDll.Value()))
         {
             App.Error.WriteLine($"Can't find core dll at: {CoreDll.Value()}");
-            App.ShowHelp();
-            Environment.Exit(1);
-        }
-        if (Cert == null || String.IsNullOrWhiteSpace(Cert.Value()) || CoreDll == null || String.IsNullOrWhiteSpace(CoreDll.Value()))
-        {
             App.ShowHelp();
             Environment.Exit(1);
         }
