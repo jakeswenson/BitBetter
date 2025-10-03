@@ -6,6 +6,25 @@ BW_VERSION=$(curl -sL https://go.btwrdn.co/bw-sh-versions | grep '^ *"'coreVersi
 
 echo "Building BitBetter for BitWarden version $BW_VERSION"
 
+# Enable BuildKit for better build experience and to ensure platform args are populated
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
+# Determine host architecture to use as default BUILDPLATFORM / TARGETPLATFORM if not supplied.
+# Allow override via environment variables when invoking the script.
+HOST_UNAME_ARCH=$(uname -m 2>/dev/null || echo unknown)
+case "$HOST_UNAME_ARCH" in
+	x86_64|amd64)   DEFAULT_ARCH=amd64 ;;
+	aarch64|arm64)  DEFAULT_ARCH=arm64 ;;
+	armv7l|armv7)   DEFAULT_ARCH=arm/v7 ;;
+	*)              DEFAULT_ARCH=amd64 ;;
+esac
+
+: "${BUILDPLATFORM:=linux/${DEFAULT_ARCH}}"
+: "${TARGETPLATFORM:=linux/${DEFAULT_ARCH}}"
+
+echo "Using BUILDPLATFORM=$BUILDPLATFORM TARGETPLATFORM=$TARGETPLATFORM"
+
 # If there aren't any keys, generate them first.
 [ -e "$DIR/.keys/cert.cert" ] || "$DIR/.keys/generate-keys.sh"
 
@@ -17,10 +36,27 @@ git clone --branch "v${BW_VERSION}" --depth 1 https://github.com/bitwarden/serve
 old_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in $DIR/server/src/Core/licensing.cer | cut -d= -f2 | tr -d ':')
 new_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in $DIR/.keys/cert.cert | cut -d= -f2 | tr -d ':')
 sed -i -e "s/$old_thumbprint/$new_thumbprint/g" $DIR/server/src/Core/Billing/Services/Implementations/LicensingService.cs
-cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cer
+cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cerb
 
-docker build --no-cache --label com.bitwarden.product="bitbetter" $DIR/server -f $DIR/server/src/Api/Dockerfile -t bitbetter/api
-docker build --no-cache --label com.bitwarden.product="bitbetter" $DIR/server -f $DIR/server/src/Identity/Dockerfile -t bitbetter/identity
+docker build \
+	--no-cache \
+	--platform "$BUILDPLATFORM" \
+	--build-arg BUILDPLATFORM="$BUILDPLATFORM" \
+	--build-arg TARGETPLATFORM="$TARGETPLATFORM" \
+	--label com.bitwarden.product="bitbetter" \
+	-f $DIR/server/src/Api/Dockerfile \
+	-t bitbetter/api \
+	$DIR/server
+
+docker build \
+	--no-cache \
+	--platform "$BUILDPLATFORM" \
+	--build-arg BUILDPLATFORM="$BUILDPLATFORM" \
+	--build-arg TARGETPLATFORM="$TARGETPLATFORM" \
+	--label com.bitwarden.product="bitbetter" \
+	-f $DIR/server/src/Identity/Dockerfile \
+	-t bitbetter/identity \
+	$DIR/server
 
 docker tag bitbetter/api bitbetter/api:latest
 docker tag bitbetter/identity bitbetter/identity:latest
