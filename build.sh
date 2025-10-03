@@ -40,7 +40,7 @@ cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cer
 
 docker build \
 	--no-cache \
-	--platform "$BUILDPLATFORM" \
+	--platform "$TARGETPLATFORM" \
 	--build-arg BUILDPLATFORM="$BUILDPLATFORM" \
 	--build-arg TARGETPLATFORM="$TARGETPLATFORM" \
 	--label com.bitwarden.product="bitbetter" \
@@ -50,7 +50,7 @@ docker build \
 
 docker build \
 	--no-cache \
-	--platform "$BUILDPLATFORM" \
+	--platform "$TARGETPLATFORM" \
 	--build-arg BUILDPLATFORM="$BUILDPLATFORM" \
 	--build-arg TARGETPLATFORM="$TARGETPLATFORM" \
 	--label com.bitwarden.product="bitbetter" \
