@@ -36,7 +36,7 @@ git clone --branch "v${BW_VERSION}" --depth 1 https://github.com/bitwarden/serve
 old_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in $DIR/server/src/Core/licensing.cer | cut -d= -f2 | tr -d ':')
 new_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in $DIR/.keys/cert.cert | cut -d= -f2 | tr -d ':')
 sed -i -e "s/$old_thumbprint/$new_thumbprint/g" $DIR/server/src/Core/Billing/Services/Implementations/LicensingService.cs
-cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cerb
+cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cer
 
 docker build \
 	--no-cache \
