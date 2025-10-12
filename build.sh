@@ -14,10 +14,10 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 # Allow override via environment variables when invoking the script.
 HOST_UNAME_ARCH=$(uname -m 2>/dev/null || echo unknown)
 case "$HOST_UNAME_ARCH" in
-	x86_64|amd64)   DEFAULT_ARCH=amd64 ;;
-	aarch64|arm64)  DEFAULT_ARCH=arm64 ;;
-	armv7l|armv7)   DEFAULT_ARCH=arm/v7 ;;
-	*)              DEFAULT_ARCH=amd64 ;;
+    x86_64|amd64)   DEFAULT_ARCH=amd64 ;;
+    aarch64|arm64)  DEFAULT_ARCH=arm64 ;;
+    armv7l|armv7)   DEFAULT_ARCH=arm/v7 ;;
+    *)              DEFAULT_ARCH=amd64 ;;
 esac
 
 : "${BUILDPLATFORM:=linux/${DEFAULT_ARCH}}"
