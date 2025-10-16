@@ -4,6 +4,10 @@ set -e
 # detect buildx, set -e will ensure the script stops execution if not found
 docker buildx version
 
+# Enable BuildKit for better build experience and to ensure platform args are populated
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
 # define temporary directory
 TEMPDIRECTORY="$PWD/temp"
 

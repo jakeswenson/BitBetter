@@ -4,6 +4,10 @@ $PSNativeCommandUseErrorActionPreference = $true
 # detect buildx, ErrorActionPreference will ensure the script stops execution if not found
 docker buildx version
 
+# Enable BuildKit for better build experience and to ensure platform args are populated
+$env:DOCKER_BUILDKIT=1
+$env:COMPOSE_DOCKER_CLI_BUILD=1
+
 # define temporary directory
 $tempdirectory = "$pwd\temp"
 # define services to patch
