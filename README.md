@@ -63,14 +63,14 @@ The scripts supports running and patching multi instances.
 Edit the .servers/serverlist.txt file and fill in the missing values, they can be replaced with existing installation values.
 This file may be empty, but there will be no containers will be spun up automatically.
 
-Now it is time to **run the main build script** to generate a modified version of the `ghcr.io/bitwarden/self-host` docker image and the license generator.
+Now it is time to **run the main build script** to generate a modified version of the `ghcr.io/bitwarden/lite` docker image and the license generator.
 
 From the BitBetter directory, simply run:
 ```
 ./build.[sh|ps1]
 ```
 
-This will create a new self-signed certificate in the `.keys` directory if one does not already exist and then create a modified version of the official `ghcr.io/bitwarden/self-host` image called `bitwarden-patched`.
+This will create a new self-signed certificate in the `.keys` directory if one does not already exist and then create a modified version of the official `ghcr.io/bitwarden/lite` image called `bitwarden-patched`.
 
 Afterwards it will automatically generate the license generator and start all previously specified containers which are **now ready to accept self-issued licenses.**
 
@@ -100,7 +100,7 @@ If you ran the build script, you can **simply run the license gen in interactive
 
 ## Migrating from mssql to a real database
 
-Prepare a new database and bwdata directory, download and prepare the new settings.env (https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/docker-unified/settings.env)
+Prepare a new database and bwdata directory, download and prepare the new settings.env (https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/bitwarden-lite/settings.env)
 
 Make sure you can get the data from either the backup file or by connecting directly to the mssql database (navicat has a trial).
 
