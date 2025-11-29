@@ -1,3 +1,3 @@
-FROM ghcr.io/bitwarden/self-host:beta
+FROM ghcr.io/bitwarden/lite:beta
 
 COPY ./temp/ /app/

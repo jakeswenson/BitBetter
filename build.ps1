@@ -53,11 +53,11 @@ foreach ($instance in $oldinstances) {
 
 # update bitwarden itself
 if ($args[0] -eq 'update') {
-	docker pull ghcr.io/bitwarden/self-host:beta
+	docker pull ghcr.io/bitwarden/lite:beta
 } else {
 	$confirmation = Read-Host "Update (or get) bitwarden source container (y/n)"
 	if ($confirmation -eq 'y') {
-		docker pull ghcr.io/bitwarden/self-host:beta
+		docker pull ghcr.io/bitwarden/lite:beta
 	}
 }
 
@@ -80,7 +80,7 @@ foreach ($instance in $oldinstances) {
 }
 
 # start a new bitwarden instance so we can patch it
-$patchinstance = docker run -d --name bitwarden-extract ghcr.io/bitwarden/self-host:beta
+$patchinstance = docker run -d --name bitwarden-extract ghcr.io/bitwarden/lite:beta
 
 # create our temporary directory
 New-item -ItemType Directory -Path $tempdirectory
