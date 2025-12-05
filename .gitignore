@@ -9,3 +9,4 @@ src/bitBetter/.vs/*
 *.pfx
 *.cer
 *.vsidx
+.DS_Store
