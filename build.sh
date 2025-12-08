@@ -54,11 +54,11 @@ done
 
 # update bitwarden itself
 if [ "$1" = "update" ]; then
-	docker pull ghcr.io/bitwarden/lite:beta
+	docker pull ghcr.io/bitwarden/lite:latest
 else
 	read -p "Update (or get) bitwarden source container (y/n): "
 	if [[ $REPLY =~ ^[Yy]$ ]]; then
-		docker pull ghcr.io/bitwarden/lite:beta
+		docker pull ghcr.io/bitwarden/lite:latest
 	fi
 fi
 
@@ -81,7 +81,7 @@ for INSTANCE in ${OLDINSTANCES[@]}; do
 done
 
 # start a new bitwarden instance so we can patch it
-PATCHINSTANCE=$(docker run -d --name bitwarden-extract ghcr.io/bitwarden/lite:beta)
+PATCHINSTANCE=$(docker run -d --name bitwarden-extract ghcr.io/bitwarden/lite:latest)
 
 # create our temporary directory
 mkdir $TEMPDIRECTORY
