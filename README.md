@@ -39,7 +39,7 @@ Aside from docker, which you also need for Bitwarden, BitBetter requires the fol
 With your dependencies installed, begin the installation of BitBetter by downloading it through Github or using the git command:
 
 ```
-git clone https://github.com/jakeswenson/BitBetter.git
+git clone https://github.com/jakeswenson/BitBetter.git -b lite
 ```
 
 ### Optional: Manually generating Certificate & Key
