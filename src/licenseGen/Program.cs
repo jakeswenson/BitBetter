@@ -467,8 +467,6 @@ internal class Program
 		Set(type, license, "SmSeats", Int32.MaxValue);
 		Set(type, license, "SmServiceAccounts", Int32.MaxValue);
 		Set(type, license, "UseRiskInsights", true);
-		Set(type, license, "LimitCollectionCreationDeletion", true);
-		Set(type, license, "AllowAdminAccessToAllCollectionItems", true);
 		Set(type, license, "Trial", false);
 		Set(type, license, "LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
 		Set(type, license, "UseOrganizationDomains", true);
