@@ -473,6 +473,7 @@ internal class Program
 		Set(type, license, "LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
 		Set(type, license, "UseOrganizationDomains", true);
 		Set(type, license, "UseAdminSponsoredFamilies", true);
+		Set(type, license, "UsePhishingBlocker", true);
 		Set(type, license, "Hash", Convert.ToBase64String((Byte[])computeHash.Invoke(license, [])!));
 		Set(type, license, "Signature", Convert.ToBase64String((Byte[])sign.Invoke(license, [cert])!));
 
