@@ -92,7 +92,7 @@ New-item -ItemType Directory -Path $tempdirectory
 # extract the files that need to be patched from the services that need to be patched into our temporary directory
 foreach ($component in $components) {
 	New-item -itemtype Directory -path "$tempdirectory\$component"
-	docker cp $patchinstance`:/app/$component/Core.dll "$tempdirectory\$component\Core.dll"
+	docker cp $patchinstance`:/app/$component/$component "$tempdirectory\$component\$component"
 }
 
 # stop and remove our temporary container

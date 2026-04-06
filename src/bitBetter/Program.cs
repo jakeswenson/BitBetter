@@ -19,6 +19,8 @@ internal class Program
 
 		foreach (String file in files)
 		{
+			if (Path.HasExtension(file)) continue;
+
 			Console.WriteLine(file);
 			ModuleDefMD moduleDefMd = ModuleDefMD.Load(file);
 			Byte[] cert = File.ReadAllBytes(certFile);
