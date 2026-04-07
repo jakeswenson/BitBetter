@@ -104,7 +104,17 @@ docker rm bitwarden-extract
 docker run -v "$TEMPDIRECTORY:/app/mount" --rm bitbetter/bitbetter
 
 # create a new image with the patched files
-docker build . --tag bitwarden-patched --file "$PWD/src/bitBetter/Dockerfile-bitwarden-patch"
+if [ -f "$PWD/Dockerfile-bitwarden-patch" ]; then
+	rm -f "$PWD/Dockerfile-bitwarden-patch"
+fi
+echo "FROM ghcr.io/bitwarden/lite:latest" >> "$PWD/Dockerfile-bitwarden-patch"
+for COMPONENT in ${COMPONENTS[@]}; do
+	echo "" >> "$PWD/Dockerfile-bitwarden-patch"
+	echo "RUN rm -f /app/$COMPONENT/$COMPONENT" >> "$PWD/Dockerfile-bitwarden-patch"
+	echo "COPY ./temp/$COMPONENT/ /app/$COMPONENT/" >> "$PWD/Dockerfile-bitwarden-patch"
+done
+
+docker build . --tag bitwarden-patched --file "$PWD/Dockerfile-bitwarden-patch"
 
 # start all user requested instances
 if [ -f "$PWD/.servers/serverlist.txt" ]; then

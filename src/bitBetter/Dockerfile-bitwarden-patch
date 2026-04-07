@@ -1,3 +1,0 @@
-FROM ghcr.io/bitwarden/lite:latest
-
-COPY ./temp/ /app/
