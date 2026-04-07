@@ -113,6 +113,7 @@ foreach ($component in $components) {
 }
 [System.IO.File]::WriteAllLines("$pwd\Dockerfile-bitwarden-patch", $dockerFile)
 docker build . --tag bitwarden-patched --file "$pwd\Dockerfile-bitwarden-patch"
+Remove-Item "$pwd\Dockerfile-bitwarden-patch" -Force
 
 # start all user requested instances
 if (Test-Path -Path "$pwd\.servers\serverlist.txt" -PathType Leaf) {
