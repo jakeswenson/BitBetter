@@ -93,7 +93,7 @@ mkdir $TEMPDIRECTORY
 # extract the files that need to be patched from the services that need to be patched into our temporary directory
 for COMPONENT in ${COMPONENTS[@]}; do
 	mkdir "$TEMPDIRECTORY/$COMPONENT"
-	docker cp $PATCHINSTANCE:/app/$COMPONENT/Core.dll "$TEMPDIRECTORY/$COMPONENT/Core.dll"
+	docker cp $PATCHINSTANCE:/app/$COMPONENT/$COMPONENT "$TEMPDIRECTORY/$COMPONENT/$COMPONENT"
 done
 
 # stop and remove our temporary container
