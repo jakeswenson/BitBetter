@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.Writer;
@@ -16,23 +17,36 @@ internal class Program
 	private static Int32 Main()
 	{
 		const String certFile = "/app/cert.cer";
-        String[] singleFiles = Directory.GetFiles("/app/mount", "*", SearchOption.AllDirectories);
-		
-        foreach (String singleFile in singleFiles)
+
+		foreach (String iniFile in Directory.GetFiles("/app/mount/", "*.ini", SearchOption.TopDirectoryOnly))
+		{
+			Console.WriteLine("Patching: " + iniFile);
+
+			String[] lines = File.ReadAllLines(iniFile);
+			for (Int32 i = 0; i < lines.Length; i++)
+			{
+				String line = lines[i];
+				if (!line.StartsWith("command=", StringComparison.Ordinal)) continue;
+
+				lines[i] = "command=/usr/bin/dotnet " + line[(line.LastIndexOf('/') + 1)..] + ".dll";
+				break;
+			}
+			File.WriteAllText(iniFile, String.Join("\n", lines), new UTF8Encoding(false));
+		}
+
+		foreach (String singleFile in Directory.GetFiles("/app/mount/", "*", SearchOption.AllDirectories))
 		{
 			if (Path.HasExtension(singleFile)) continue;
 
 			Console.WriteLine("Extracting: " + singleFile);
 
-            String newCoreDll = Path.Combine(Path.GetDirectoryName(singleFile), "Core.dll");
 			ExecutableReader reader1 = new(singleFile);
-			foreach (FileEntry bundleFile in reader1.Bundle.Files)
-			{
-				if (!String.Equals(bundleFile.RelativePath, "Core.dll", StringComparison.Ordinal)) continue;
+			String currentDirectory = Path.GetDirectoryName(singleFile);
+			String newCoreDll = Path.Combine(currentDirectory, "Core.dll");
+			reader1.ExtractToDirectory(currentDirectory);
+			reader1.Dispose();
 
-				bundleFile.ExtractToFile(newCoreDll);
-				break;
-			}
+			File.Delete(singleFile);
 
 			if (!File.Exists(newCoreDll))
 			{

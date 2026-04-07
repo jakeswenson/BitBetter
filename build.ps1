@@ -93,6 +93,7 @@ New-item -ItemType Directory -Path $tempdirectory
 foreach ($component in $components) {
 	New-item -itemtype Directory -path "$tempdirectory\$component"
 	docker cp $patchinstance`:/app/$component/$component "$tempdirectory\$component\$component"
+	docker cp $patchinstance`:/etc/supervisor.d/$($component.ToLower()).ini "$tempdirectory\$($component.ToLower()).ini"
 }
 
 # stop and remove our temporary container
@@ -109,6 +110,7 @@ if (Test-Path -Path "$pwd\Dockerfile-bitwarden-patch" -PathType Leaf) {
 $dockerFile = "FROM ghcr.io/bitwarden/lite:latest"
 foreach ($component in $components) {
 	$dockerFile = -join($dockerFile, "`n`nCOPY ./temp/$component/ /app/$component/")
+	$dockerFile = -join($dockerFile, "`nCOPY ./temp/$($component.ToLower()).ini /etc/supervisor.d/$($component.ToLower()).ini")
 	$dockerFile = -join($dockerFile, "`nRUN rm -f /app/$component/$component")
 }
 [System.IO.File]::WriteAllLines("$pwd\Dockerfile-bitwarden-patch", $dockerFile)

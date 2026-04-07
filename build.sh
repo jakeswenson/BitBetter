@@ -94,6 +94,7 @@ mkdir $TEMPDIRECTORY
 for COMPONENT in ${COMPONENTS[@]}; do
 	mkdir "$TEMPDIRECTORY/$COMPONENT"
 	docker cp $PATCHINSTANCE:/app/$COMPONENT/$COMPONENT "$TEMPDIRECTORY/$COMPONENT/$COMPONENT"
+	docker cp $PATCHINSTANCE:/etc/supervisor.d/${COMPONENT,,}.ini "$TEMPDIRECTORY/${COMPONENT,,}.ini"
 done
 
 # stop and remove our temporary container
@@ -111,6 +112,7 @@ echo "FROM ghcr.io/bitwarden/lite:latest" >> "$PWD/Dockerfile-bitwarden-patch"
 for COMPONENT in ${COMPONENTS[@]}; do
 	echo "" >> "$PWD/Dockerfile-bitwarden-patch"
 	echo "RUN rm -f /app/$COMPONENT/$COMPONENT" >> "$PWD/Dockerfile-bitwarden-patch"
+	echo "COPY ./temp/${COMPONENT,,}.ini /etc/supervisor.d/${COMPONENT,,}.ini" >> "$PWD/Dockerfile-bitwarden-patch"
 	echo "COPY ./temp/$COMPONENT/ /app/$COMPONENT/" >> "$PWD/Dockerfile-bitwarden-patch"
 done
 docker build . --tag bitwarden-patched --file "$PWD/Dockerfile-bitwarden-patch"
