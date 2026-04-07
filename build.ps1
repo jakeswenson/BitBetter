@@ -94,6 +94,7 @@ foreach ($component in $components) {
 	New-item -itemtype Directory -path "$tempdirectory\$component"
 	docker cp $patchinstance`:/app/$component/$component "$tempdirectory\$component\$component"
 	docker cp $patchinstance`:/etc/supervisor.d/$($component.ToLower()).ini "$tempdirectory\$($component.ToLower()).ini"
+	Copy-Item "$pwd\src\bitBetter/runtimeconfig.json" "$tempdirectory/$component/$component.runtimeconfig.json"
 }
 
 # stop and remove our temporary container

@@ -95,6 +95,7 @@ for COMPONENT in ${COMPONENTS[@]}; do
 	mkdir "$TEMPDIRECTORY/$COMPONENT"
 	docker cp $PATCHINSTANCE:/app/$COMPONENT/$COMPONENT "$TEMPDIRECTORY/$COMPONENT/$COMPONENT"
 	docker cp $PATCHINSTANCE:/etc/supervisor.d/${COMPONENT,,}.ini "$TEMPDIRECTORY/${COMPONENT,,}.ini"
+	cp "$PWD/src/bitBetter/runtimeconfig.json" "$TEMPDIRECTORY/$COMPONENT/$COMPONENT.runtimeconfig.json"
 done
 
 # stop and remove our temporary container
