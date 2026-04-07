@@ -113,9 +113,8 @@ for COMPONENT in ${COMPONENTS[@]}; do
 	echo "RUN rm -f /app/$COMPONENT/$COMPONENT" >> "$PWD/Dockerfile-bitwarden-patch"
 	echo "COPY ./temp/$COMPONENT/ /app/$COMPONENT/" >> "$PWD/Dockerfile-bitwarden-patch"
 done
-rm -f "$PWD/Dockerfile-bitwarden-patch"
-
 docker build . --tag bitwarden-patched --file "$PWD/Dockerfile-bitwarden-patch"
+rm -f "$PWD/Dockerfile-bitwarden-patch"
 
 # start all user requested instances
 if [ -f "$PWD/.servers/serverlist.txt" ]; then
