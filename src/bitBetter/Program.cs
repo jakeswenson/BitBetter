@@ -8,7 +8,7 @@ using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using SingleFileExtractor.Core;
 
-namespace bitwardenSelfLicensor
+namespace BitwardenSelfLicensor
 {
     class Program
     {
@@ -20,22 +20,30 @@ namespace bitwardenSelfLicensor
             string coreDllPath;
             string extractDir = Path.GetDirectoryName(Path.GetFullPath(inputPath));
 
-            try
+            if (string.Equals(Path.GetExtension(inputPath), ".dll", StringComparison.OrdinalIgnoreCase))
             {
-                var reader = new ExecutableReader(inputPath);
-                reader.ExtractToDirectory(extractDir);
-                Console.WriteLine($"Extracted bundle to {extractDir}");
-                coreDllPath = Path.Combine(extractDir, "Core.dll");
-
-                // The extracted runtimeconfig.json is in self-contained format (no "framework" key).
-                // Running "dotnet App.dll" requires framework-dependent format; without it .NET looks
-                // for libhostpolicy.so in the app dir (which isn't there) and crashes.
-                FixRuntimeConfig(extractDir, Path.GetFileNameWithoutExtension(inputPath));
-            }
-            catch
-            {
-                // Not a single-file bundle — treat inputPath as a direct Core.dll path
+                // Input is already a direct Core.dll path — skip bundle extraction
                 coreDllPath = inputPath;
+            }
+            else
+            {
+                try
+                {
+                    var reader = new ExecutableReader(inputPath);
+                    reader.ExtractToDirectory(extractDir);
+                    Console.WriteLine($"Extracted bundle to {extractDir}");
+                    coreDllPath = Path.Combine(extractDir, "Core.dll");
+
+                    // The extracted runtimeconfig.json is in self-contained format (no "framework" key).
+                    // Running "dotnet App.dll" requires framework-dependent format; without it .NET looks
+                    // for libhostpolicy.so in the app dir (which isn't there) and crashes.
+                    FixRuntimeConfig(extractDir, Path.GetFileNameWithoutExtension(inputPath));
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"ERROR: Failed to extract single-file bundle '{inputPath}': {ex.Message}");
+                    return 1;
+                }
             }
 
             Console.WriteLine($"Patching: {coreDllPath}");
@@ -46,7 +54,13 @@ namespace bitwardenSelfLicensor
             // Replace embedded certificate resource
             var existingRes = module.Resources
                 .OfType<EmbeddedResource>()
-                .First(r => r.Name == "Bit.Core.licensing.cer");
+                .FirstOrDefault(r => r.Name == "Bit.Core.licensing.cer");
+
+            if (existingRes == null)
+            {
+                Console.Error.WriteLine("ERROR: Embedded resource 'Bit.Core.licensing.cer' not found in Core.dll");
+                return 1;
+            }
 
             Console.WriteLine($"Found resource: {existingRes.Name}");
             module.Resources.Add(new EmbeddedResource("Bit.Core.licensing.cer", existingRes.Attributes, certBytes));
@@ -105,16 +119,26 @@ namespace bitwardenSelfLicensor
             var root = JsonNode.Parse(File.ReadAllText(path))!;
             var opts = root["runtimeOptions"]!.AsObject();
 
+            // Derive framework name/version from the self-contained includedFrameworks before removing it
+            string fwName    = "Microsoft.AspNetCore.App";
+            string fwVersion = "8.0.0";
+            if (opts["includedFrameworks"] is JsonArray included && included.Count > 0)
+            {
+                var first = included[0]!.AsObject();
+                fwName    = first["name"]?.GetValue<string>()    ?? fwName;
+                fwVersion = first["version"]?.GetValue<string>() ?? fwVersion;
+            }
+
             // Remove self-contained markers
             opts.Remove("includedFrameworks");
 
-            // Add framework-dependent reference (rollForward ensures compatibility across 8.x patches)
+            // Add framework-dependent reference (LatestPatch allows compatibility across patch releases only)
             opts["framework"] = new JsonObject
             {
-                ["name"]    = "Microsoft.AspNetCore.App",
-                ["version"] = "8.0.0"
+                ["name"]    = fwName,
+                ["version"] = fwVersion
             };
-            opts["rollForward"] = "LatestMinor";
+            opts["rollForward"] = "LatestPatch";
 
             File.WriteAllText(path, root.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
             Console.WriteLine($"Fixed runtimeconfig: {path}");

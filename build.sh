@@ -63,7 +63,7 @@ if [ "${BITBETTER_BUILD_FROM_SOURCE:-0}" = "1" ]; then
 else
 	echo "--- Fast patch mode ---"
 
-	[ -e "$DIR/src/bitBetter/.keys" ] || mkdir "$DIR/src/bitBetter/.keys"
+	mkdir -p "$DIR/src/bitBetter/.keys"
 	cp "$DIR/.keys/cert.cert" "$DIR/src/bitBetter/.keys/cert.cert"
 
 	# Build the patcher tool inside the SDK container
@@ -74,6 +74,7 @@ else
 
 	docker build \
 		--no-cache \
+		--platform "$TARGETPLATFORM" \
 		--label com.bitwarden.product="bitbetter" \
 		--build-arg BITWARDEN_TAG="ghcr.io/bitwarden/api:$BW_VERSION" \
 		-t bitbetter/api \
@@ -81,6 +82,7 @@ else
 
 	docker build \
 		--no-cache \
+		--platform "$TARGETPLATFORM" \
 		--label com.bitwarden.product="bitbetter" \
 		--build-arg BITWARDEN_TAG="ghcr.io/bitwarden/identity:$BW_VERSION" \
 		-t bitbetter/identity \
