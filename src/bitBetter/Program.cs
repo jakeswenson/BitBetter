@@ -28,7 +28,7 @@ internal class Program
 				String line = lines[i];
 				if (!line.StartsWith("command=", StringComparison.Ordinal)) continue;
 
-				lines[i] = "command=/usr/bin/dotnet \"" + line[(line.LastIndexOf('/') + 1)..] + ".dll\"";
+				lines[i] = "command=/usr/bin/dotnet \"" + line[(line.LastIndexOf('=') + 1)..] + ".dll\"";
 				break;
 			}
 			File.WriteAllText(iniFile, String.Join("\n", lines), new UTF8Encoding(false));
