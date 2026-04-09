@@ -75,7 +75,7 @@ internal class Program
 			TypeDef type = services.First(t => t.Name == "LicensingService");
 			MethodDef constructor = type.FindConstructors().First();
 			
-			Instruction instructionToPatch = constructor.Body.Instructions.FirstOrDefault(i => i.OpCode == OpCodes.Ldstr && String.Equals((String)i.Operand, existingCert.Thumbprint, StringComparison.InvariantCultureIgnoreCase));
+			Instruction instructionToPatch = constructor.Body.Instructions.FirstOrDefault(i => i.OpCode == OpCodes.Ldstr && ((String)i.Operand).Contains(existingCert.Thumbprint, StringComparison.InvariantCultureIgnoreCase));
 			
 			if (instructionToPatch != null)
 			{
