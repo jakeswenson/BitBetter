@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -66,25 +65,37 @@ internal class Program
 			DataReader reader = embeddedResourceToRemove.CreateReader();
 			X509Certificate2 existingCert = new(reader.ReadRemainingBytes());
 			
-			Console.WriteLine($"Existing Cert Thumbprint: {existingCert.Thumbprint}");
+			Console.WriteLine($"Existing certificate Thumbprint: {existingCert.Thumbprint}");
 			X509Certificate2 certificate = new(cert);
 
-			Console.WriteLine($"New Cert Thumbprint: {certificate.Thumbprint}");
+			Console.WriteLine($"New certificate Thumbprint: {certificate.Thumbprint}");
 
-			IEnumerable<TypeDef> services = moduleDefMd.Types.Where(t => t.Namespace == "Bit.Core.Billing.Services");
-			TypeDef type = services.First(t => t.Name == "LicensingService");
+			TypeDef type = moduleDefMd.Types.FirstOrDefault(t => String.Equals(t.Name, "LicensingService", StringComparison.OrdinalIgnoreCase));
+
+			if (type == null)
+			{
+				Console.Error.WriteLine("ERROR: LicensingService class not found");
+				return -1;
+			}
+			Console.WriteLine($"Found: {type.FullName}");
+
 			MethodDef constructor = type.FindConstructors().First();
-			
-			Instruction instructionToPatch = constructor.Body.Instructions.FirstOrDefault(i => i.OpCode == OpCodes.Ldstr && ((String)i.Operand).Contains(existingCert.Thumbprint, StringComparison.InvariantCultureIgnoreCase));
-			
-			if (instructionToPatch != null)
+
+			if (constructor == null)
 			{
-				instructionToPatch.Operand = certificate.Thumbprint;
+				Console.Error.WriteLine("ERROR: Cannot find constructor");
+				return -1;
 			}
-			else
+
+			Instruction instructionToPatch = constructor.Body.Instructions.FirstOrDefault(i => i.OpCode == OpCodes.Ldstr && ((String)i.Operand).Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase));
+
+			if (instructionToPatch == null)
 			{
-				Console.WriteLine("Can't find constructor to patch");
+				Console.WriteLine("ERROR: Can't find instruction to patch");
+				return -1;
 			}
+
+			instructionToPatch.Operand = certificate.Thumbprint;
 
 			Console.WriteLine("Writing: " + newCoreDll);
 
