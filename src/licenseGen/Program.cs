@@ -373,15 +373,16 @@ namespace BitwardenSelfLicensor
             set("Premium", true);
             set("MaxStorageGb", storage == 0 ? short.MaxValue : storage);
             set("Version", 1);
-            set("Issued", DateTime.UtcNow);
-            set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
-            set("Expires", DateTime.UtcNow.AddYears(100));
+            var now = DateTime.UtcNow;
+            set("Issued", now);
+            set("Refresh", now.AddYears(100).AddMonths(-1));
+            set("Expires", now.AddYears(100));
             set("Trial", false);
             set("LicenseType", Enum.Parse(licenseTypeEnum, "User"));
 
+            set("Token", GenerateUserToken(cert, userId, licenseKey, userName, email, storage, now));
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
             set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
-            set("Token", GenerateUserToken(cert, userId, licenseKey, userName, email, storage));
 
             Console.WriteLine(JsonConvert.SerializeObject(license, Formatting.Indented));
         }
@@ -435,10 +436,11 @@ namespace BitwardenSelfLicensor
             set("SmSeats", int.MaxValue);
             set("SmServiceAccounts", int.MaxValue);
             set("Version", 16);
-            set("Issued", DateTime.UtcNow);
-            set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
-            set("Expires", DateTime.UtcNow.AddYears(100));
-            set("ExpirationWithoutGracePeriod", DateTime.UtcNow.AddYears(100));
+            var now = DateTime.UtcNow;
+            set("Issued", now);
+            set("Refresh", now.AddYears(100).AddMonths(-1));
+            set("Expires", now.AddYears(100));
+            set("ExpirationWithoutGracePeriod", now.AddYears(100));
             set("Trial", false);
             set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
             set("LimitCollectionCreationDeletion", true);
@@ -453,18 +455,17 @@ namespace BitwardenSelfLicensor
 
             var orgId = (Guid)type.GetProperty("Id").GetValue(license);
 
+            set("Token", GenerateOrgToken(cert, orgId, instalId, licenseKey, email, businessNameFinal, userName, storage, planTypeEnum, now));
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
             set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
-            set("Token", GenerateOrgToken(cert, orgId, instalId, licenseKey, email, businessNameFinal, userName, storage, planTypeEnum));
 
             Console.WriteLine(JsonConvert.SerializeObject(license, Formatting.Indented));
         }
 
-        private static string GenerateUserToken(X509Certificate2 cert, Guid userId, string licenseKey, string name, string email, short maxStorageGb)
+        private static string GenerateUserToken(X509Certificate2 cert, Guid userId, string licenseKey, string name, string email, short maxStorageGb, DateTime now)
         {
             var secKey  = new X509SecurityKey(cert);
             var creds   = new SigningCredentials(secKey, SecurityAlgorithms.RsaSha256);
-            var now     = DateTime.UtcNow;
             var expires = now.AddYears(100);
 
             var claims = new List<Claim>
@@ -494,11 +495,10 @@ namespace BitwardenSelfLicensor
             return handler.WriteToken(token);
         }
 
-        private static string GenerateOrgToken(X509Certificate2 cert, Guid orgId, Guid installationId, string licenseKey, string billingEmail, string businessName, string name, short maxStorageGb, Type planTypeEnum)
+        private static string GenerateOrgToken(X509Certificate2 cert, Guid orgId, Guid installationId, string licenseKey, string billingEmail, string businessName, string name, short maxStorageGb, Type planTypeEnum, DateTime now)
         {
             var secKey  = new X509SecurityKey(cert);
             var creds   = new SigningCredentials(secKey, SecurityAlgorithms.RsaSha256);
-            var now     = DateTime.UtcNow;
             var expires = now.AddYears(100);
 
             // Resolve the integer value of EnterpriseAnnually from the runtime enum
@@ -537,6 +537,7 @@ namespace BitwardenSelfLicensor
                 new Claim("UseSecretsManager",                    "true"),
                 new Claim("SmSeats",                              int.MaxValue.ToString()),
                 new Claim("SmServiceAccounts",                    int.MaxValue.ToString()),
+                new Claim("UseRiskInsights",                      "true"),
                 new Claim("UseAdminSponsoredFamilies",            "true"),
                 new Claim("UseOrganizationDomains",               "true"),
                 new Claim("UseAutomaticUserConfirmation",         "true"),
