@@ -1,11 +1,15 @@
 namespace BitwardenSelfLicensor
 {
     using Microsoft.Extensions.CommandLineUtils;
+    using Microsoft.IdentityModel.Tokens;
     using Newtonsoft.Json;
     using SingleFileExtractor.Core;
     using System;
+    using System.Collections.Generic;
+    using System.IdentityModel.Tokens.Jwt;
     using System.IO;
     using System.Runtime.Loader;
+    using System.Security.Claims;
     using System.Security.Cryptography.X509Certificates;
 
     public static class Program
@@ -20,7 +24,7 @@ namespace BitwardenSelfLicensor
             bool ExecExists() => File.Exists(exec.Value());
             bool CertExists() => File.Exists(cert.Value());
             bool CoreExists() => File.Exists(coreDll.Value());
-            bool VerifyTopOptions() => 
+            bool VerifyTopOptions() =>
                 !string.IsNullOrWhiteSpace(cert.Value()) &&
                 (!string.IsNullOrWhiteSpace(coreDll.Value()) || !string.IsNullOrWhiteSpace(exec.Value())) &&
                 CertExists() &&
@@ -34,7 +38,7 @@ namespace BitwardenSelfLicensor
                 return fileInfo.FullName;
             }
             string GetCoreDllPath() => CoreExists() ? coreDll.Value() : GetExtractedDll();
-            
+
             app.Command("interactive", config =>
             {
                 string buff="", licensetype="", name="", email="", businessname="";
@@ -360,19 +364,23 @@ namespace BitwardenSelfLicensor
                 type.GetProperty(name).SetValue(license, value);
             }
 
-            set("LicenseKey", string.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key);
+            var licenseKey = string.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key;
+
+            set("LicenseKey", licenseKey);
             set("Id", userId);
             set("Name", userName);
             set("Email", email);
             set("Premium", true);
             set("MaxStorageGb", storage == 0 ? short.MaxValue : storage);
             set("Version", 1);
-            set("Issued", DateTime.UtcNow);
-            set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
-            set("Expires", DateTime.UtcNow.AddYears(100));
+            var now = DateTime.UtcNow;
+            set("Issued", now);
+            set("Refresh", now.AddYears(100).AddMonths(-1));
+            set("Expires", now.AddYears(100));
             set("Trial", false);
             set("LicenseType", Enum.Parse(licenseTypeEnum, "User"));
 
+            set("Token", GenerateUserToken(cert, userId, licenseKey, userName, email, storage, now));
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
             set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
 
@@ -394,12 +402,15 @@ namespace BitwardenSelfLicensor
                 type.GetProperty(name).SetValue(license, value);
             }
 
-            set("LicenseKey", string.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key);
+            var licenseKey = string.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key;
+            var businessNameFinal = string.IsNullOrWhiteSpace(businessName) ? "BitBetter" : businessName;
+
+            set("LicenseKey", licenseKey);
             set("InstallationId", instalId);
             set("Id", Guid.NewGuid());
             set("Name", userName);
             set("BillingEmail", email);
-            set("BusinessName", string.IsNullOrWhiteSpace(businessName) ? "BitBetter" : businessName);
+            set("BusinessName", businessNameFinal);
             set("Enabled", true);
             set("Plan", "Enterprise (Annually)");
             set("PlanType", Enum.Parse(planTypeEnum, "EnterpriseAnnually"));
@@ -424,22 +435,134 @@ namespace BitwardenSelfLicensor
             set("UseSecretsManager", true);
             set("SmSeats", int.MaxValue);
             set("SmServiceAccounts", int.MaxValue);
-            set("Version", 15); //This is set to 15 to use AllowAdminAccessToAllCollectionItems can be changed to 13 to just use Secrets Manager
-            set("Issued", DateTime.UtcNow);
-            set("Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
-            set("Expires", DateTime.UtcNow.AddYears(100));
+            set("Version", 16);
+            var now = DateTime.UtcNow;
+            set("Issued", now);
+            set("Refresh", now.AddYears(100).AddMonths(-1));
+            set("Expires", now.AddYears(100));
+            set("ExpirationWithoutGracePeriod", now.AddYears(100));
             set("Trial", false);
             set("LicenseType", Enum.Parse(licenseTypeEnum, "Organization"));
-            set("LimitCollectionCreationDeletion", true); //This will be used in the new version of BitWarden but can be applied now
+            set("LimitCollectionCreationDeletion", true);
             set("AllowAdminAccessToAllCollectionItems", true);
             set("UseRiskInsights", true);
             set("UseOrganizationDomains", true);
             set("UseAdminSponsoredFamilies", true);
+            set("UseAutomaticUserConfirmation", true);
+            set("UsePhishingBlocker", true);
+            set("UseDisableSmAdsForUsers", true);
+            set("UseMyItems", true);
 
+            var orgId = (Guid)type.GetProperty("Id").GetValue(license);
+
+            set("Token", GenerateOrgToken(cert, orgId, instalId, licenseKey, email, businessNameFinal, userName, storage, planTypeEnum, now));
             set("Hash", Convert.ToBase64String((byte[])type.GetMethod("ComputeHash").Invoke(license, new object[0])));
             set("Signature", Convert.ToBase64String((byte[])type.GetMethod("Sign").Invoke(license, new object[] { cert })));
 
             Console.WriteLine(JsonConvert.SerializeObject(license, Formatting.Indented));
+        }
+
+        private static string GenerateUserToken(X509Certificate2 cert, Guid userId, string licenseKey, string name, string email, short maxStorageGb, DateTime now)
+        {
+            var secKey  = new X509SecurityKey(cert);
+            var creds   = new SigningCredentials(secKey, SecurityAlgorithms.RsaSha256);
+            var expires = now.AddYears(100);
+
+            var claims = new List<Claim>
+            {
+                new Claim("LicenseType",  "User"),
+                new Claim("LicenseKey",   licenseKey),
+                new Claim("Id",           userId.ToString()),
+                new Claim("Name",         name),
+                new Claim("Email",        email),
+                new Claim("Premium",      "true"),
+                new Claim("MaxStorageGb", (maxStorageGb == 0 ? short.MaxValue : maxStorageGb).ToString()),
+                new Claim("Trial",        "false"),
+                new Claim("Issued",       now.ToString("o")),
+                new Claim("Expires",      expires.ToString("o")),
+                new Claim("Refresh",      now.AddYears(100).AddMonths(-1).ToString("o")),
+            };
+
+            var handler = new JwtSecurityTokenHandler();
+            var token = new JwtSecurityToken(
+                issuer:             "bitwarden",
+                audience:           $"user:{userId}",
+                claims:             claims,
+                notBefore:          now,
+                expires:            expires,
+                signingCredentials: creds);
+
+            return handler.WriteToken(token);
+        }
+
+        private static string GenerateOrgToken(X509Certificate2 cert, Guid orgId, Guid installationId, string licenseKey, string billingEmail, string businessName, string name, short maxStorageGb, Type planTypeEnum, DateTime now)
+        {
+            var secKey  = new X509SecurityKey(cert);
+            var creds   = new SigningCredentials(secKey, SecurityAlgorithms.RsaSha256);
+            var expires = now.AddYears(100);
+
+            // Resolve the integer value of EnterpriseAnnually from the runtime enum
+            var planTypeInt = Convert.ToInt32(Enum.Parse(planTypeEnum, "EnterpriseAnnually"));
+
+            var claims = new List<Claim>
+            {
+                new Claim("LicenseType",                          "Organization"),
+                new Claim("LicenseKey",                           licenseKey),
+                new Claim("InstallationId",                       installationId.ToString()),
+                new Claim("Id",                                   orgId.ToString()),
+                new Claim("Name",                                 name),
+                new Claim("BillingEmail",                         billingEmail),
+                new Claim("BusinessName",                         businessName),
+                new Claim("Enabled",                              "true"),
+                new Claim("Plan",                                 "Enterprise (Annually)"),
+                new Claim("PlanType",                             planTypeInt.ToString()),
+                new Claim("Seats",                                int.MaxValue.ToString()),
+                new Claim("MaxCollections",                       short.MaxValue.ToString()),
+                new Claim("MaxStorageGb",                         (maxStorageGb == 0 ? short.MaxValue : maxStorageGb).ToString()),
+                new Claim("SelfHost",                             "true"),
+                new Claim("UsersGetPremium",                      "true"),
+                new Claim("UseGroups",                            "true"),
+                new Claim("UseDirectory",                         "true"),
+                new Claim("UseEvents",                            "true"),
+                new Claim("UseTotp",                              "true"),
+                new Claim("Use2fa",                               "true"),
+                new Claim("UseApi",                               "true"),
+                new Claim("UsePolicies",                          "true"),
+                new Claim("UseSso",                               "true"),
+                new Claim("UseResetPassword",                     "true"),
+                new Claim("UseKeyConnector",                      "true"),
+                new Claim("UseScim",                              "true"),
+                new Claim("UseCustomPermissions",                 "true"),
+                new Claim("UsePasswordManager",                   "true"),
+                new Claim("UseSecretsManager",                    "true"),
+                new Claim("SmSeats",                              int.MaxValue.ToString()),
+                new Claim("SmServiceAccounts",                    int.MaxValue.ToString()),
+                new Claim("UseRiskInsights",                      "true"),
+                new Claim("UseAdminSponsoredFamilies",            "true"),
+                new Claim("UseOrganizationDomains",               "true"),
+                new Claim("UseAutomaticUserConfirmation",         "true"),
+                new Claim("UseDisableSmAdsForUsers",              "true"),
+                new Claim("UsePhishingBlocker",                   "true"),
+                new Claim("UseMyItems",                           "true"),
+                new Claim("LimitCollectionCreationDeletion",      "true"),
+                new Claim("AllowAdminAccessToAllCollectionItems", "true"),
+                new Claim("Trial",                                "false"),
+                new Claim("Issued",                               now.ToString("o")),
+                new Claim("Expires",                              expires.ToString("o")),
+                new Claim("Refresh",                              now.AddYears(100).AddMonths(-1).ToString("o")),
+                new Claim("ExpirationWithoutGracePeriod",         expires.ToString("o")),
+            };
+
+            var handler = new JwtSecurityTokenHandler();
+            var token = new JwtSecurityToken(
+                issuer:             "bitwarden",
+                audience:           $"organization:{orgId}",
+                claims:             claims,
+                notBefore:          now,
+                expires:            expires,
+                signingCredentials: creds);
+
+            return handler.WriteToken(token);
         }
     }
 }
