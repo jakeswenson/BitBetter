@@ -28,35 +28,66 @@ echo "Using BUILDPLATFORM=$BUILDPLATFORM TARGETPLATFORM=$TARGETPLATFORM"
 # If there aren't any keys, generate them first.
 [ -e "$DIR/.keys/cert.cert" ] || "$DIR/.keys/generate-keys.sh"
 
-# Prepare Bitwarden server repository
-rm -rf $DIR/server
-git clone --branch "v${BW_VERSION}" --depth 1 https://github.com/bitwarden/server.git $DIR/server
+if [ "${BITBETTER_BUILD_FROM_SOURCE:-0}" = "1" ]; then
+	echo "--- Source build mode ---"
 
-# Replace certificate file and thumbprint
-old_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in $DIR/server/src/Core/licensing.cer | cut -d= -f2 | tr -d ':')
-new_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in $DIR/.keys/cert.cert | cut -d= -f2 | tr -d ':')
-sed -i -e "s/$old_thumbprint/$new_thumbprint/g" $DIR/server/src/Core/Billing/Services/Implementations/LicensingService.cs
-cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cer
+	# Prepare Bitwarden server repository
+	rm -rf $DIR/server
+	git clone --branch "v${BW_VERSION}" --depth 1 https://github.com/bitwarden/server.git $DIR/server
 
-docker build \
-	--no-cache \
-	--platform "$TARGETPLATFORM" \
-	--build-arg BUILDPLATFORM="$BUILDPLATFORM" \
-	--build-arg TARGETPLATFORM="$TARGETPLATFORM" \
-	--label com.bitwarden.product="bitbetter" \
-	-f $DIR/server/src/Api/Dockerfile \
-	-t bitbetter/api \
-	$DIR/server
+	# Replace certificate file and thumbprint
+	old_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in $DIR/server/src/Core/licensing.cer | cut -d= -f2 | tr -d ':')
+	new_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in $DIR/.keys/cert.cert | cut -d= -f2 | tr -d ':')
+	sed -i -e "s/$old_thumbprint/$new_thumbprint/g" $DIR/server/src/Core/Billing/Services/Implementations/LicensingService.cs
+	cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cer
 
-docker build \
-	--no-cache \
-	--platform "$TARGETPLATFORM" \
-	--build-arg BUILDPLATFORM="$BUILDPLATFORM" \
-	--build-arg TARGETPLATFORM="$TARGETPLATFORM" \
-	--label com.bitwarden.product="bitbetter" \
-	-f $DIR/server/src/Identity/Dockerfile \
-	-t bitbetter/identity \
-	$DIR/server
+	docker build \
+		--no-cache \
+		--platform "$TARGETPLATFORM" \
+		--build-arg BUILDPLATFORM="$BUILDPLATFORM" \
+		--build-arg TARGETPLATFORM="$TARGETPLATFORM" \
+		--label com.bitwarden.product="bitbetter" \
+		-f $DIR/server/src/Api/Dockerfile \
+		-t bitbetter/api \
+		$DIR/server
+
+	docker build \
+		--no-cache \
+		--platform "$TARGETPLATFORM" \
+		--build-arg BUILDPLATFORM="$BUILDPLATFORM" \
+		--build-arg TARGETPLATFORM="$TARGETPLATFORM" \
+		--label com.bitwarden.product="bitbetter" \
+		-f $DIR/server/src/Identity/Dockerfile \
+		-t bitbetter/identity \
+		$DIR/server
+else
+	echo "--- Fast patch mode ---"
+
+	mkdir -p "$DIR/src/bitBetter/.keys"
+	cp "$DIR/.keys/cert.cert" "$DIR/src/bitBetter/.keys/cert.cert"
+
+	# Build the patcher tool inside the SDK container
+	docker run --rm \
+		-v "$DIR/src/bitBetter:/bitBetter" \
+		-w /bitBetter \
+		mcr.microsoft.com/dotnet/sdk:8.0 sh build.sh
+
+	docker build \
+		--no-cache \
+		--platform "$TARGETPLATFORM" \
+		--label com.bitwarden.product="bitbetter" \
+		--build-arg BITWARDEN_TAG="ghcr.io/bitwarden/api:$BW_VERSION" \
+		-t bitbetter/api \
+		"$DIR/src/bitBetter"
+
+	docker build \
+		--no-cache \
+		--platform "$TARGETPLATFORM" \
+		--label com.bitwarden.product="bitbetter" \
+		--build-arg BITWARDEN_TAG="ghcr.io/bitwarden/identity:$BW_VERSION" \
+		-t bitbetter/identity \
+		"$DIR/src/bitBetter"
+fi
 
 docker tag bitbetter/api bitbetter/api:latest
 docker tag bitbetter/identity bitbetter/identity:latest

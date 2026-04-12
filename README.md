@@ -68,6 +68,16 @@ From the BitBetter directory, simply run:
 
 This will create a new self-signed certificate in the `.keys` directory if one does not already exist and then create a modified version of the official `bitwarden/api` called `bitbetter/api` and a modified version of the `bitwarden/identity` called `bitbetter/identity`.
 
+By default, the build script runs in **fast patch mode**: it pulls the official Bitwarden images from the GitHub Container Registry and patches the license certificate directly inside them — no local compilation required.
+
+To instead **build from source**, set the `BITBETTER_BUILD_FROM_SOURCE` environment variable to `1` before running the script:
+
+```bash
+BITBETTER_BUILD_FROM_SOURCE=1 ./build.sh
+```
+
+In source build mode the script clones the Bitwarden server repository at the matching version tag, replaces the embedded license certificate, and compiles the `api` and `identity` images from scratch. This takes considerably longer but gives you full control over the build.
+
 You may now simply create the file `/path/to/bwdata/docker/docker-compose.override.yml` with the following contents to utilize the modified images.
 
 ```yaml
@@ -92,6 +102,16 @@ You can now start or restart Bitwarden as normal and the modified api will be us
 ## Updating Bitwarden and BitBetter
 
 To update Bitwarden, the provided `update-bitwarden.sh` script can be used. It will rebuild the BitBetter images and automatically update Bitwarden afterwards. Docker pull errors can be ignored for api and identity images.
+
+By default, the images are built in **fast patch mode**: the official Bitwarden images are pulled from the GitHub Container Registry and the license certificate are directly patched inside them.
+
+To instead **build from source**, set the `BITBETTER_BUILD_FROM_SOURCE` environment variable to `1` before running the script:
+
+```bash
+BITBETTER_BUILD_FROM_SOURCE=1 ./update-bitwarden.sh
+```
+
+In source build mode the script clones the Bitwarden server repository at the matching version tag, replaces the embedded license certificate, and compiles the `api` and `identity` images from scratch. This takes considerably longer but gives you full control over the build.
 
 You can either run this script without providing any parameters in interactive mode (`./update-bitwarden.sh`) or by setting the parameters as follows, to run the script in non-interactive mode:
 ```bash
