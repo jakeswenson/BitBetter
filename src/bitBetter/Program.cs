@@ -111,6 +111,22 @@ internal class Program
 			File.Move(newCoreDll + ".new", newCoreDll);
 		}
 
+		foreach (String runtimeconfigFile in Directory.GetFiles("/app/mount/", "*.runtimeconfig.json", SearchOption.AllDirectories))
+		{
+			Console.WriteLine("Patching: " + runtimeconfigFile);
+
+			String[] lines = File.ReadAllLines(runtimeconfigFile);
+			for (Int32 i = 0; i < lines.Length; i++)
+			{
+				String line = lines[i];
+				if (!line.Contains("includedFrameworks", StringComparison.Ordinal)) continue;
+
+				lines[i] = lines[i].Replace("includedFrameworks", "frameworks", StringComparison.Ordinal);
+				break;
+			}
+			File.WriteAllText(runtimeconfigFile, String.Join("\n", lines), new UTF8Encoding(false));
+		}
+
 		return 0;
 	}
 }
