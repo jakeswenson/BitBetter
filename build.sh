@@ -124,7 +124,7 @@ if [ -f "$PWD/.servers/serverlist.txt" ]; then
 	# convert line endings to unix
 	sed -i 's/\r$//' "$PWD/.servers/serverlist.txt"
 	cat "$PWD/.servers/serverlist.txt" | while read -r LINE; do
-		if [[ $LINE != "#"* ]]; then
+		if [[ $LINE != "#"* && -n $LINE ]]; then
 			bash -c "$LINE"
 		fi
 	done

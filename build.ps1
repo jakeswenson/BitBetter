@@ -121,7 +121,7 @@ Remove-Item "$pwd\Dockerfile-bitwarden-patch" -Force
 # start all user requested instances
 if (Test-Path -Path "$pwd\.servers\serverlist.txt" -PathType Leaf) {
 	foreach($line in Get-Content "$pwd\.servers\serverlist.txt") {
-		if (!($line.StartsWith("#"))) {
+		if ((-not ($line.StartsWith("#"))) -and (-not [string]::IsNullOrWhiteSpace($line))) {
 			Invoke-Expression "& $line"
 		}
 	}
