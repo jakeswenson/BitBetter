@@ -85,15 +85,22 @@ namespace BitwardenSelfLicensor
 
             // Use Contains() to handle the hidden Unicode LRM character (\u200E) that Bitwarden
             // prepends to the production thumbprint string literal in LicensingService.cs
-            var instToReplace = ctor.Body.Instructions
+            // Replace ALL occurrences since const fields are inlined at compile time and used in
+            // multiple validation checks (both _creationCertificate and _verificationCertificates)
+            var instructionsToReplace = ctor.Body.Instructions
                 .Where(i => i.OpCode == OpCodes.Ldstr)
-                .FirstOrDefault(i => ((string)i.Operand)
-                    .Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase));
+                .Where(i => ((string)i.Operand)
+                    .Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-            if (instToReplace != null)
+            if (instructionsToReplace.Count > 0)
             {
-                Console.WriteLine($"Replacing thumbprint Ldstr: '{instToReplace.Operand}'");
-                rewriter.Replace(instToReplace, Instruction.Create(OpCodes.Ldstr, newCert.Thumbprint));
+                Console.WriteLine($"Found {instructionsToReplace.Count} thumbprint Ldstr instruction(s) to replace");
+                foreach (var inst in instructionsToReplace)
+                {
+                    Console.WriteLine($"  Replacing: '{inst.Operand}'");
+                    rewriter.Replace(inst, Instruction.Create(OpCodes.Ldstr, newCert.Thumbprint));
+                }
             }
             else
             {
