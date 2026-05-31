@@ -66,8 +66,8 @@ namespace BitwardenSelfLicensor
             module.Resources.Add(new EmbeddedResource("Bit.Core.licensing.cer", existingRes.Attributes, certBytes));
             module.Resources.Remove(existingRes);
 
-            var existingCert = new X509Certificate2(existingRes.GetResourceData());
-            var newCert      = new X509Certificate2(certBytes);
+            var existingCert = X509CertificateLoader.LoadCertificate(existingRes.GetResourceData());
+            var newCert      = X509CertificateLoader.LoadCertificate(certBytes);
             Console.WriteLine($"Old thumbprint: {existingCert.Thumbprint}");
             Console.WriteLine($"New thumbprint: {newCert.Thumbprint}");
 
@@ -121,7 +121,7 @@ namespace BitwardenSelfLicensor
 
             // Derive framework name/version from the self-contained includedFrameworks before removing it
             string fwName    = "Microsoft.AspNetCore.App";
-            string fwVersion = "8.0.0";
+            string fwVersion = "10.0.0";
             if (opts["includedFrameworks"] is JsonArray included && included.Count > 0)
             {
                 var first = included[0]!.AsObject();

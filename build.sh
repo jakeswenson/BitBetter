@@ -70,7 +70,7 @@ else
 	docker run --rm \
 		-v "$DIR/src/bitBetter:/bitBetter" \
 		-w /bitBetter \
-		mcr.microsoft.com/dotnet/sdk:8.0 sh build.sh
+		mcr.microsoft.com/dotnet/sdk:10.0 sh build.sh
 
 	docker build \
 		--no-cache \
