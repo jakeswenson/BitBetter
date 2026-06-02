@@ -22,4 +22,4 @@ New-item -ItemType Directory -Path "$pwd\.keys"
 # generate actual keys
 Invoke-Expression "& '$opensslbinary' req -x509 -newkey rsa:4096 -keyout `"$pwd\.keys\key.pem`" -out `"$pwd\.keys\cert.cer`" -days 36500 -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -outform DER -passout pass:test"
 Invoke-Expression "& '$opensslbinary' x509 -inform DER -in `"$pwd\.keys\cert.cer`" -out `"$pwd\.keys\cert.pem`""
-Invoke-Expression "& '$opensslbinary' pkcs12 -export -out `"$pwd\.keys\cert.pfx`" -inkey `"$pwd\.keys\key.pem`" -in `"$pwd\.keys\cert.pem`" -passin pass:test -passout pass:test"
+Invoke-Expression "& '$opensslbinary' pkcs12 -export -out `"$pwd\.keys\cert.pfx`" -inkey `"$pwd\.keys\key.pem`" -in `"$pwd\.keys\cert.pem`" -passin pass:test -passout pass:test -certpbe AES-256-CBC -keypbe AES-256-CBC -macalg SHA256"
