@@ -131,7 +131,7 @@ internal class Program
 						buff = Console.ReadLine();
 						if (buff is "" or "y" or "Y")
 						{
-							GenerateUserLicense(new X509Certificate2(Cert.Value(), "test"), CoreDll.Value(), name, email, storage, guid, null);
+							GenerateUserLicense(X509CertificateLoader.LoadPkcs12FromFile(Cert.Value(), "test"), CoreDll.Value(), name, email, storage, guid, null);
 						}
 						else
 						{
@@ -147,7 +147,7 @@ internal class Program
 						buff = Console.ReadLine();
 						if (buff is "" or "y" or "Y")
 						{
-							GenerateOrgLicense(new X509Certificate2(Cert.Value(), "test"), CoreDll.Value(), name, email, storage, installid, businessName, null);
+							GenerateOrgLicense(X509CertificateLoader.LoadPkcs12FromFile(Cert.Value(), "test"), CoreDll.Value(), name, email, storage, installid, businessName, null);
 						}
 						else
 						{
@@ -201,7 +201,7 @@ internal class Program
 					storageShort = (Int16) parsedStorage;
 				}
 
-				GenerateUserLicense(new X509Certificate2(Cert.Value()!, "test"), CoreDll.Value(), name.Value, email.Value, storageShort, userId, key.Value);
+				GenerateUserLicense(X509CertificateLoader.LoadPkcs12FromFile(Cert.Value()!, "test"), CoreDll.Value(), name.Value, email.Value, storageShort, userId, key.Value);
 
 				return 0;
 			});
@@ -247,7 +247,7 @@ internal class Program
 					storageShort = (Int16)parsedStorage;
 				}
 
-				GenerateOrgLicense(new X509Certificate2(Cert.Value()!, "test"), CoreDll.Value(), name.Value, email.Value, storageShort, installationId, businessName.Value, key.Value);
+				GenerateOrgLicense(X509CertificateLoader.LoadPkcs12FromFile(Cert.Value()!, "test"), CoreDll.Value(), name.Value, email.Value, storageShort, installationId, businessName.Value, key.Value);
 
 				return 0;
 			});
