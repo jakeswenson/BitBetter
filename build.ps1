@@ -107,7 +107,9 @@ docker run -v "$tempdirectory`:/app/mount" --rm bitbetter/bitbetter
 if (Test-Path -Path "$pwd\Dockerfile-bitwarden-patch" -PathType Leaf) {
 	Remove-Item "$pwd\Dockerfile-bitwarden-patch" -Force
 }
-$dockerFile = "FROM ghcr.io/bitwarden/lite:latest"
+$dockerFile = "FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine3.23"
+$dockerFile = -join($dockerFile, "FROM ghcr.io/bitwarden/lite:latest")
+$dockerFile = -join($dockerFile, "COPY --from=0 /usr/share/dotnet /usr/share/dotnet")
 foreach ($component in $components) {
 	$dockerFile = -join($dockerFile, "`n`nCOPY ./temp/$component/ /app/$component/")
 	$dockerFile = -join($dockerFile, "`nCOPY ./temp/$($component.ToLower()).ini /etc/supervisor.d/$($component.ToLower()).ini")
