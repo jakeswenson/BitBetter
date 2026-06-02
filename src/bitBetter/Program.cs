@@ -64,15 +64,15 @@ internal class Program
 			moduleDefMd.Resources.Remove(embeddedResourceToRemove);
 
 			DataReader reader = embeddedResourceToRemove.CreateReader();
-			X509Certificate2 existingCert = new(reader.ReadRemainingBytes());
 			
+			var existingCert = X509CertificateLoader.LoadCertificate(reader.ReadRemainingBytes());
+			var certificate      = X509CertificateLoader.LoadCertificate(cert);
 			Console.WriteLine($"Existing certificate Thumbprint: {existingCert.Thumbprint}");
-			X509Certificate2 certificate = new(cert);
-
 			Console.WriteLine($"New certificate Thumbprint: {certificate.Thumbprint}");
 
-			TypeDef type = moduleDefMd.Types.FirstOrDefault(t => String.Equals(t.Name, "LicensingService", StringComparison.OrdinalIgnoreCase));
 
+			// Find LicensingService by class name (namespace-agnostic to handle renames)
+			TypeDef type = moduleDefMd.Types.FirstOrDefault(t => String.Equals(t.Name, "LicensingService", StringComparison.OrdinalIgnoreCase));
 			if (type == null)
 			{
 				Console.Error.WriteLine("ERROR: LicensingService class not found");
@@ -88,15 +88,26 @@ internal class Program
 				return -1;
 			}
 
-			Instruction instructionToPatch = constructor.Body.Instructions.FirstOrDefault(i => i.OpCode == OpCodes.Ldstr && ((String)i.Operand).Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase));
+			var instructionToPatch = constructor.Body.Instructions
+                .Where(i => i.OpCode == OpCodes.Ldstr)
+                .Where(i => ((string)i.Operand)
+                    .Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-			if (instructionToPatch == null)
+			if (instructionToPatch.Count > 0)
+			{
+                Console.WriteLine($"Found {instructionToPatch.Count} thumbprint Ldstr instruction(s) to replace");
+                foreach (var inst in instructionToPatch)
+                {
+                    Console.WriteLine($"  Replacing: '{inst.Operand}'");
+                    inst.Operand = certificate.Thumbprint;
+                }
+            }
+			else
 			{
 				Console.WriteLine("ERROR: Can't find instruction to patch");
 				return -1;
 			}
-
-			instructionToPatch.Operand = certificate.Thumbprint;
 
 			Console.WriteLine("Writing: " + newCoreDll);
 
