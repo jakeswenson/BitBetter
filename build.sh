@@ -108,7 +108,9 @@ docker run -v "$TEMPDIRECTORY:/app/mount" --rm bitbetter/bitbetter
 if [ -f "$PWD/Dockerfile-bitwarden-patch" ]; then
 	rm -f "$PWD/Dockerfile-bitwarden-patch"
 fi
+echo "FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine3.23" >> "$PWD/Dockerfile-bitwarden-patch"
 echo "FROM ghcr.io/bitwarden/lite:latest" >> "$PWD/Dockerfile-bitwarden-patch"
+echo "COPY --from=0 /usr/share/dotnet /usr/share/dotnet" >> "$PWD/Dockerfile-bitwarden-patch"
 for COMPONENT in ${COMPONENTS[@]}; do
 	echo "" >> "$PWD/Dockerfile-bitwarden-patch"
 	echo "RUN rm -f /app/$COMPONENT/$COMPONENT" >> "$PWD/Dockerfile-bitwarden-patch"
