@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /licenseGen
 
 COPY . /licenseGen
@@ -8,7 +8,7 @@ COPY cert.pfx /app/
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app --no-restore
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+FROM mcr.microsoft.com/dotnet/sdk:10.0
 WORKDIR /app
 COPY --from=build /app .
 
