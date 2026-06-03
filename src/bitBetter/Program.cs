@@ -85,20 +85,24 @@ namespace BitwardenSelfLicensor
 
             // Use Contains() to handle the hidden Unicode LRM character (\u200E) that Bitwarden
             // prepends to the production thumbprint string literal in LicensingService.cs
-            var instToReplace = ctor.Body.Instructions
+            var instsToReplace = ctor.Body.Instructions
                 .Where(i => i.OpCode == OpCodes.Ldstr)
-                .FirstOrDefault(i => ((string)i.Operand)
-                    .Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase));
+                .Where(i => ((string)i.Operand)
+                    .Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-            if (instToReplace != null)
+            if (instsToReplace.Count == 0)
             {
-                Console.WriteLine($"Replacing thumbprint Ldstr: '{instToReplace.Operand}'");
-                rewriter.Replace(instToReplace, Instruction.Create(OpCodes.Ldstr, newCert.Thumbprint));
+                Console.Error.WriteLine("ERROR: No thumbprint Ldstr found in LicensingService ctor");
+                return 1;
             }
-            else
+
+            foreach (var inst in instsToReplace)
             {
-                Console.WriteLine("WARNING: Thumbprint Ldstr not found — cert resource replaced anyway");
+                Console.WriteLine($"Replacing thumbprint Ldstr: '{inst.Operand}'");
+                rewriter.Replace(inst, Instruction.Create(OpCodes.Ldstr, newCert.Thumbprint));
             }
+            Console.WriteLine($"Replaced {instsToReplace.Count} Ldstr instance(s).");
 
             module.Write(coreDllPath);
             Console.WriteLine("Done.");
