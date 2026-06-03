@@ -66,8 +66,8 @@ namespace BitwardenSelfLicensor
             module.Resources.Add(new EmbeddedResource("Bit.Core.licensing.cer", existingRes.Attributes, certBytes));
             module.Resources.Remove(existingRes);
 
-            var existingCert = new X509Certificate2(existingRes.GetResourceData());
-            var newCert      = new X509Certificate2(certBytes);
+            var existingCert = X509CertificateLoader.LoadCertificate(existingRes.GetResourceData());
+            var newCert      = X509CertificateLoader.LoadCertificate(certBytes);
             Console.WriteLine($"Old thumbprint: {existingCert.Thumbprint}");
             Console.WriteLine($"New thumbprint: {newCert.Thumbprint}");
 
@@ -85,15 +85,22 @@ namespace BitwardenSelfLicensor
 
             // Use Contains() to handle the hidden Unicode LRM character (\u200E) that Bitwarden
             // prepends to the production thumbprint string literal in LicensingService.cs
-            var instToReplace = ctor.Body.Instructions
+            // Replace ALL occurrences since const fields are inlined at compile time and used in
+            // multiple validation checks (both _creationCertificate and _verificationCertificates)
+            var instructionsToReplace = ctor.Body.Instructions
                 .Where(i => i.OpCode == OpCodes.Ldstr)
-                .FirstOrDefault(i => ((string)i.Operand)
-                    .Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase));
+                .Where(i => ((string)i.Operand)
+                    .Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-            if (instToReplace != null)
+            if (instructionsToReplace.Count > 0)
             {
-                Console.WriteLine($"Replacing thumbprint Ldstr: '{instToReplace.Operand}'");
-                rewriter.Replace(instToReplace, Instruction.Create(OpCodes.Ldstr, newCert.Thumbprint));
+                Console.WriteLine($"Found {instructionsToReplace.Count} thumbprint Ldstr instruction(s) to replace");
+                foreach (var inst in instructionsToReplace)
+                {
+                    Console.WriteLine($"  Replacing: '{inst.Operand}'");
+                    rewriter.Replace(inst, Instruction.Create(OpCodes.Ldstr, newCert.Thumbprint));
+                }
             }
             else
             {
@@ -121,7 +128,7 @@ namespace BitwardenSelfLicensor
 
             // Derive framework name/version from the self-contained includedFrameworks before removing it
             string fwName    = "Microsoft.AspNetCore.App";
-            string fwVersion = "8.0.0";
+            string fwVersion = "10.0.0";
             if (opts["includedFrameworks"] is JsonArray included && included.Count > 0)
             {
                 var first = included[0]!.AsObject();

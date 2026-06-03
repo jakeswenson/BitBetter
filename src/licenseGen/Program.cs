@@ -141,7 +141,7 @@ namespace BitwardenSelfLicensor
                         buff = Console.ReadLine();
                         if ( buff == "" || buff == "y" || buff == "Y" )
                         {
-                            GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), GetCoreDllPath(), name, email, storage, guid, null);
+                            GenerateUserLicense(X509CertificateLoader.LoadPkcs12FromFile(cert.Value(), "test"), GetCoreDllPath(), name, email, storage, guid, null);
                         }
                         else
                         {
@@ -155,7 +155,7 @@ namespace BitwardenSelfLicensor
                         buff = Console.ReadLine();
                         if ( buff == "" || buff == "y" || buff == "Y" )
                         {
-                            GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), GetCoreDllPath(), name, email, storage, installid, businessname, null);
+                            GenerateOrgLicense(X509CertificateLoader.LoadPkcs12FromFile(cert.Value(), "test"), GetCoreDllPath(), name, email, storage, installid, businessname, null);
                         }
                         else
                         {
@@ -214,7 +214,7 @@ namespace BitwardenSelfLicensor
                         storageShort = (short) parsedStorage;
                     }
 
-                    GenerateUserLicense(new X509Certificate2(cert.Value(), "test"), GetCoreDllPath(), name.Value, email.Value, storageShort, userId, key.Value);
+                    GenerateUserLicense(X509CertificateLoader.LoadPkcs12FromFile(cert.Value(), "test"), GetCoreDllPath(), name.Value, email.Value, storageShort, userId, key.Value);
 
                     return 0;
                 });
@@ -269,7 +269,7 @@ namespace BitwardenSelfLicensor
                         storageShort = (short) parsedStorage;
                     }
 
-                    GenerateOrgLicense(new X509Certificate2(cert.Value(), "test"), GetCoreDllPath(), name.Value, email.Value, storageShort, installationId, businessName.Value, key.Value);
+                    GenerateOrgLicense(X509CertificateLoader.LoadPkcs12FromFile(cert.Value(), "test"), GetCoreDllPath(), name.Value, email.Value, storageShort, installationId, businessName.Value, key.Value);
 
                     return 0;
                 });
