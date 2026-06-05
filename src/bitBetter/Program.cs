@@ -65,11 +65,10 @@ internal class Program
 
 			DataReader reader = embeddedResourceToRemove.CreateReader();
 			
-			var existingCert = X509CertificateLoader.LoadCertificate(reader.ReadRemainingBytes());
-			var certificate      = X509CertificateLoader.LoadCertificate(cert);
+			X509Certificate2 existingCert = X509CertificateLoader.LoadCertificate(reader.ReadRemainingBytes());
+			X509Certificate2 certificate = X509CertificateLoader.LoadCertificate(cert);
 			Console.WriteLine($"Existing certificate Thumbprint: {existingCert.Thumbprint}");
 			Console.WriteLine($"New certificate Thumbprint: {certificate.Thumbprint}");
-
 
 			// Find LicensingService by class name (namespace-agnostic to handle renames)
 			TypeDef type = moduleDefMd.Types.FirstOrDefault(t => String.Equals(t.Name, "LicensingService", StringComparison.OrdinalIgnoreCase));
@@ -88,16 +87,16 @@ internal class Program
 				return -1;
 			}
 
-			var instructionToPatch = constructor.Body.Instructions
+			Instruction[] instructionToPatch = constructor.Body.Instructions
                 .Where(i => i.OpCode == OpCodes.Ldstr)
-                .Where(i => ((string)i.Operand)
+                .Where(i => ((String)i.Operand)
                     .Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+                .ToArray();
 
-			if (instructionToPatch.Count > 0)
+			if (instructionToPatch.Length > 0)
 			{
-                Console.WriteLine($"Found {instructionToPatch.Count} thumbprint Ldstr instruction(s) to replace");
-                foreach (var inst in instructionToPatch)
+                Console.WriteLine($"Found {instructionToPatch.Length} thumbprint Ldstr instruction(s) to replace");
+                foreach (Instruction inst in instructionToPatch)
                 {
                     Console.WriteLine($"  Replacing: '{inst.Operand}'");
                     inst.Operand = certificate.Thumbprint;
@@ -122,11 +121,11 @@ internal class Program
 			File.Move(newCoreDll + ".new", newCoreDll);
 		}
 
-		foreach (String runtimeconfigFile in Directory.GetFiles("/app/mount/", "*.runtimeconfig.json", SearchOption.AllDirectories))
+		foreach (String runtimeConfigFile in Directory.GetFiles("/app/mount/", "*.runtimeconfig.json", SearchOption.AllDirectories))
 		{
-			Console.WriteLine("Patching: " + runtimeconfigFile);
+			Console.WriteLine("Patching: " + runtimeConfigFile);
 
-			String[] lines = File.ReadAllLines(runtimeconfigFile);
+			String[] lines = File.ReadAllLines(runtimeConfigFile);
 			for (Int32 i = 0; i < lines.Length; i++)
 			{
 				String line = lines[i];
@@ -135,7 +134,7 @@ internal class Program
 				lines[i] = lines[i].Replace("includedFrameworks", "frameworks", StringComparison.Ordinal);
 				break;
 			}
-			File.WriteAllText(runtimeconfigFile, String.Join("\n", lines), new UTF8Encoding(false));
+			File.WriteAllText(runtimeConfigFile, String.Join("\n", lines), new UTF8Encoding(false));
 		}
 
 		return 0;
