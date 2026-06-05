@@ -92,7 +92,8 @@ New-item -ItemType Directory -Path $tempdirectory
 # extract the files that need to be patched from the services that need to be patched into our temporary directory
 foreach ($component in $components) {
 	New-item -itemtype Directory -path "$tempdirectory\$component"
-	docker cp $patchinstance`:/app/$component/Core.dll "$tempdirectory\$component\Core.dll"
+	docker cp $patchinstance`:/app/$component/$component "$tempdirectory\$component\$component"
+	docker cp $patchinstance`:/etc/supervisor.d/$($component.ToLower()).ini "$tempdirectory\$($component.ToLower()).ini"
 }
 
 # stop and remove our temporary container
@@ -103,12 +104,25 @@ docker rm bitwarden-extract
 docker run -v "$tempdirectory`:/app/mount" --rm bitbetter/bitbetter
 
 # create a new image with the patched files
-docker build . --tag bitwarden-patched --file "$pwd\src\bitBetter\Dockerfile-bitwarden-patch"
+if (Test-Path -Path "$pwd\Dockerfile-bitwarden-patch" -PathType Leaf) {
+	Remove-Item "$pwd\Dockerfile-bitwarden-patch" -Force
+}
+$dockerFile = "FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine3.23"
+$dockerFile = -join($dockerFile, "FROM ghcr.io/bitwarden/lite:latest")
+$dockerFile = -join($dockerFile, "COPY --from=0 /usr/share/dotnet /usr/share/dotnet")
+foreach ($component in $components) {
+	$dockerFile = -join($dockerFile, "`n`nCOPY ./temp/$component/ /app/$component/")
+	$dockerFile = -join($dockerFile, "`nCOPY ./temp/$($component.ToLower()).ini /etc/supervisor.d/$($component.ToLower()).ini")
+	$dockerFile = -join($dockerFile, "`nRUN rm -f /app/$component/$component")
+}
+[System.IO.File]::WriteAllLines("$pwd\Dockerfile-bitwarden-patch", $dockerFile)
+docker build . --tag bitwarden-patched --file "$pwd\Dockerfile-bitwarden-patch"
+Remove-Item "$pwd\Dockerfile-bitwarden-patch" -Force
 
 # start all user requested instances
 if (Test-Path -Path "$pwd\.servers\serverlist.txt" -PathType Leaf) {
 	foreach($line in Get-Content "$pwd\.servers\serverlist.txt") {
-		if (!($line.StartsWith("#"))) {
+		if ((-not ($line.StartsWith("#"))) -and (-not [string]::IsNullOrWhiteSpace($line))) {
 			Invoke-Expression "& $line"
 		}
 	}

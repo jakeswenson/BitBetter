@@ -1,10 +1,14 @@
+using McMaster.Extensions.CommandLineUtils;
 using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
-using System.Text.Json;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
-using McMaster.Extensions.CommandLineUtils;
+using System.Text.Json;
+using Microsoft.IdentityModel.Tokens;
 
 namespace licenseGen;
 
@@ -127,7 +131,7 @@ internal class Program
 						buff = Console.ReadLine();
 						if (buff is "" or "y" or "Y")
 						{
-							GenerateUserLicense(new X509Certificate2(Cert.Value(), "test"), CoreDll.Value(), name, email, storage, guid, null);
+							GenerateUserLicense(X509CertificateLoader.LoadPkcs12FromFile(Cert.Value(), "test"), CoreDll.Value(), name, email, storage, guid, null);
 						}
 						else
 						{
@@ -143,7 +147,7 @@ internal class Program
 						buff = Console.ReadLine();
 						if (buff is "" or "y" or "Y")
 						{
-							GenerateOrgLicense(new X509Certificate2(Cert.Value(), "test"), CoreDll.Value(), name, email, storage, installid, businessName, null);
+							GenerateOrgLicense(X509CertificateLoader.LoadPkcs12FromFile(Cert.Value(), "test"), CoreDll.Value(), name, email, storage, installid, businessName, null);
 						}
 						else
 						{
@@ -197,7 +201,7 @@ internal class Program
 					storageShort = (Int16) parsedStorage;
 				}
 
-				GenerateUserLicense(new X509Certificate2(Cert.Value()!, "test"), CoreDll.Value(), name.Value, email.Value, storageShort, userId, key.Value);
+				GenerateUserLicense(X509CertificateLoader.LoadPkcs12FromFile(Cert.Value()!, "test"), CoreDll.Value(), name.Value, email.Value, storageShort, userId, key.Value);
 
 				return 0;
 			});
@@ -243,7 +247,7 @@ internal class Program
 					storageShort = (Int16)parsedStorage;
 				}
 
-				GenerateOrgLicense(new X509Certificate2(Cert.Value()!, "test"), CoreDll.Value(), name.Value, email.Value, storageShort, installationId, businessName.Value, key.Value);
+				GenerateOrgLicense(X509CertificateLoader.LoadPkcs12FromFile(Cert.Value()!, "test"), CoreDll.Value(), name.Value, email.Value, storageShort, installationId, businessName.Value, key.Value);
 
 				return 0;
 			});
@@ -375,24 +379,28 @@ internal class Program
 			return;
 		}
 
-		Set(type, license, "LicenseKey", String.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key);
+		String licenseKey = String.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key;
+		Set(type, license, "LicenseKey", licenseKey);
 		Set(type, license, "Id", userId);
 		Set(type, license, "Name", userName);
 		Set(type, license, "Email", email);
 		Set(type, license, "Premium", true);
 		Set(type, license, "MaxStorageGb", storage == 0 ? Int16.MaxValue : storage);
 		Set(type, license, "Version", 1);
-		Set(type, license, "Issued", DateTime.UtcNow);
-		Set(type, license, "Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
-		Set(type, license, "Expires", DateTime.UtcNow.AddYears(100));
+		DateTime issued = DateTime.UtcNow;
+		Set(type, license, "Issued", issued);
+		Set(type, license, "Refresh", issued.AddYears(100).AddMonths(-1));
+		Set(type, license, "Expires", issued.AddYears(100));
 		Set(type, license, "Trial", false);
 		Set(type, license, "LicenseType", Enum.Parse(licenseTypeEnum, "User"));
+
+		Set(type, license, "Token", GenerateUserToken(cert, userId, licenseKey, userName, email, storage, issued));
 		Set(type, license, "Hash", Convert.ToBase64String(((Byte[])computeHash.Invoke(license, []))!));
 		Set(type, license, "Signature", Convert.ToBase64String((Byte[])sign.Invoke(license, [cert])!));
 
 		Console.WriteLine(JsonSerializer.Serialize(license, JsonOptions));
 	}
-	private static void GenerateOrgLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid instalId, String businessName, String key)
+	private static void GenerateOrgLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid installId, String businessName, String key)
 	{
 		Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(corePath));
 		Type type = core.GetType("Bit.Core.Billing.Organizations.Models.OrganizationLicense");
@@ -431,12 +439,14 @@ internal class Program
 			return;
 		}
 
-		Set(type, license, "LicenseKey", String.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key);
-		Set(type, license, "InstallationId", instalId);
+		String licenseKey = String.IsNullOrWhiteSpace(key) ? Guid.NewGuid().ToString("n") : key;
+		String businessNameFinal = String.IsNullOrWhiteSpace(businessName) ? "BitBetter" : businessName;
+		Set(type, license, "LicenseKey", licenseKey);
+		Set(type, license, "InstallationId", installId);
 		Set(type, license, "Id", Guid.NewGuid());
 		Set(type, license, "Name", userName);
 		Set(type, license, "BillingEmail", email);
-		Set(type, license, "BusinessName", String.IsNullOrWhiteSpace(businessName) ? "BitBetter" : businessName);
+		Set(type, license, "BusinessName", businessNameFinal);
 		Set(type, license, "Enabled", true);
 		Set(type, license, "Plan", "Enterprise (Annually)");
 		Set(type, license, "PlanType", Enum.Parse(planTypeEnum, "EnterpriseAnnually"));
@@ -458,10 +468,11 @@ internal class Program
 		Set(type, license, "UsersGetPremium", true);		
 		Set(type, license, "UseCustomPermissions", true);
 		Set(type, license, "Version", 16);
-		Set(type, license, "Issued", DateTime.UtcNow);
-		Set(type, license, "Refresh", DateTime.UtcNow.AddYears(100).AddMonths(-1));
-		Set(type, license, "Expires", DateTime.UtcNow.AddYears(100));
-		Set(type, license, "ExpirationWithoutGracePeriod", DateTime.UtcNow.AddYears(100));
+		DateTime issued = DateTime.UtcNow;
+		Set(type, license, "Issued", issued);
+		Set(type, license, "Refresh", issued.AddYears(100).AddMonths(-1));
+		Set(type, license, "Expires", issued.AddYears(100));
+		Set(type, license, "ExpirationWithoutGracePeriod", issued.AddYears(100));
 		Set(type, license, "UsePasswordManager", true);
 		Set(type, license, "UseSecretsManager", true);
 		Set(type, license, "SmSeats", Int32.MaxValue);
@@ -472,6 +483,13 @@ internal class Program
 		Set(type, license, "UseOrganizationDomains", true);
 		Set(type, license, "UseAdminSponsoredFamilies", true);
 		Set(type, license, "UsePhishingBlocker", true);
+		Set(type, license, "UseAutomaticUserConfirmation", true);
+		Set(type, license, "UseDisableSmAdsForUsers", true);
+		Set(type, license, "UseMyItems", true);
+
+		Guid orgId = (Guid)type.GetProperty("Id").GetValue(license);
+
+		Set(type, license, "Token", GenerateOrgToken(cert, orgId, installId, licenseKey, email, businessNameFinal, userName, storage, planTypeEnum, issued));
 		Set(type, license, "Hash", Convert.ToBase64String((Byte[])computeHash.Invoke(license, [])!));
 		Set(type, license, "Signature", Convert.ToBase64String((Byte[])sign.Invoke(license, [cert])!));
 
@@ -480,5 +498,108 @@ internal class Program
 	private static void Set(Type type, Object license, String name, Object value)
 	{
 		type.GetProperty(name)?.SetValue(license, value);
+	}
+
+	private static String GenerateUserToken(X509Certificate2 cert, Guid userId, String licenseKey, String name, String email, Int16 maxStorageGb, DateTime now)
+	{
+		X509SecurityKey x509SecurityKey = new(cert);
+		SigningCredentials signingCredentials = new(x509SecurityKey, SecurityAlgorithms.RsaSha256);
+		DateTime expires = now.AddYears(100);
+
+		List<Claim> claims =
+		[
+			new("LicenseType", "User"),
+			new("LicenseKey", licenseKey),
+			new("Id", userId.ToString()),
+			new("Name", name),
+			new("Email", email),
+			new("Premium", "true"),
+			new("MaxStorageGb", (maxStorageGb == 0 ? Int16.MaxValue : maxStorageGb).ToString()),
+			new("Trial", "false"),
+			new("Issued", now.ToString("o")),
+			new("Expires", expires.ToString("o")),
+			new("Refresh", now.AddYears(100).AddMonths(-1).ToString("o"))
+		];
+
+		JwtSecurityTokenHandler handler = new();
+		JwtSecurityToken token = new(
+			issuer: "bitwarden",
+			audience: $"user:{userId}",
+			claims: claims,
+			notBefore: now,
+			expires: expires,
+			signingCredentials: signingCredentials);
+
+		return handler.WriteToken(token);
+	}
+
+	private static String GenerateOrgToken(X509Certificate2 cert, Guid orgId, Guid installationId, String licenseKey, String billingEmail, String businessName, String name, Int16 maxStorageGb, Type planTypeEnum, DateTime now)
+	{
+		X509SecurityKey x509SecurityKey = new(cert);
+		SigningCredentials signingCredentials = new(x509SecurityKey, SecurityAlgorithms.RsaSha256);
+		DateTime expires = now.AddYears(100);
+
+		// Resolve the integer value of EnterpriseAnnually from the runtime enum
+		Int32 planTypeInt = Convert.ToInt32(Enum.Parse(planTypeEnum, "EnterpriseAnnually"));
+
+		List<Claim> claims =
+		[
+			new("LicenseType", "Organization"),
+			new("LicenseKey", licenseKey),
+			new("InstallationId", installationId.ToString()),
+			new("Id", orgId.ToString()),
+			new("Name", name),
+			new("BillingEmail", billingEmail),
+			new("BusinessName", businessName),
+			new("Enabled", "true"),
+			new("Plan", "Enterprise (Annually)"),
+			new("PlanType", planTypeInt.ToString()),
+			new("Seats", Int32.MaxValue.ToString()),
+			new("MaxCollections", Int16.MaxValue.ToString()),
+			new("MaxStorageGb", (maxStorageGb == 0 ? Int16.MaxValue : maxStorageGb).ToString()),
+			new("SelfHost", "true"),
+			new("UsersGetPremium", "true"),
+			new("UseGroups", "true"),
+			new("UseDirectory", "true"),
+			new("UseEvents", "true"),
+			new("UseTotp", "true"),
+			new("Use2fa", "true"),
+			new("UseApi", "true"),
+			new("UsePolicies", "true"),
+			new("UseSso", "true"),
+			new("UseResetPassword", "true"),
+			new("UseKeyConnector", "true"),
+			new("UseScim", "true"),
+			new("UseCustomPermissions", "true"),
+			new("UsePasswordManager", "true"),
+			new("UseSecretsManager", "true"),
+			new("SmSeats", Int32.MaxValue.ToString()),
+			new("SmServiceAccounts", Int32.MaxValue.ToString()),
+			new("UseRiskInsights", "true"),
+			new("UseAdminSponsoredFamilies", "true"),
+			new("UseOrganizationDomains", "true"),
+			new("UseAutomaticUserConfirmation", "true"),
+			new("UseDisableSmAdsForUsers", "true"),
+			new("UsePhishingBlocker", "true"),
+			new("UseMyItems", "true"),
+			new("LimitCollectionCreationDeletion", "true"),
+			new("AllowAdminAccessToAllCollectionItems", "true"),
+			new("Trial", "false"),
+			new("Issued", now.ToString("o")),
+			new("Expires", expires.ToString("o")),
+			new("Refresh", now.AddYears(100).AddMonths(-1).ToString("o")),
+			new("ExpirationWithoutGracePeriod", expires.ToString("o"))
+		];
+
+		JwtSecurityTokenHandler handler = new();
+		JwtSecurityToken token = new(
+			issuer: "bitwarden",
+			audience: $"organization:{orgId}",
+			claims: claims,
+			notBefore: now,
+			expires: expires,
+			signingCredentials: signingCredentials);
+
+		return handler.WriteToken(token);
 	}
 }

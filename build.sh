@@ -93,7 +93,8 @@ mkdir $TEMPDIRECTORY
 # extract the files that need to be patched from the services that need to be patched into our temporary directory
 for COMPONENT in ${COMPONENTS[@]}; do
 	mkdir "$TEMPDIRECTORY/$COMPONENT"
-	docker cp $PATCHINSTANCE:/app/$COMPONENT/Core.dll "$TEMPDIRECTORY/$COMPONENT/Core.dll"
+	docker cp $PATCHINSTANCE:/app/$COMPONENT/$COMPONENT "$TEMPDIRECTORY/$COMPONENT/$COMPONENT"
+	docker cp $PATCHINSTANCE:/etc/supervisor.d/${COMPONENT,,}.ini "$TEMPDIRECTORY/${COMPONENT,,}.ini"
 done
 
 # stop and remove our temporary container
@@ -104,14 +105,27 @@ docker rm bitwarden-extract
 docker run -v "$TEMPDIRECTORY:/app/mount" --rm bitbetter/bitbetter
 
 # create a new image with the patched files
-docker build . --tag bitwarden-patched --file "$PWD/src/bitBetter/Dockerfile-bitwarden-patch"
+if [ -f "$PWD/Dockerfile-bitwarden-patch" ]; then
+	rm -f "$PWD/Dockerfile-bitwarden-patch"
+fi
+echo "FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine3.23" >> "$PWD/Dockerfile-bitwarden-patch"
+echo "FROM ghcr.io/bitwarden/lite:latest" >> "$PWD/Dockerfile-bitwarden-patch"
+echo "COPY --from=0 /usr/share/dotnet /usr/share/dotnet" >> "$PWD/Dockerfile-bitwarden-patch"
+for COMPONENT in ${COMPONENTS[@]}; do
+	echo "" >> "$PWD/Dockerfile-bitwarden-patch"
+	echo "RUN rm -f /app/$COMPONENT/$COMPONENT" >> "$PWD/Dockerfile-bitwarden-patch"
+	echo "COPY ./temp/${COMPONENT,,}.ini /etc/supervisor.d/${COMPONENT,,}.ini" >> "$PWD/Dockerfile-bitwarden-patch"
+	echo "COPY ./temp/$COMPONENT/ /app/$COMPONENT/" >> "$PWD/Dockerfile-bitwarden-patch"
+done
+docker build . --tag bitwarden-patched --file "$PWD/Dockerfile-bitwarden-patch"
+rm -f "$PWD/Dockerfile-bitwarden-patch"
 
 # start all user requested instances
 if [ -f "$PWD/.servers/serverlist.txt" ]; then
 	# convert line endings to unix
 	sed -i 's/\r$//' "$PWD/.servers/serverlist.txt"
 	cat "$PWD/.servers/serverlist.txt" | while read -r LINE; do
-		if [[ $LINE != "#"* ]]; then
+		if [[ $LINE != "#"* && -n $LINE ]]; then
 			bash -c "$LINE"
 		fi
 	done
