@@ -88,20 +88,20 @@ internal class Program
 			}
 
 			Instruction[] instructionToPatch = constructor.Body.Instructions
-                .Where(i => i.OpCode == OpCodes.Ldstr)
-                .Where(i => ((String)i.Operand)
-                    .Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase))
-                .ToArray();
+				.Where(i => i.OpCode == OpCodes.Ldstr)
+				.Where(i => ((String)i.Operand)
+					.Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase))
+				.ToArray();
 
 			if (instructionToPatch.Length > 0)
 			{
-                Console.WriteLine($"Found {instructionToPatch.Length} thumbprint Ldstr instruction(s) to replace");
-                foreach (Instruction inst in instructionToPatch)
-                {
-                    Console.WriteLine($"  Replacing: '{inst.Operand}'");
-                    inst.Operand = certificate.Thumbprint;
-                }
-            }
+				Console.WriteLine($"Found {instructionToPatch.Length} thumbprint Ldstr instruction(s) to replace");
+				foreach (Instruction inst in instructionToPatch)
+				{
+					Console.WriteLine($"  Replacing: '{inst.Operand}'");
+					inst.Operand = certificate.Thumbprint;
+				}
+			}
 			else
 			{
 				Console.WriteLine("ERROR: Can't find instruction to patch");
@@ -110,7 +110,7 @@ internal class Program
 
 			Console.WriteLine("Writing: " + newCoreDll);
 
-            ModuleWriterOptions moduleWriterOptions = new(moduleDefMd);
+			ModuleWriterOptions moduleWriterOptions = new(moduleDefMd);
 			moduleWriterOptions.MetadataOptions.Flags |= MetadataFlags.KeepOldMaxStack;
 			moduleWriterOptions.MetadataOptions.Flags |= MetadataFlags.PreserveAll;
 			moduleWriterOptions.MetadataOptions.Flags |= MetadataFlags.PreserveRids;
