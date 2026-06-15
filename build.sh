@@ -4,7 +4,7 @@ DIR=`dirname "$0"`
 DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /usr/bin/pwd || /bin/pwd || pwd`
 
 # Check prerequisite libraries and executables
-for cmd in docker curl openssl jq openssl; do
+for cmd in docker curl openssl jq; do
     command -v "$cmd" >/dev/null 2>&1 || { echo "Error: '$cmd' is required but not installed." >&2; exit 1; }
 done
 BW_VERSION=$(curl -sL https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/version.json | jq -r '.versions.coreVersion')
