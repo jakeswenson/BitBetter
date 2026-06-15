@@ -13,7 +13,7 @@ ask () {
 SCRIPT_BASE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # Check prerequisite libraries and executables
-for cmd in docker curl openssl jq openssl; do
+for cmd in docker curl openssl jq; do
     command -v "$cmd" >/dev/null 2>&1 || { echo "Error: '$cmd' is required but not installed." >&2; exit 1; }
 done
 
