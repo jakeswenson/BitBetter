@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e 
+set -e
 
 ask () {
   local __resultVar=$1
@@ -17,7 +17,7 @@ for cmd in docker curl openssl jq; do
     command -v "$cmd" >/dev/null 2>&1 || { echo "Error: '$cmd' is required but not installed." >&2; exit 1; }
 done
 
-BW_VERSION=$(curl -sL https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/version.json | jq -r '.versions.coreVersion')
+BW_VERSION=$(curl -fsSL https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/version.json | jq -er '.versions.coreVersion')
 
 echo "Starting Bitwarden update, newest server version: $BW_VERSION"
 
