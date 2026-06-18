@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 ask () {
   local __resultVar=$1
   local __result="$2"
@@ -9,7 +11,13 @@ ask () {
 }
 
 SCRIPT_BASE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-BW_VERSION=$(curl -sL https://go.btwrdn.co/bw-sh-versions | grep '^ *"'coreVersion'":' | awk -F\: '{ print $2 }' | sed -e 's/,$//' -e 's/^"//' -e 's/"$//')
+
+# Check prerequisite libraries and executables
+for cmd in docker curl openssl jq; do
+    command -v "$cmd" >/dev/null 2>&1 || { echo "Error: '$cmd' is required but not installed." >&2; exit 1; }
+done
+
+BW_VERSION=$(curl -fsSL https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/version.json | jq -er '.versions.coreVersion')
 
 echo "Starting Bitwarden update, newest server version: $BW_VERSION"
 

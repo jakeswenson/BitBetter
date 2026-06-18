@@ -2,7 +2,15 @@
 set -e
 DIR=`dirname "$0"`
 DIR=`exec 2>/dev/null;(cd -- "$DIR") && cd -- "$DIR"|| cd "$DIR"; unset PWD; /usr/bin/pwd || /bin/pwd || pwd`
-BW_VERSION=$(curl -sL https://go.btwrdn.co/bw-sh-versions | grep '^ *"'coreVersion'":' | awk -F\: '{ print $2 }' | sed -e 's/,$//' -e 's/^"//' -e 's/"$//')
+
+# Check prerequisite libraries and executables
+for cmd in docker curl openssl jq; do
+    command -v "$cmd" >/dev/null 2>&1 || { echo "Error: '$cmd' is required but not installed." >&2; exit 1; }
+done
+if [ "${BITBETTER_BUILD_FROM_SOURCE:-0}" = "1" ]; then
+    command -v git >/dev/null 2>&1 || { echo "Error: 'git' is required for BITBETTER_BUILD_FROM_SOURCE=1 but not installed." >&2; exit 1; }
+fi
+BW_VERSION=$(curl -fsSL https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/version.json | jq -er '.versions.coreVersion')
 
 echo "Building BitBetter for BitWarden version $BW_VERSION"
 
