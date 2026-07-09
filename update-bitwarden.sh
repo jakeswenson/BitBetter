@@ -17,7 +17,13 @@ for cmd in docker curl openssl jq; do
     command -v "$cmd" >/dev/null 2>&1 || { echo "Error: '$cmd' is required but not installed." >&2; exit 1; }
 done
 
-BW_VERSION=$(curl -fsSL https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/version.json | jq -er '.versions.coreVersion')
+# Fetch version and handle potential HTTP 429 Rate Limit error gracefully
+BW_VERSION=$(curl -fsSL https://raw.githubusercontent.com/bitwarden/self-host/refs/heads/main/version.json | jq -er '.versions.coreVersion' || true)
+
+if [ -z "$BW_VERSION" ]; then
+    echo "Error: Failed to fetch Bitwarden version. You might be rate-limited by GitHub (HTTP 429). Please try again later or set BW_VERSION manually." >&2
+    exit 1
+fi
 
 echo "Starting Bitwarden update, newest server version: $BW_VERSION"
 
@@ -56,8 +62,12 @@ else
 fi
 
 # Check if user wants to rebuild the bitbetter images
-docker images bitbetter/api --format="{{ .Tag }}" | grep -F -- "${BW_VERSION}" > /dev/null
-retval=$?
+if [ -z "$(docker images -q bitbetter/api:${BW_VERSION})" ]; then
+    retval=1
+else
+    retval=0
+fi
+
 REBUILD_BB="n"
 REBUILD_BB_DESCR="[y/N]"
 if [ $retval -ne 0 ]; then
@@ -87,7 +97,7 @@ echo "Patching bitwarden.sh completed..."
 
 # Prune Docker images without at least one container associated to them.
 echo "Pruning Docker images without at least one container associated to them..."
-docker image prune -a
+docker image prune -a -f
 
 cd $SCRIPT_BASE
 echo "Bitwarden update completed!"
