@@ -83,6 +83,21 @@ echo "Patching bitwarden.sh completed..."
 
 ./bitwarden.sh update
 
+# A Bitwarden update may report "Update not needed" when rebuilding BitBetter
+# for the currently installed Bitwarden version. In that case, the existing
+# containers remain attached to the old image IDs and the newly built images
+# are considered unused by `docker image prune -a`.
+if [[ $REBUILD_BB =~ ^[Yy]$ ]]
+then
+    echo "Recreating BitBetter containers with the newly built images..."
+    cd "$BITWARDEN_BASE/bwdata/docker"
+    docker compose up -d \
+        --no-deps \
+        --force-recreate \
+        api identity
+    cd "$BITWARDEN_BASE"
+fi
+
 # Prune Docker images without at least one container associated to them.
 echo "Pruning Docker images without at least one container associated to them..."
 docker image prune -a
