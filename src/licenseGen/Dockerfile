@@ -3,6 +3,7 @@ WORKDIR /licenseGen
 
 COPY . /licenseGen
 COPY Core.dll /app/
+COPY Data.dll /app/
 COPY cert.pfx /app/
 
 RUN dotnet restore

@@ -22,6 +22,10 @@ if (Test-Path -Path "$pwd\src\licenseGen\Core.dll" -PathType Leaf) {
 	Remove-Item "$pwd\src\licenseGen\Core.dll" -Force
 }
 
+if (Test-Path -Path "$pwd\src\licenseGen\Data.dll" -PathType Leaf) {
+	Remove-Item "$pwd\src\licenseGen\Data.dll" -Force
+}
+
 if (Test-Path -Path "$pwd\src\licenseGen\cert.pfx" -PathType Leaf) {
 	Remove-Item "$pwd\src\licenseGen\cert.pfx" -Force
 }
@@ -131,8 +135,9 @@ if (Test-Path -Path "$pwd\.servers\serverlist.txt" -PathType Leaf) {
 # remove our bitBetter image
 docker image rm bitbetter/bitbetter
 
-# copy our patched library to the licenseGen source directory
+# copy our patched library and its dependency assemblies to the licenseGen source directory
 Copy-Item "$tempdirectory\Identity\Core.dll" -Destination "$pwd\src\licenseGen"
+Copy-Item "$tempdirectory\Identity\Data.dll" -Destination "$pwd\src\licenseGen"
 Copy-Item "$pwd\.keys\cert.pfx" -Destination "$pwd\src\licenseGen"
 
 # build the licenseGen
@@ -140,6 +145,7 @@ docker build -t bitbetter/licensegen "$pwd\src\licenseGen"
 
 # clean the licenseGen source directory
 Remove-Item "$pwd\src\licenseGen\Core.dll" -Force
+Remove-Item "$pwd\src\licenseGen\Data.dll" -Force
 Remove-Item "$pwd\src\licenseGen\cert.pfx" -Force
 
 # remove our temporary directory
