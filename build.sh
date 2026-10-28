@@ -140,7 +140,9 @@ docker image rm bitbetter/bitbetter
 
 # copy our patched library and its dependency assemblies to the licenseGen source directory
 cp -f "$TEMPDIRECTORY/Identity/Core.dll" "$PWD/src/licenseGen"
-cp -f "$TEMPDIRECTORY/Identity/Data.dll" "$PWD/src/licenseGen"
+if [ -f "$TEMPDIRECTORY/Identity/Data.dll" ]; then
+	cp -f "$TEMPDIRECTORY/Identity/Data.dll" "$PWD/src/licenseGen"
+fi
 cp -f "$PWD/.keys/cert.pfx" "$PWD/src/licenseGen"
 
 # build the licenseGen
