@@ -104,6 +104,9 @@ docker rm bitwarden-extract
 # run bitBetter, this applies our patches to the required files
 docker run -v "$TEMPDIRECTORY:/app/mount" --rm bitbetter/bitbetter
 
+# bitBetter runs as root, hand the extracted files back to the current user so they can be cleaned up
+docker run -v "$TEMPDIRECTORY:/app/mount" --rm --entrypoint chown bitbetter/bitbetter -R "$(id -u):$(id -g)" /app/mount
+
 # create a new image with the patched files
 if [ -f "$PWD/Dockerfile-bitwarden-patch" ]; then
 	rm -f "$PWD/Dockerfile-bitwarden-patch"
