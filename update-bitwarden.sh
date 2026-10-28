@@ -91,10 +91,11 @@ if [[ $REBUILD_BB =~ ^[Yy]$ ]]
 then
     echo "Recreating BitBetter containers with the newly built images..."
     cd "$BITWARDEN_BASE/bwdata/docker"
-    docker compose up -d \
-        --no-deps \
-        --force-recreate \
-        api identity
+    if docker compose &> /dev/null; then
+        docker compose up -d --no-deps --force-recreate api identity
+    else
+        docker-compose up -d --no-deps --force-recreate api identity
+    fi
     cd "$BITWARDEN_BASE"
 fi
 
