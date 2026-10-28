@@ -92,10 +92,14 @@ then
     echo "Recreating BitBetter containers with the newly built images..."
     cd "$BITWARDEN_BASE/bwdata/docker"
     if docker compose &> /dev/null; then
-        docker compose up -d --no-deps --force-recreate api identity
+        dccmd='docker compose'
     else
-        docker-compose up -d --no-deps --force-recreate api identity
+        dccmd='docker-compose'
     fi
+    $dccmd up -d --no-deps --force-recreate api identity
+    # nginx resolves the api/identity hostnames only on startup, so restart it
+    # to pick up the addresses of the recreated containers.
+    $dccmd restart nginx
     cd "$BITWARDEN_BASE"
 fi
 
