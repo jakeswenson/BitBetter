@@ -40,14 +40,14 @@ if [ "${BITBETTER_BUILD_FROM_SOURCE:-0}" = "1" ]; then
 	echo "--- Source build mode ---"
 
 	# Prepare Bitwarden server repository
-	rm -rf $DIR/server
-	git clone --branch "v${BW_VERSION}" --depth 1 https://github.com/bitwarden/server.git $DIR/server
+	rm -rf "$DIR/server"
+	git clone --branch "v${BW_VERSION}" --depth 1 https://github.com/bitwarden/server.git "$DIR/server"
 
 	# Replace certificate file and thumbprint
-	old_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in $DIR/server/src/Core/licensing.cer | cut -d= -f2 | tr -d ':')
-	new_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in $DIR/.keys/cert.cert | cut -d= -f2 | tr -d ':')
-	sed -i -e "s/$old_thumbprint/$new_thumbprint/g" $DIR/server/src/Core/Billing/Services/Implementations/LicensingService.cs
-	cp $DIR/.keys/cert.cert $DIR/server/src/Core/licensing.cer
+	old_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in "$DIR/server/src/Core/licensing.cer" | cut -d= -f2 | tr -d ':')
+	new_thumbprint=$(openssl x509 -inform DER -fingerprint -noout -in "$DIR/.keys/cert.cert" | cut -d= -f2 | tr -d ':')
+	sed -i -e "s/$old_thumbprint/$new_thumbprint/g" "$DIR/server/src/Core/Billing/Services/Implementations/LicensingService.cs"
+	cp "$DIR/.keys/cert.cert" "$DIR/server/src/Core/licensing.cer"
 
 	docker build \
 		--no-cache \
@@ -55,9 +55,9 @@ if [ "${BITBETTER_BUILD_FROM_SOURCE:-0}" = "1" ]; then
 		--build-arg BUILDPLATFORM="$BUILDPLATFORM" \
 		--build-arg TARGETPLATFORM="$TARGETPLATFORM" \
 		--label com.bitwarden.product="bitbetter" \
-		-f $DIR/server/src/Api/Dockerfile \
+		-f "$DIR/server/src/Api/Dockerfile" \
 		-t bitbetter/api \
-		$DIR/server
+		"$DIR/server"
 
 	docker build \
 		--no-cache \
@@ -65,20 +65,21 @@ if [ "${BITBETTER_BUILD_FROM_SOURCE:-0}" = "1" ]; then
 		--build-arg BUILDPLATFORM="$BUILDPLATFORM" \
 		--build-arg TARGETPLATFORM="$TARGETPLATFORM" \
 		--label com.bitwarden.product="bitbetter" \
-		-f $DIR/server/src/Identity/Dockerfile \
+		-f "$DIR/server/src/Identity/Dockerfile" \
 		-t bitbetter/identity \
-		$DIR/server
+		"$DIR/server"
 else
 	echo "--- Fast patch mode ---"
 
 	mkdir -p "$DIR/src/bitBetter/.keys"
 	cp "$DIR/.keys/cert.cert" "$DIR/src/bitBetter/.keys/cert.cert"
 
-	# Build the patcher tool inside the SDK container
+	# Build the patcher tool inside the SDK container, then give the build output the owner of the
+	# mounted checkout as seen from inside the container, which also maps correctly under rootless Docker
 	docker run --rm \
 		-v "$DIR/src/bitBetter:/bitBetter" \
 		-w /bitBetter \
-		mcr.microsoft.com/dotnet/sdk:10.0 sh build.sh
+		mcr.microsoft.com/dotnet/sdk:10.0 sh -c 'sh build.sh && chown -R "$(stat -c %u:%g .)" bin obj'
 
 	docker build \
 		--no-cache \
@@ -99,9 +100,9 @@ fi
 
 docker tag bitbetter/api bitbetter/api:latest
 docker tag bitbetter/identity bitbetter/identity:latest
-docker tag bitbetter/api bitbetter/api:$BW_VERSION
-docker tag bitbetter/identity bitbetter/identity:$BW_VERSION
+docker tag bitbetter/api "bitbetter/api:$BW_VERSION"
+docker tag bitbetter/identity "bitbetter/identity:$BW_VERSION"
 
 # Remove old instances of the image after a successful build.
-ids=$( docker image ls --format="{{ .ID }} {{ .Tag }}" 'bitbetter/*' | grep -E -v -- "CREATED|latest|${BW_VERSION}" | awk '{ ids = (ids ? ids FS $1 : $1) } END { print ids }' )
+ids=$( docker image ls --format="{{ .ID }} {{ .Tag }}" 'bitbetter/*' | awk -v v="$BW_VERSION" '$2 != "latest" && $2 != v { print $1 }' )
 [ -n "$ids" ] && docker rmi $ids || true
