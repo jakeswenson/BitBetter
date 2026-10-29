@@ -129,9 +129,10 @@ namespace BitwardenSelfLicensor
                         {
                             storage = short.MaxValue;
                         }
-                        else
+                        else if (CheckStorage(buff, out var parsedStorage))
                         {
-                            if (CheckStorage(buff)) storage = short.Parse(buff);
+                            // 0 means the maximum, as in the user and org commands
+                            storage = parsedStorage == 0 ? short.MaxValue : parsedStorage;
                         }
                     }
 
@@ -194,24 +195,26 @@ namespace BitwardenSelfLicensor
                         return 1;
                     }
 
-                    if (string.IsNullOrWhiteSpace(userIdArg.Value) || !Guid.TryParse(userIdArg.Value, out Guid userId))
+                    if (string.IsNullOrWhiteSpace(userIdArg.Value))
                     {
                         config.Error.WriteLine($"User ID not provided");
                         config.ShowHelp("user");
                         return 1;
                     }
 
-                    short storageShort = 0;
-                    if (!string.IsNullOrWhiteSpace(storage.Value))
+                    if (!Guid.TryParse(userIdArg.Value, out Guid userId))
                     {
-                        var parsedStorage = double.Parse(storage.Value);
-                        if (parsedStorage > short.MaxValue || parsedStorage < 0)
-                        {
-                            config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + short.MaxValue + "]");
-                            config.ShowHelp("org");
-                            return 1;
-                        }
-                        storageShort = (short) parsedStorage;
+                        config.Error.WriteLine("Unable to parse your user id as a GUID");
+                        config.ShowHelp("user");
+                        return 1;
+                    }
+
+                    short storageShort = 0;
+                    if (!string.IsNullOrWhiteSpace(storage.Value) && !TryParseStorage(storage.Value, out storageShort))
+                    {
+                        config.Error.WriteLine("The storage value provided is not a number in the accepted range of [0-" + short.MaxValue + "]");
+                        config.ShowHelp("user");
+                        return 1;
                     }
 
                     GenerateUserLicense(X509CertificateLoader.LoadPkcs12FromFile(cert.Value(), "test"), GetCoreDllPath(), name.Value, email.Value, storageShort, userId, key.Value);
@@ -257,16 +260,11 @@ namespace BitwardenSelfLicensor
                     }
 
                     short storageShort = 0;
-                    if (!string.IsNullOrWhiteSpace(storage.Value))
+                    if (!string.IsNullOrWhiteSpace(storage.Value) && !TryParseStorage(storage.Value, out storageShort))
                     {
-                        var parsedStorage = double.Parse(storage.Value);
-                        if (parsedStorage > short.MaxValue || parsedStorage < 0)
-                        {
-                            config.Error.WriteLine("The storage value provided is outside the accepted range of [0-" + short.MaxValue + "]");
-                            config.ShowHelp("org");
-                            return 1;
-                        }
-                        storageShort = (short) parsedStorage;
+                        config.Error.WriteLine("The storage value provided is not a number in the accepted range of [0-" + short.MaxValue + "]");
+                        config.ShowHelp("org");
+                        return 1;
                     }
 
                     GenerateOrgLicense(X509CertificateLoader.LoadPkcs12FromFile(cert.Value(), "test"), GetCoreDllPath(), name.Value, email.Value, storageShort, installationId, businessName.Value, key.Value);
@@ -324,19 +322,26 @@ namespace BitwardenSelfLicensor
             return true;    // TODO: Actually validate
         }
 
-        // checkStorage Checks that the storage is in a valid range
-        private static bool CheckStorage(string s)
+        // checkStorage Checks that the storage is a number in a valid range
+        private static bool CheckStorage(string s, out short storage)
         {
-            if (string.IsNullOrWhiteSpace(s))
+            if (!TryParseStorage(s, out storage))
             {
-                WriteLineOver("The storage provided doesn't appear to be valid.\n");
+                WriteLineOver("The storage value provided is not a number in the accepted range of [0-" + short.MaxValue + "].\n");
                 return false;
             }
-            if (double.Parse(s) > short.MaxValue || double.Parse(s) < 0)
+            return true;
+        }
+
+        // TryParseStorage Parses a storage value in GB, truncating fractions, within [0-short.MaxValue]
+        private static bool TryParseStorage(string s, out short storage)
+        {
+            storage = 0;
+            if (!double.TryParse(s, out var parsed) || double.IsNaN(parsed) || parsed > short.MaxValue || parsed < 0)
             {
-                WriteLineOver("The storage value provided is outside the accepted range of [0-" + short.MaxValue + "].\n");
                 return false;
             }
+            storage = (short) parsed;
             return true;
         }
 
