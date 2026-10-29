@@ -74,11 +74,12 @@ else
 	mkdir -p "$DIR/src/bitBetter/.keys"
 	cp "$DIR/.keys/cert.cert" "$DIR/src/bitBetter/.keys/cert.cert"
 
-	# Build the patcher tool inside the SDK container, then hand the build output back to the host user
+	# Build the patcher tool inside the SDK container, then give the build output the owner of the
+	# mounted checkout as seen from inside the container, which also maps correctly under rootless Docker
 	docker run --rm \
 		-v "$DIR/src/bitBetter:/bitBetter" \
 		-w /bitBetter \
-		mcr.microsoft.com/dotnet/sdk:10.0 sh -c "sh build.sh && chown -R $(id -u):$(id -g) bin obj"
+		mcr.microsoft.com/dotnet/sdk:10.0 sh -c 'sh build.sh && chown -R "$(stat -c %u:%g .)" bin obj'
 
 	docker build \
 		--no-cache \
