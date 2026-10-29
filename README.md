@@ -152,13 +152,13 @@ If you generated your keys in the default `BitBetter/.keys` directory, you can *
 
 ### Note: Alternative Ways to Generate License
 
-If you wish to run the license gen from a directory aside from the root `BitBetter` one, you'll have to provide the absolute path to your cert.pfx.
+If your cert.pfx is not in the default `BitBetter/.keys` directory, you'll have to provide the absolute path to it as the first argument.
 
 ```bash
 ./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx interactive
 ```
 
-Additional, instead of interactive mode, you can also pass the parameters directly to the command as follows.
+Additional, instead of interactive mode, you can also pass the parameters directly to the command as follows. The cert.pfx path can be omitted if it is in the default `BitBetter/.keys` directory.
 
 ```bash
 ./src/licenseGen/run.sh /Absolute/Path/To/BitBetter/.keys/cert.pfx user "Name" "E-Mail" "User-GUID" ["Storage Space in GB"] ["Custom LicenseKey"]
