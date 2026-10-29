@@ -80,8 +80,7 @@ namespace BitwardenSelfLicensor
             }
             Console.WriteLine($"Found: {type.FullName}");
 
-            var ctor     = type.Resolve().GetConstructors().First();
-            var rewriter = ctor.Body.GetILProcessor();
+            var ctor = type.Resolve().GetConstructors().First();
 
             // Use Contains() to handle the hidden Unicode LRM character (\u200E) that Bitwarden
             // prepends to the production thumbprint string literal in LicensingService.cs
@@ -105,7 +104,8 @@ namespace BitwardenSelfLicensor
             foreach (var inst in instructionsToReplace)
             {
                 Console.WriteLine($"  Replacing: '{inst.Operand}'");
-                rewriter.Replace(inst, Instruction.Create(OpCodes.Ldstr, newCert.Thumbprint));
+                // Change the operand in place so branches targeting this instruction stay valid
+                inst.Operand = newCert.Thumbprint;
             }
 
             module.Write(coreDllPath);
