@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /licenseGen
 
 COPY . /licenseGen
-COPY Core.dll /app/
+COPY *.dll /app/
 COPY cert.pfx /app/
 
 RUN dotnet restore

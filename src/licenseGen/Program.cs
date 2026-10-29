@@ -261,6 +261,7 @@ internal class Program
 
 		try
 		{
+			AssemblyLoadContext.Default.Resolving += ResolveCoreDependency;
 			App.HelpOption("-? | -h | --help");
 			return App.Execute(args);
 		}
@@ -344,10 +345,26 @@ internal class Program
 		return false;
 	}
 
+	private static String CoreDirectory = String.Empty;
+
+	private static Assembly LoadCoreAssembly(String corePath)
+	{
+		String path = Path.GetFullPath(corePath);
+		CoreDirectory = Path.GetDirectoryName(path) ?? String.Empty;
+		return AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
+	}
+
+	private static Assembly ResolveCoreDependency(AssemblyLoadContext context, AssemblyName name)
+	{
+		if (CoreDirectory == String.Empty || name.Name == null) return null;
+		String candidate = Path.Combine(CoreDirectory, name.Name + ".dll");
+		return File.Exists(candidate) ? context.LoadFromAssemblyPath(candidate) : null;
+	}
+
 	private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 	private static void GenerateUserLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid userId, String key)
 	{
-		Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(corePath));
+		Assembly core = LoadCoreAssembly(corePath);
 
 		Type type = core.GetType("Bit.Core.Billing.Models.Business.UserLicense");
 		Type licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
@@ -402,7 +419,7 @@ internal class Program
 	}
 	private static void GenerateOrgLicense(X509Certificate2 cert, String corePath, String userName, String email, Int16 storage, Guid installId, String businessName, String key)
 	{
-		Assembly core = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(corePath));
+		Assembly core = LoadCoreAssembly(corePath);
 		Type type = core.GetType("Bit.Core.Billing.Organizations.Models.OrganizationLicense");
 		Type licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
 		Type planTypeEnum = core.GetType("Bit.Core.Billing.Enums.PlanType");
