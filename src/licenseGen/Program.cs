@@ -8,6 +8,7 @@ namespace BitwardenSelfLicensor
     using System.Collections.Generic;
     using System.IdentityModel.Tokens.Jwt;
     using System.IO;
+    using System.Reflection;
     using System.Runtime.Loader;
     using System.Security.Claims;
     using System.Security.Cryptography.X509Certificates;
@@ -350,9 +351,30 @@ namespace BitwardenSelfLicensor
         // WriteLine This wrapper is just here so that console writes all look similar.
         private static void WriteLine(string s) => Console.WriteLine(s);
 
+        private static string coreDir;
+
+        private static Assembly LoadCore(string corePath)
+        {
+            // LoadFromAssemblyPath requires an absolute path
+            corePath = Path.GetFullPath(corePath);
+            if (coreDir == null)
+            {
+                AssemblyLoadContext.Default.Resolving += ResolveFromCoreDir;
+            }
+            coreDir = Path.GetDirectoryName(corePath);
+            return AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
+        }
+
+        // Core.dll's dependencies (e.g. Data.dll) are not in licenseGen's deps.json, so probe next to Core.dll
+        private static Assembly ResolveFromCoreDir(AssemblyLoadContext ctx, AssemblyName name)
+        {
+            var path = Path.Combine(coreDir, name.Name + ".dll");
+            return File.Exists(path) ? ctx.LoadFromAssemblyPath(path) : null;
+        }
+
         private static void GenerateUserLicense(X509Certificate2 cert, string corePath, string userName, string email, short storage, Guid userId, string key)
         {
-            var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
+            var core = LoadCore(corePath);
 
             var type = core.GetType("Bit.Core.Billing.Models.Business.UserLicense");
             var licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
@@ -389,7 +411,7 @@ namespace BitwardenSelfLicensor
 
         private static void GenerateOrgLicense(X509Certificate2 cert, string corePath, string userName, string email, short storage, Guid instalId, string businessName, string key)
         {
-            var core = AssemblyLoadContext.Default.LoadFromAssemblyPath(corePath);
+            var core = LoadCore(corePath);
 
             var type = core.GetType("Bit.Core.Billing.Organizations.Models.OrganizationLicense");
             var licenseTypeEnum = core.GetType("Bit.Core.Enums.LicenseType");
