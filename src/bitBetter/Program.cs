@@ -80,8 +80,7 @@ namespace BitwardenSelfLicensor
             }
             Console.WriteLine($"Found: {type.FullName}");
 
-            var ctor     = type.Resolve().GetConstructors().First();
-            var rewriter = ctor.Body.GetILProcessor();
+            var ctor = type.Resolve().GetConstructors().First();
 
             // Use Contains() to handle the hidden Unicode LRM character (\u200E) that Bitwarden
             // prepends to the production thumbprint string literal in LicensingService.cs
@@ -93,18 +92,20 @@ namespace BitwardenSelfLicensor
                     .Contains(existingCert.Thumbprint, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            if (instructionsToReplace.Count > 0)
+            // Without the thumbprint patched, LicensingService rejects the replaced certificate at runtime,
+            // so fail the build rather than produce an image that cannot validate licenses
+            if (instructionsToReplace.Count == 0)
             {
-                Console.WriteLine($"Found {instructionsToReplace.Count} thumbprint Ldstr instruction(s) to replace");
-                foreach (var inst in instructionsToReplace)
-                {
-                    Console.WriteLine($"  Replacing: '{inst.Operand}'");
-                    rewriter.Replace(inst, Instruction.Create(OpCodes.Ldstr, newCert.Thumbprint));
-                }
+                Console.Error.WriteLine($"ERROR: Thumbprint '{existingCert.Thumbprint}' Ldstr not found in {type.FullName} constructor");
+                return 1;
             }
-            else
+
+            Console.WriteLine($"Found {instructionsToReplace.Count} thumbprint Ldstr instruction(s) to replace");
+            foreach (var inst in instructionsToReplace)
             {
-                Console.WriteLine("WARNING: Thumbprint Ldstr not found — cert resource replaced anyway");
+                Console.WriteLine($"  Replacing: '{inst.Operand}'");
+                // Change the operand in place so branches targeting this instruction stay valid
+                inst.Operand = newCert.Thumbprint;
             }
 
             module.Write(coreDllPath);
